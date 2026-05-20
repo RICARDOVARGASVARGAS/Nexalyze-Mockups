@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Detalle política</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#F5F7FA] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen p-4">
+    <section class="rd-card p-5">
+      <h1 class="rd-modal-title">Detalle de política</h1>
+      <p class="rd-modal-subtitle">Vista lateral tipo drawer</p>
+      <button class="btn btn-primary mt-4" onclick="abrirDrawer()">Abrir detalle</button>
+      <a class="btn btn-muted mt-4 ml-2" href="./politicas-listar.html">Volver a políticas</a>
+    </section>
+  </main>
+
+  <div id="drawerWrap" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/20" onclick="closeDrawer('drawerPoliticaDetalle')"></div>
+    <aside id="drawerPoliticaDetalle" class="drawer-slide translate-x-full ml-auto h-full w-full max-w-xl bg-white p-5 overflow-y-auto">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="inline-flex px-2 py-1 rounded bg-primary-light text-primary text-xs font-semibold">POL-001</span>
+          <h3 class="rd-modal-title mt-2">POLÍTICA GENERAL PEN</h3>
+          <span class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold mt-1">ACTIVO</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="rd-action-btn"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button class="rd-action-btn"><i data-lucide="users" class="w-4 h-4"></i></button>
+          <button class="rd-action-btn"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          <button class="rd-modal-close" onclick="closeDrawer('drawerPoliticaDetalle')"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="mt-4 space-y-4 text-sm">
+        <div class="rd-card p-3"><p class="rd-label mb-2">Información general</p><p><strong>CÓDIGO:</strong> POL-001</p><p><strong>MONEDA:</strong> S/ PEN — Soles</p><p><strong>FLUJO DE REVISIÓN:</strong> <a href="#" class="text-primary font-semibold">Flujo Standard 2 Niveles</a></p><p><strong>ESTADO:</strong> <span class="status-pill status-active">ACTIVO</span></p></div>
+        <div class="rd-card p-3 bg-bg"><p class="rd-label mb-2">Configuración</p><p><strong>DETECCIÓN DE DUPLICADOS:</strong> <span class="status-pill status-active">ACTIVO</span> Similitud mínima: 75%</p><p><strong>REABRIR INFORMES:</strong> <span class="status-pill status-inactive">INACTIVO</span></p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Rendidores asignados</p><p class="text-3xl font-extrabold text-primary">12</p><p class="text-xs text-ink-muted uppercase">Rendidores usando esta política</p><div class="flex items-center mt-2 -space-x-2"><span class="w-8 h-8 rounded-full bg-primary text-white text-xs inline-flex items-center justify-center border border-white">AG</span><span class="w-8 h-8 rounded-full bg-info text-white text-xs inline-flex items-center justify-center border border-white">CM</span><span class="w-8 h-8 rounded-full bg-success text-white text-xs inline-flex items-center justify-center border border-white">PQ</span><span class="w-8 h-8 rounded-full bg-warning text-white text-xs inline-flex items-center justify-center border border-white">MT</span><span class="w-8 h-8 rounded-full bg-danger text-white text-xs inline-flex items-center justify-center border border-white">LR</span><span class="w-8 h-8 rounded-full bg-gray-200 text-ink text-xs inline-flex items-center justify-center border border-white">+7</span></div><button class="btn btn-outline mt-3">VER TODOS LOS RENDIDORES →</button></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2"><div class="rd-card p-3"><p class="rd-label">Gastos bajo esta política</p><p class="text-xl font-bold text-primary">342</p><p class="text-[11px] text-ink-muted uppercase">Últimos 6 meses</p></div><div class="rd-card p-3"><p class="rd-label">Informes cerrados</p><p class="text-xl font-bold text-primary">89</p><p class="text-[11px] text-ink-muted uppercase">Total histórico</p></div><div class="rd-card p-3"><p class="rd-label">Monto total aprobado</p><p class="text-xl font-bold text-primary">S/ 48,250</p><p class="text-[11px] text-ink-muted uppercase">Acumulado</p></div></div>
+        <div class="rd-card p-3 bg-bg"><p class="rd-label mb-2">Descripción</p><p>Política estándar para empleados de Lima</p></div>
+      </div>
+      <div class="sticky bottom-0 bg-white pt-4 mt-4 border-t border-border">
+        <button class="btn btn-outline w-full"><i data-lucide="users" class="w-4 h-4"></i> GESTIONAR RENDIDORES DE ESTA POLÍTICA</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    function abrirDrawer() {
+      document.getElementById('drawerWrap').classList.remove('hidden');
+      openDrawer('drawerPoliticaDetalle');
+    }
+    const closeOriginal = closeDrawer;
+    closeDrawer = function (id) {
+      closeOriginal(id);
+      setTimeout(() => {
+        document.getElementById('drawerWrap').classList.add('hidden');
+      }, 300);
+    };
+    initLayout('RINDE GASTOS / POLÍTICAS / DETALLE', '../components').then(() => {
+      abrirDrawer();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

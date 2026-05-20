@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Redirigiendo…</title>
+  <script>
+    (function () {
+      const q = window.location.search;
+      const params = new URLSearchParams(q);
+      if (params.get('modo') === 'editar' && params.get('nro')) {
+        window.location.replace('informes-listar.html' + q);
+      } else {
+        window.location.replace('informes-listar.html?nuevo=1');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p style="font-family:system-ui;padding:2rem">Redirigiendo a mis informes…</p>
+</body>
+</html>

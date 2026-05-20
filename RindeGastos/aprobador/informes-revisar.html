@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Detalle del informe IR-00050</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      safelist: [
+        'bg-warning-light', 'text-warning', 'bg-success-light', 'text-success', 'bg-danger-light', 'text-danger',
+        'bg-primary-light/10', 'bg-primary-light/20', 'ring-info-light', 'bg-info-light/50', 'bg-bg/80'
+      ],
+      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, info: { DEFAULT: '#3B82F6', light: '#DBEAFE' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291400">
+  <style>
+    tr.inf-rev-gasto-sel { background: rgba(237, 233, 254, 0.45); box-shadow: inset 3px 0 0 #6B5BFF; }
+    .inf-rev-chk { width: 1.125rem; height: 1.125rem; border-radius: 0.25rem; border: 1px solid #D1D5DB; cursor: pointer; accent-color: #6B5BFF; }
+    .inf-rev-chk:disabled { cursor: not-allowed; opacity: 0.45; }
+  </style>
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-28">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <!-- Barra superior contextual (Revisión / Detalle) -->
+    <div class="theme-surface border-b border-border flex flex-wrap items-center justify-between gap-2 px-2 md:px-4">
+      <div class="flex items-stretch min-h-[48px]">
+        <a href="informes-bandeja.html" class="inline-flex items-center px-3 md:px-4 text-xs md:text-sm font-semibold uppercase text-ink-muted hover:text-primary border-b-2 border-transparent hover:border-primary/30 transition-colors">
+          Revisión de informes
+        </a>
+        <span class="inline-flex items-center px-3 md:px-4 text-xs md:text-sm font-extrabold uppercase text-primary border-b-2 border-primary bg-primary-light/30">
+          Detalle del Informe
+        </span>
+      </div>
+      <div class="relative py-2 pr-1">
+        <button type="button" id="btnOpcionesTop" class="btn btn-outline border-border text-ink text-xs h-9 px-3 inline-flex items-center gap-1.5">
+          Opciones <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+        </button>
+        <div id="menuOpcionesTop" class="hidden absolute right-0 top-full mt-1 w-52 theme-surface border border-border rounded-lg shadow-lg z-40 py-1 text-sm">
+          <button type="button" class="w-full text-left px-3 py-2 hover:bg-bg" onclick="showToast('Exportar PDF (simulado)', 'info')">Exportar PDF</button>
+          <button type="button" class="w-full text-left px-3 py-2 hover:bg-bg" onclick="showToast('Imprimir (simulado)', 'info')">Imprimir</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="px-3 py-3 max-w-[1400px] mx-auto space-y-3">
+      <!-- Barra de acciones principal -->
+      <div class="theme-surface rd-card p-4 flex flex-wrap items-center gap-2">
+        <button type="button" id="btnDevolverInforme" disabled class="btn btn-outline border-orange-500 text-orange-700 h-10 text-sm px-4 opacity-40 cursor-not-allowed inline-flex items-center gap-2">
+          <i data-lucide="undo-2" class="w-4 h-4"></i> Devolver informe
+        </button>
+        <button type="button" id="btnFinalizarRevision" disabled class="btn btn-primary h-10 text-sm px-4 opacity-40 cursor-not-allowed inline-flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Finalizar revisión
+        </button>
+      </div>
+
+      <!-- Sub-pestañas de contenido -->
+      <div class="flex flex-wrap gap-1 border-b border-border items-end" id="subTabsWrap">
+        <button type="button" data-subtab="detalle" class="subtab px-4 py-2.5 text-xs font-extrabold uppercase border-b-2 border-primary text-primary">Detalle informe</button>
+        <button type="button" data-subtab="historial" class="subtab px-4 py-2.5 text-xs font-extrabold uppercase border-b-2 border-transparent text-ink-muted inline-flex items-center gap-1.5">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Historial
+        </button>
+        <button type="button" data-subtab="flujo" class="subtab px-4 py-2.5 text-xs font-extrabold uppercase border-b-2 border-transparent text-ink-muted">Flujo de revisión</button>
+      </div>
+
+      <!-- Panel: Detalle informe -->
+      <div id="panel-detalle" class="space-y-4">
+        <div class="theme-surface rd-card p-4 md:p-5 space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <p class="text-xs font-bold text-primary">Política GENERAL PEN / Rendidor: Ana Guevara Muñoz</p>
+              <div class="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
+                <span>Enviado: 25/04/2026</span>
+                <button type="button" class="inline-flex items-center gap-1 text-primary font-semibold hover:underline" onclick="showToast('Enlace copiado (simulado)', 'success')">
+                  <i data-lucide="link" class="w-3.5 h-3.5"></i> Generar enlace para compartir
+                </button>
+              </div>
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <h1 class="text-xl md:text-2xl font-extrabold text-primary leading-tight">IR-00050 · Reembolso Mayo - Lima</h1>
+                <span class="text-xl md:text-2xl font-extrabold text-primary whitespace-nowrap" id="hdrMontoTotal">S/ 702,80</span>
+              </div>
+            </div>
+            <span class="shrink-0 inline-flex items-center text-[10px] font-extrabold uppercase px-3 py-1 rounded-full" style="background:#FEF3C7;color:#B45309">En proceso</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+            <article class="rd-card p-5 w-full min-h-[132px] flex flex-col justify-center border" style="border-color:#E6E9F2;border-left:3px solid #3B82F6;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,0.04)">
+              <p class="text-[11px] font-extrabold uppercase tracking-wide" style="color:#6D7488">Fondos rendir</p>
+              <p class="text-sm mt-2 text-ink-muted"><span id="cardTotalN">6</span> gastos cargados</p>
+              <p class="text-3xl font-extrabold mt-1 tabular-nums" style="color:#3B82F6" id="cardFondosMonto">S/ 702,80</p>
+            </article>
+            <article class="rd-card p-5 w-full min-h-[132px] flex flex-col justify-center border" style="border-color:#E6E9F2;border-left:3px solid #10B981;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,0.04)">
+              <p class="text-[11px] font-extrabold uppercase tracking-wide" style="color:#6D7488">Aprobados</p>
+              <p class="text-sm mt-2 text-ink-muted"><span id="cardAprN">3</span> de <span id="cardTotalN2">6</span> gastos</p>
+              <p class="text-3xl font-extrabold mt-1 tabular-nums" style="color:#10B981" id="cardAprMonto">S/ 510,00</p>
+            </article>
+            <article class="rd-card p-5 w-full min-h-[132px] flex flex-col justify-center border" style="border-color:#E6E9F2;border-left:3px solid #EF4444;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,0.04)">
+              <p class="text-[11px] font-extrabold uppercase tracking-wide" style="color:#6D7488">Rechazados</p>
+              <p class="text-sm mt-2 text-ink-muted"><span id="cardRecN">0</span> gastos observados</p>
+              <p class="text-3xl font-extrabold mt-1 tabular-nums" style="color:#EF4444" id="cardRecMonto">S/ 0,00</p>
+            </article>
+            <article class="rd-card p-5 w-full min-h-[132px] flex flex-col justify-center border" style="border-color:#E6E9F2;border-left:3px solid #F59E0B;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,0.04)">
+              <p class="text-[11px] font-extrabold uppercase tracking-wide" style="color:#6D7488">Diferencia</p>
+              <p class="text-sm mt-2 text-ink-muted"><span id="cardPenN">3</span> gastos pendientes</p>
+              <p class="text-3xl font-extrabold mt-1 tabular-nums" style="color:#B45309" id="cardDifMonto">S/ 192,80</p>
+            </article>
+          </div>
+
+          <div class="rounded-lg border border-dashed border-border bg-bg/50 p-4">
+            <p class="text-xs font-extrabold uppercase text-ink-muted mb-1">Nota</p>
+            <p class="text-sm text-ink-soft" id="blqNotaInforme">Sin datos</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm pt-2 border-t border-border">
+            <p><span class="text-ink-muted">Creador:</span> <strong>Ana Guevara Muñoz</strong></p>
+            <p><span class="text-ink-muted">Tipo rendición:</span> <strong>Reembolso</strong></p>
+          </div>
+        </div>
+
+        <div class="theme-surface rd-card overflow-hidden">
+          <div class="px-4 py-3 border-b border-[#E3E6EE] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h2 class="table-panel-title mb-0">Gastos del informe (<span id="tituloNGastos">6</span>)</h2>
+              <p class="text-xs text-ink-muted mt-1">Marca los gastos en estado <span class="font-semibold text-ink">En informe</span> y usa la barra inferior para aprobar o rechazar.</p>
+            </div>
+            <button type="button" id="btnAprTodos" class="btn btn-outline border-success text-success text-xs h-9 shrink-0">Aprobar todos los pendientes</button>
+          </div>
+          <div class="px-2 pb-2 overflow-x-auto">
+            <table class="rd-table w-full min-w-[1000px] text-sm" id="tablaGastos">
+              <thead>
+                <tr class="text-left border-b border-[#E5E7EF]">
+                  <th class="py-2.5 px-2 w-12 text-center"><span class="sr-only">Seleccionar</span></th>
+                  <th class="py-2.5 px-2">Nombre / Fecha</th>
+                  <th class="py-2.5 px-2">Estado</th>
+                  <th class="py-2.5 px-2">Política</th>
+                  <th class="py-2.5 px-2">Categoría</th>
+                  <th class="py-2.5 px-2 text-right">Total</th>
+                  <th class="py-2.5 px-2 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyGastos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Historial -->
+      <div id="panel-historial" class="hidden space-y-4">
+        <div class="theme-surface rd-card p-5">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-lg font-extrabold text-primary">Historial</h2>
+              <p class="text-sm text-ink-muted mt-1">En esta sección puedes ver todos los eventos asociados a este informe y enviar comentarios.</p>
+            </div>
+            <button type="button" class="btn btn-outline border-border text-xs h-9" onclick="showToast('Filtro de historial (simulado)', 'info')">Filtrar</button>
+          </div>
+          <div class="space-y-4 max-h-[420px] overflow-y-auto pr-1">
+            <div class="flex gap-3">
+              <span class="w-9 h-9 rounded-full text-white flex items-center justify-center shrink-0" style="background:#6B5BFF"><i data-lucide="user" class="w-4 h-4"></i></span>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm">Informe enviado</p>
+                <p class="text-xs text-ink-muted">25-04-2026 09:15 · Rendidor: Ana Guevara Muñoz</p>
+                <button type="button" class="text-xs font-bold text-primary mt-1 hover:underline">Comentar</button>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <span class="w-9 h-9 rounded-full text-white flex items-center justify-center shrink-0" style="background:#3B82F6"><i data-lucide="inbox" class="w-4 h-4"></i></span>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm">Informe en bandeja del aprobador</p>
+                <p class="text-xs text-ink-muted">25-04-2026 09:20 · Sistema</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-end gap-3">
+            <div class="flex gap-3 flex-1 min-w-0">
+              <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:#EDE9FE;color:#6B5BFF"><i data-lucide="user" class="w-4 h-4"></i></span>
+              <div class="flex-1 min-w-0">
+                <label class="relative block">
+                  <textarea id="histComentario" maxlength="250" rows="2" class="rd-textarea w-full pr-16 text-sm" placeholder="Escribe una nota o comentario"></textarea>
+                  <span class="absolute bottom-2 right-2 text-[10px] text-ink-soft tabular-nums"><span id="histComCount">0</span> de 250</span>
+                </label>
+              </div>
+            </div>
+            <button type="button" id="btnHistComentar" class="btn btn-outline border-primary text-primary h-10 text-sm shrink-0">Comentar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Flujo -->
+      <div id="panel-flujo" class="hidden space-y-4">
+        <div class="theme-surface rd-card p-5">
+          <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+            <div>
+              <h2 class="text-lg font-extrabold text-ink">Flujo de revisión</h2>
+              <p class="text-xs text-primary font-mono mt-0.5">FLU-001 · 2 niveles</p>
+            </div>
+            <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full" style="background:#FEF3C7;color:#B45309">En proceso</span>
+          </div>
+          <p class="text-sm text-ink-muted mb-6">Revisa el flujo de revisión del informe.</p>
+          <div class="flex items-center justify-between max-w-2xl mx-auto gap-2 text-xs font-bold mb-8">
+            <div class="flex flex-col items-center gap-2 flex-1">
+              <span class="w-10 h-10 rounded-full text-white flex items-center justify-center" style="background:#6B5BFF"><i data-lucide="check" class="w-5 h-5"></i></span>
+              <span class="text-center font-extrabold" style="color:#6B5BFF">Enviado</span>
+            </div>
+            <div class="h-0.5 flex-1 -mt-8 min-w-[24px]" style="background:rgba(107,91,255,0.35)"></div>
+            <div class="flex flex-col items-center gap-2 flex-1">
+              <span class="w-10 h-10 rounded-full text-white flex items-center justify-center" style="background:#3B82F6;box-shadow:0 0 0 4px #DBEAFE"><i data-lucide="loader-circle" class="w-5 h-5 animate-spin"></i></span>
+              <span class="text-center font-extrabold" style="color:#3B82F6">En proceso</span>
+            </div>
+            <div class="h-0.5 flex-1 bg-gray-200 -mt-8 min-w-[24px]"></div>
+            <div class="flex flex-col items-center gap-2 flex-1">
+              <span class="w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center" style="color:#9CA3AF"></span>
+              <span class="text-center text-ink-muted">Cerrado</span>
+            </div>
+          </div>
+          <div class="rounded-xl border-l-4 p-4 flex gap-3" style="border-color:#6B5BFF;background:rgba(237,233,254,0.35)">
+            <span class="w-12 h-12 rounded-full text-white flex items-center justify-center shrink-0" style="background:#6B5BFF"><i data-lucide="file-check" class="w-6 h-6"></i></span>
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-sm">Informe en revisión por: Pedro Morales Quispe, Aprobador</p>
+              <p class="text-xs text-ink-muted mt-1 text-right md:text-left">pedro.morales@empresa.com.pe</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Barra flotante selección múltiple -->
+  <div id="bulkBar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] flex items-stretch rounded-xl shadow-xl border border-border overflow-hidden max-w-[95vw]">
+    <div class="text-white w-14 flex items-center justify-center font-extrabold text-xl shrink-0" id="bulkCount" style="background:#6B5BFF">0</div>
+    <div class="bg-white flex items-center gap-4 px-4 py-2 flex-wrap">
+      <button type="button" id="bulkBtnAprobar" class="flex flex-col items-center gap-0.5 text-[10px] font-bold hover:opacity-80" style="color:#15803d">
+        <span class="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0" style="background:#22C55E"><i data-lucide="check" class="w-5 h-5"></i></span>
+        Aprobar gasto
+      </button>
+      <button type="button" id="bulkBtnRechazar" class="flex flex-col items-center gap-0.5 text-[10px] font-bold hover:opacity-80" style="color:#b91c1c">
+        <span class="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0" style="background:#EF4444"><i data-lucide="x" class="w-5 h-5"></i></span>
+        Rechazar gasto
+      </button>
+    </div>
+    <button type="button" id="bulkBtnCerrar" class="bg-gray-100 px-3 hover:bg-gray-200 border-l border-border shrink-0" title="Cerrar selección"><i data-lucide="x" class="w-4 h-4 text-ink-muted"></i></button>
+  </div>
+
+  <button type="button" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center hover:opacity-90" style="background:#6B5BFF" title="Ayuda" onclick="showToast('Chat de soporte (simulado)', 'info')">
+    <i data-lucide="message-circle" class="w-6 h-6"></i>
+  </button>
+
+  <!-- Modal devolver informe (comentario obligatorio) -->
+  <div id="modal-devolver-informe" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl p-5">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <h3 class="rd-modal-title">Devolver informe</h3>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-devolver-informe')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p class="text-sm text-ink-muted">El informe volverá al rendidor. El comentario es <strong>obligatorio</strong> para que sepa qué corregir.</p>
+      <label class="block mt-4">
+        <span class="rd-label text-xs">Comentario para el rendidor</span>
+        <textarea id="txtDevolverComentario" maxlength="500" rows="4" class="rd-textarea w-full mt-1 text-sm" placeholder="Describe el motivo de la devolución…"></textarea>
+      </label>
+      <p class="text-xs text-ink-muted mt-1"><span id="devolverComCount">0</span>/500</p>
+      <p id="devolverComErr" class="text-xs text-danger font-semibold mt-2 hidden">Ingresa un comentario para continuar.</p>
+      <div class="rd-modal-footer border-0 pt-4 justify-end gap-2">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-devolver-informe')">Cancelar</button>
+        <button type="button" id="btnConfirmarDevolver" disabled class="btn opacity-50 cursor-not-allowed border-0 text-white bg-orange-600 hover:opacity-90">Confirmar devolución</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal aprobar todos -->
+  <div id="modal-aprobacion-masiva" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-border rounded-xl shadow-xl p-5">
+      <h3 class="rd-modal-title">Aprobar pendientes</h3>
+      <p class="text-sm text-ink-muted mt-2">¿Aprobar los <span id="nPendModal">3</span> gastos pendientes sin revisarlos individualmente?</p>
+      <div class="rd-modal-footer border-0 pt-4">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-aprobacion-masiva')">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="confirmarMasivo()">Sí, aprobar todos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal detalle / comprobante -->
+  <div id="modal-ver-comprobante" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <p class="text-xs font-semibold text-primary mb-1"><span id="mcCodigo">GAS-2026-00125</span></p>
+          <h3 class="rd-modal-title">Detalle del gasto</h3>
+          <p class="rd-modal-subtitle" id="mcSub">Petroperú — S/ 80.00</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-ver-comprobante')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <div class="rounded-lg bg-bg border border-border h-64 flex items-center justify-center text-ink-muted"><i data-lucide="file-text" class="w-16 h-16"></i></div>
+          <button type="button" class="btn btn-outline w-full mt-2 text-sm" onclick="showToast('Descarga simulada','success')">Descargar comprobante</button>
+        </div>
+        <div class="space-y-1.5">
+          <p class="text-xs text-ink-muted uppercase font-bold mb-2">Datos del gasto</p>
+          <p><strong>Proveedor:</strong> <span id="mcProv">Petroperú</span></p>
+          <p><strong>Fecha:</strong> <span id="mcFecha">25/04/2026</span></p>
+          <p><strong>Categoría:</strong> <span id="mcCat">—</span></p>
+          <p><strong>Proyecto:</strong> <span id="mcProy">—</span></p>
+          <p><strong>Centro de costo:</strong> <span id="mcCC">—</span></p>
+          <p><strong>Política:</strong> <span id="mcPolitica">Política General PEN</span></p>
+          <p><strong>Monto:</strong> <span id="mcMonto">S/ 80.00</span></p>
+          <p><strong>Tipo doc.:</strong> <span id="mcTipo">Factura</span></p>
+          <p><strong>Número:</strong> <span id="mcNum">F001-12345</span></p>
+          <p><strong>RUC:</strong> <span id="mcRuc">20100070970</span></p>
+          <p><strong>Nota del rendidor:</strong> <span id="mcNota" class="text-ink-muted">—</span></p>
+          <p class="text-xs text-info mt-3 p-2 rounded-lg border border-info/20" style="background:#EFF6FF">Compara los datos con el comprobante adjunto.</p>
+        </div>
+      </div>
+      <div class="rd-modal-footer px-5 pb-5 border-t border-border flex flex-wrap items-center gap-2">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-ver-comprobante')">Cerrar</button>
+        <div id="mcFooterAcciones" class="inline-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-success" onclick="abrirConfirmarAprobarUno()">Aprobar este gasto</button>
+          <button type="button" class="btn btn-outline border-danger text-danger" onclick="abrirConfirmarRechazoUno()">Rechazar este gasto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmar aprobar gastos seleccionados (barra flotante) -->
+  <div id="modal-confirmar-aprobar-seleccion" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-border rounded-xl shadow-xl p-5">
+      <h3 class="rd-modal-title">Confirmar aprobación</h3>
+      <p class="text-sm text-ink-muted mt-2" id="txtAprSeleccionBody">¿Aprobar los gastos seleccionados?</p>
+      <div class="rd-modal-footer border-0 pt-4">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-aprobar-seleccion')">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="ejecutarAprobarSeleccion()">Sí, aprobar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmar aprobar un gasto (desde detalle) -->
+  <div id="modal-confirmar-aprobar-uno" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-border rounded-xl shadow-xl p-5">
+      <h3 class="rd-modal-title">Aprobar gasto</h3>
+      <p class="text-sm text-ink-muted mt-2" id="txtAprUnoBody">¿Confirmas aprobar este gasto?</p>
+      <div class="rd-modal-footer border-0 pt-4">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-aprobar-uno')">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="ejecutarAprobarUnoConfirmado()">Sí, aprobar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmar rechazar un gasto (desde detalle → luego motivo) -->
+  <div id="modal-confirmar-rechazo-uno" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-border rounded-xl shadow-xl p-5">
+      <h3 class="rd-modal-title">Rechazar gasto</h3>
+      <p class="text-sm text-ink-muted mt-2" id="txtRechazoUnoBody">¿Confirmas rechazar este gasto? En el siguiente paso deberás indicar el motivo.</p>
+      <div class="rd-modal-footer border-0 pt-4">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-rechazo-uno')">Cancelar</button>
+        <button type="button" class="btn btn-danger border-0" onclick="continuarRechazoUnoTrasConfirmar()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal confirmar finalización -->
+  <div id="modal-confirmar-decision" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 class="rd-modal-title" id="mdTitulo">Finalizar revisión</h3>
+          <p class="rd-modal-subtitle" id="mdSub">Confirmación</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-confirmar-decision')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto text-sm space-y-3" id="mdBody"></div>
+      <div class="rd-modal-footer px-5 pb-5 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-decision')">Cancelar</button>
+        <button type="button" id="mdConfirm" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal rechazo rápido (fila / masivo) -->
+  <div id="modal-rechazo-rapido" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-border rounded-xl shadow-xl p-5">
+      <h3 class="rd-modal-title">Motivo del rechazo</h3>
+      <p class="text-sm text-ink-muted mt-1">Obligatorio para rechazar <span id="nRechazoRapido">1</span> gasto(s).</p>
+      <textarea id="txtRechazoRapido" class="rd-textarea w-full mt-3 text-sm" rows="3" placeholder="Ej: Documentación ilegible"></textarea>
+      <div class="rd-modal-footer border-0 pt-4">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-rechazo-rapido')">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="confirmarRechazoRapido()">Rechazar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const gastos = [
+      { id: 'g1', codigo: 'GAS-2026-00801', fecha: '25/04/2026', cat: 'Combustible', prov: 'PETROPERÚ', monto: 80, proy: 'Proyecto Sur', cc: 'Operaciones Lima', doc: 'F001-12345', ruc: '20100070970', politica: 'Política General PEN', nota: 'Carga de combustible para visita técnica al sitio sur', estado: 'aprobado' },
+      { id: 'g2', codigo: 'GAS-2026-00802', fecha: '23/04/2026', cat: 'Hospedaje', prov: 'HOTEL CASA ANDINA', monto: 380, proy: 'Proyecto Norte', cc: 'Operaciones Lima', doc: 'F003-1122', ruc: '20123456789', politica: 'Política General PEN', nota: '', estado: 'aprobado' },
+      { id: 'g3', codigo: 'GAS-2026-00803', fecha: '22/04/2026', cat: 'Movilidad', prov: 'TAXI BEAT', monto: 50, proy: 'Proyecto Sur', cc: 'Operaciones Lima', doc: 'REC-4455', ruc: '', politica: 'Política General PEN', nota: '', estado: 'aprobado' },
+      { id: 'g4', codigo: 'GAS-2026-00804', fecha: '24/04/2026', cat: 'Alimentación', prov: 'RESTAURANTE LA MAR', monto: 145.5, proy: '—', cc: 'Administración', doc: 'B002-8891', ruc: '20565478912', politica: 'Política General PEN', nota: '', estado: 'pendiente' },
+      { id: 'g5', codigo: 'GAS-2026-00805', fecha: '21/04/2026', cat: 'Útiles de oficina', prov: 'TAY LOY', monto: 47.3, proy: '—', cc: 'Administración', doc: 'B004-2211', ruc: '20100113610', politica: 'Política General PEN', nota: 'Útiles abril', estado: 'pendiente' },
+      { id: 'g6', codigo: 'GAS-2026-00806', fecha: '20/04/2026', cat: 'Gastos de representación', prov: 'SOC. GASTRONÓMICA LA NOTARIA LTDA.', monto: 108.9, proy: '—', cc: 'Administración', doc: 'B009-7711', ruc: '20600044123', politica: 'Política General PEN', nota: '', estado: 'pendiente' }
+    ];
+    let modalGastoId = null;
+    let motivoRechazo = {};
+    let seleccion = new Set();
+    let rechazoRapidoIds = [];
+    let idsParaAprobarSeleccion = [];
+
+    function calcResumen() {
+      let a = 0, r = 0, p = 0, sa = 0, sr = 0, sp = 0;
+      gastos.forEach((g) => {
+        if (g.estado === 'aprobado') { a++; sa += g.monto; }
+        else if (g.estado === 'rechazado') { r++; sr += g.monto; }
+        else { p++; sp += g.monto; }
+      });
+      return { a, r, p, sa, sr, sp };
+    }
+
+    function badgeEstado(g) {
+      if (g.estado === 'pendiente') return '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase" style="background:#FEF3C7;color:#B45309">En informe</span>';
+      if (g.estado === 'aprobado') return '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase" style="background:#D1FAE5;color:#15803D">Aprobado</span>';
+      return '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase" style="background:#FEE2E2;color:#B91C1C">Rechazado</span>';
+    }
+
+    function iconoDocGasto(g) {
+      const d = (g.doc || '').toLowerCase();
+      return d.includes('f') ? 'file-text' : 'receipt-text';
+    }
+
+    function clearSeleccion() {
+      seleccion.clear();
+      renderTabla();
+    }
+
+    function bulkAprobar() {
+      const ids = [...seleccion].filter((id) => {
+        const g = gastos.find((x) => x.id === id);
+        return g && g.estado === 'pendiente';
+      });
+      if (!ids.length) { showToast('Selecciona filas pendientes (En informe)', 'warning'); return; }
+      idsParaAprobarSeleccion = ids;
+      const sum = ids.reduce((s, id) => {
+        const g = gastos.find((x) => x.id === id);
+        return s + (g ? g.monto : 0);
+      }, 0);
+      document.getElementById('txtAprSeleccionBody').innerHTML =
+        '¿Aprobar <strong>' + ids.length + '</strong> gasto(s) seleccionado(s)? Monto total: <strong>S/ ' +
+        sum.toLocaleString('es-PE', { minimumFractionDigits: 2 }) + '</strong>';
+      openModal('modal-confirmar-aprobar-seleccion');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function ejecutarAprobarSeleccion() {
+      idsParaAprobarSeleccion.forEach((id) => {
+        const g = gastos.find((x) => x.id === id);
+        if (g && g.estado === 'pendiente') g.estado = 'aprobado';
+      });
+      idsParaAprobarSeleccion = [];
+      closeModal('modal-confirmar-aprobar-seleccion');
+      clearSeleccion();
+      renderTabla();
+      showToast('Gastos seleccionados aprobados', 'success');
+    }
+
+    function bulkRechazar() {
+      const ids = [...seleccion].filter((id) => {
+        const g = gastos.find((x) => x.id === id);
+        return g && g.estado === 'pendiente';
+      });
+      if (!ids.length) { showToast('Selecciona filas pendientes (En informe)', 'warning'); return; }
+      rechazoRapidoIds = ids;
+      document.getElementById('nRechazoRapido').textContent = String(ids.length);
+      document.getElementById('txtRechazoRapido').value = '';
+      openModal('modal-rechazo-rapido');
+      if (window.lucide) lucide.createIcons();
+    }
+    function confirmarRechazoRapido() {
+      const t = document.getElementById('txtRechazoRapido').value.trim();
+      if (!t) { showToast('Indica el motivo del rechazo', 'warning'); return; }
+      rechazoRapidoIds.forEach((id) => {
+        motivoRechazo[id] = t;
+        const g = gastos.find((x) => x.id === id);
+        if (g) g.estado = 'rechazado';
+      });
+      closeModal('modal-rechazo-rapido');
+      rechazoRapidoIds = [];
+      clearSeleccion();
+      renderTabla();
+      showToast('Gastos rechazados', 'success');
+    }
+
+    function renderTabla() {
+      const { a, r, p, sa, sr, sp } = calcResumen();
+      const total = gastos.length;
+      const totalMonto = gastos.reduce((s, g) => s + g.monto, 0);
+
+      document.getElementById('tituloNGastos').textContent = String(total);
+      document.getElementById('cardTotalN').textContent = document.getElementById('cardTotalN2').textContent = String(total);
+      document.getElementById('cardAprN').textContent = String(a);
+      document.getElementById('cardRecN').textContent = String(r);
+      document.getElementById('cardPenN').textContent = String(p);
+      document.getElementById('cardFondosMonto').textContent = 'S/ ' + totalMonto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('cardAprMonto').textContent = 'S/ ' + sa.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('cardRecMonto').textContent = 'S/ ' + sr.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('cardDifMonto').textContent = 'S/ ' + sp.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('hdrMontoTotal').textContent = 'S/ ' + totalMonto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+
+      const completo = p === 0;
+      ['btnDevolverInforme', 'btnFinalizarRevision'].forEach((id) => {
+        const el = document.getElementById(id);
+        el.disabled = !completo;
+        el.classList.toggle('opacity-40', !completo);
+        el.classList.toggle('cursor-not-allowed', !completo);
+      });
+
+      const tbody = document.getElementById('tbodyGastos');
+      tbody.innerHTML = gastos.map((g) => {
+        const sel = seleccion.has(g.id);
+        const pend = g.estado === 'pendiente';
+        const rowCls = 'border-b border-[#ECEEF4] last:border-0' + (sel ? ' inf-rev-gasto-sel' : '');
+        const chkTd = pend
+          ? `<td class="py-2.5 px-2 align-middle text-center"><input type="checkbox" class="inf-rev-chk" data-gid="${g.id}" ${sel ? 'checked' : ''} aria-label="Seleccionar para aprobar o rechazar"></td>`
+          : `<td class="py-2.5 px-2 align-middle text-center"><input type="checkbox" class="inf-rev-chk" disabled title="Solo gastos en informe"></td>`;
+        const ic = iconoDocGasto(g);
+        const acciones = `<div class="flex justify-end gap-1">
+          <button type="button" class="rd-action-btn" title="Ver detalle" onclick="openComprobante('${g.id}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
+        </div>`;
+        return `<tr class="${rowCls}" data-gid="${g.id}" data-pendiente="${pend}">
+          ${chkTd}
+          <td class="py-2.5 px-2">
+            <div class="flex items-center gap-2">
+              <span class="w-11 h-11 rounded-xl bg-bg border border-border inline-flex items-center justify-center text-ink-soft"><i data-lucide="${ic}" class="w-5 h-5"></i></span>
+              <div>
+                <p class="font-semibold">${g.prov.toUpperCase()}</p>
+                <p class="text-ink-muted">${g.fecha}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-2.5 px-2">${badgeEstado(g)}</td>
+          <td class="py-2.5 px-2 font-medium text-[#374B7A]">${g.politica}</td>
+          <td class="py-2.5 px-2">${g.cat}</td>
+          <td class="py-2.5 px-2 text-right font-extrabold" style="color:#3B82F6">S/ ${g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+          <td class="py-2.5 px-2">${acciones}</td>
+        </tr>`;
+      }).join('');
+
+      const nSel = seleccion.size;
+      const bulk = document.getElementById('bulkBar');
+      bulk.classList.toggle('hidden', nSel === 0);
+      document.getElementById('bulkCount').textContent = String(nSel);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function rechazoUno(id) {
+      rechazoRapidoIds = [id];
+      document.getElementById('nRechazoRapido').textContent = '1';
+      document.getElementById('txtRechazoRapido').value = '';
+      openModal('modal-rechazo-rapido');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function aprobarGasto(id) {
+      const g = gastos.find((x) => x.id === id);
+      if (g) { g.estado = 'aprobado'; seleccion.delete(id); renderTabla(); }
+    }
+
+    function openComprobante(id) {
+      modalGastoId = id;
+      const g = gastos.find((x) => x.id === id);
+      if (!g) return;
+      document.getElementById('mcCodigo').textContent = g.codigo || g.id;
+      document.getElementById('mcSub').textContent = g.prov + ' — S/ ' + g.monto.toFixed(2);
+      document.getElementById('mcProv').textContent = g.prov;
+      document.getElementById('mcFecha').textContent = g.fecha;
+      document.getElementById('mcCat').textContent = g.cat;
+      document.getElementById('mcProy').textContent = g.proy || '—';
+      document.getElementById('mcCC').textContent = g.cc || '—';
+      document.getElementById('mcPolitica').textContent = g.politica || '—';
+      document.getElementById('mcMonto').textContent = 'S/ ' + g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('mcTipo').textContent = (g.doc || '').toLowerCase().includes('b') ? 'Boleta' : 'Factura';
+      document.getElementById('mcNum').textContent = g.doc;
+      document.getElementById('mcRuc').textContent = g.ruc || '—';
+      document.getElementById('mcNota').textContent = g.nota && g.nota.trim() ? g.nota : '—';
+      const puedeActuar = g.estado === 'pendiente';
+      document.getElementById('mcFooterAcciones').classList.toggle('hidden', !puedeActuar);
+      openModal('modal-ver-comprobante');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function abrirConfirmarAprobarUno() {
+      if (!modalGastoId) return;
+      const g = gastos.find((x) => x.id === modalGastoId);
+      if (!g || g.estado !== 'pendiente') return;
+      document.getElementById('txtAprUnoBody').innerHTML =
+        '¿Confirmas aprobar el gasto <strong>' + g.codigo + '</strong> · ' + g.prov + ' por <strong>S/ ' +
+        g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 }) + '</strong>?';
+      openModal('modal-confirmar-aprobar-uno');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function ejecutarAprobarUnoConfirmado() {
+      if (!modalGastoId) return;
+      aprobarGasto(modalGastoId);
+      closeModal('modal-confirmar-aprobar-uno');
+      closeModal('modal-ver-comprobante');
+      showToast('Gasto aprobado', 'success');
+    }
+
+    function abrirConfirmarRechazoUno() {
+      if (!modalGastoId) return;
+      const g = gastos.find((x) => x.id === modalGastoId);
+      if (!g || g.estado !== 'pendiente') return;
+      document.getElementById('txtRechazoUnoBody').innerHTML =
+        '¿Confirmas rechazar el gasto <strong>' + g.codigo + '</strong> · ' + g.prov +
+        '? En el siguiente paso deberás indicar el <strong>motivo del rechazo</strong>.';
+      openModal('modal-confirmar-rechazo-uno');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function continuarRechazoUnoTrasConfirmar() {
+      const id = modalGastoId;
+      closeModal('modal-confirmar-rechazo-uno');
+      closeModal('modal-ver-comprobante');
+      if (id) rechazoUno(id);
+    }
+
+    document.getElementById('btnAprTodos').addEventListener('click', () => {
+      const n = gastos.filter((g) => g.estado === 'pendiente').length;
+      if (!n) { showToast('No hay pendientes', 'info'); return; }
+      document.getElementById('nPendModal').textContent = String(n);
+      openModal('modal-aprobacion-masiva');
+    });
+
+    function confirmarMasivo() {
+      gastos.forEach((g) => { if (g.estado === 'pendiente') g.estado = 'aprobado'; });
+      closeModal('modal-aprobacion-masiva');
+      renderTabla();
+      showToast('Gastos pendientes aprobados', 'success');
+    }
+
+    function setSubTab(name) {
+      document.querySelectorAll('.subtab').forEach((b) => {
+        const on = b.getAttribute('data-subtab') === name;
+        b.classList.toggle('border-primary', on);
+        b.classList.toggle('text-primary', on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('text-ink-muted', !on);
+      });
+      document.getElementById('panel-detalle').classList.toggle('hidden', name !== 'detalle');
+      document.getElementById('panel-historial').classList.toggle('hidden', name !== 'historial');
+      document.getElementById('panel-flujo').classList.toggle('hidden', name !== 'flujo');
+      if (window.lucide) lucide.createIcons();
+    }
+    document.querySelectorAll('.subtab').forEach((b) => b.addEventListener('click', () => setSubTab(b.getAttribute('data-subtab'))));
+
+    document.getElementById('btnOpcionesTop').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('menuOpcionesTop').classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => document.getElementById('menuOpcionesTop').classList.add('hidden'));
+
+    document.getElementById('histComentario').addEventListener('input', (e) => {
+      document.getElementById('histComCount').textContent = String(e.target.value.length);
+    });
+    document.getElementById('btnHistComentar').addEventListener('click', () => {
+      const t = document.getElementById('histComentario').value.trim();
+      if (!t) { showToast('Escribe un comentario', 'warning'); return; }
+      showToast('Comentario registrado (simulado)', 'success');
+      document.getElementById('histComentario').value = '';
+      document.getElementById('histComCount').textContent = '0';
+    });
+
+    const taDev = document.getElementById('txtDevolverComentario');
+    const btnConfDev = document.getElementById('btnConfirmarDevolver');
+    taDev.addEventListener('input', () => {
+      document.getElementById('devolverComCount').textContent = String(taDev.value.length);
+      document.getElementById('devolverComErr').classList.add('hidden');
+      const ok = taDev.value.trim().length > 0;
+      btnConfDev.disabled = !ok;
+      btnConfDev.classList.toggle('opacity-50', !ok);
+      btnConfDev.classList.toggle('cursor-not-allowed', !ok);
+    });
+
+    function abrirModalDevolver() {
+      taDev.value = '';
+      document.getElementById('devolverComCount').textContent = '0';
+      document.getElementById('devolverComErr').classList.add('hidden');
+      btnConfDev.disabled = true;
+      btnConfDev.classList.add('opacity-50', 'cursor-not-allowed');
+      openModal('modal-devolver-informe');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    document.getElementById('btnDevolverInforme').addEventListener('click', () => {
+      if (document.getElementById('btnDevolverInforme').disabled) return;
+      abrirModalDevolver();
+    });
+
+    btnConfDev.addEventListener('click', () => {
+      const t = taDev.value.trim();
+      if (!t) {
+        document.getElementById('devolverComErr').classList.remove('hidden');
+        return;
+      }
+      closeModal('modal-devolver-informe');
+      showToast('Informe devuelto al rendidor (mockup)', 'success');
+    });
+
+    function openFinalizarModal() {
+      const { a, r } = calcResumen();
+      const sa = gastos.filter((g) => g.estado === 'aprobado').reduce((s, g) => s + g.monto, 0);
+      const sr = gastos.filter((g) => g.estado === 'rechazado').reduce((s, g) => s + g.monto, 0);
+      document.getElementById('mdTitulo').textContent = 'Finalizar revisión';
+      document.getElementById('mdSub').textContent = 'Confirmación';
+      document.getElementById('mdBody').innerHTML = `<p>El informe «Reembolso Mayo - Lima» pasará a <strong>María Rojas Salas</strong> para la siguiente etapa del flujo.</p>
+        <div class="rd-card p-3 bg-bg text-sm">${a} gastos aprobados (S/ ${sa.toFixed(2)}) · ${r} rechazados (S/ ${sr.toFixed(2)})</div>`;
+      const btn = document.getElementById('mdConfirm');
+      btn.className = 'btn btn-primary';
+      btn.textContent = 'Confirmar';
+      btn.onclick = () => { closeModal('modal-confirmar-decision'); showToast('Revisión finalizada (mockup)', 'success'); };
+      openModal('modal-confirmar-decision');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    document.getElementById('btnFinalizarRevision').addEventListener('click', () => {
+      if (document.getElementById('btnFinalizarRevision').disabled) return;
+      openFinalizarModal();
+    });
+
+    function setupAprobadorSidebar() {
+      ['rendidor', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const aItems = document.querySelector('[data-group="aprobador"] .group-items');
+      const aIcon = document.querySelector('[data-group="aprobador"] .group-icon');
+      if (aItems) aItems.classList.remove('hidden');
+      if (aIcon) aIcon.classList.add('rotate-90');
+    }
+
+    function highlightBandejaInformes() {
+      document.querySelectorAll('.sidebar-item').forEach((el) => el.classList.remove('active'));
+      const item = document.querySelector('[data-group="aprobador"] a[href*="informes-bandeja"]');
+      if (item) item.classList.add('active');
+    }
+
+    function initGastosTableInteractions() {
+      const tb = document.getElementById('tbodyGastos');
+      if (tb._rxGastosInit) return;
+      tb._rxGastosInit = true;
+      tb.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!t.classList || !t.classList.contains('inf-rev-chk') || t.disabled) return;
+        const id = t.getAttribute('data-gid');
+        if (!id) return;
+        if (t.checked) seleccion.add(id);
+        else seleccion.delete(id);
+        renderTabla();
+      });
+      document.getElementById('bulkBtnAprobar').addEventListener('click', (e) => { e.stopPropagation(); bulkAprobar(); });
+      document.getElementById('bulkBtnRechazar').addEventListener('click', (e) => { e.stopPropagation(); bulkRechazar(); });
+      document.getElementById('bulkBtnCerrar').addEventListener('click', (e) => { e.stopPropagation(); clearSeleccion(); });
+    }
+
+    window.confirmarMasivo = confirmarMasivo;
+    window.confirmarRechazoRapido = confirmarRechazoRapido;
+    window.openComprobante = openComprobante;
+    window.ejecutarAprobarSeleccion = ejecutarAprobarSeleccion;
+    window.ejecutarAprobarUnoConfirmado = ejecutarAprobarUnoConfirmado;
+    window.continuarRechazoUnoTrasConfirmar = continuarRechazoUnoTrasConfirmar;
+    window.abrirConfirmarAprobarUno = abrirConfirmarAprobarUno;
+    window.abrirConfirmarRechazoUno = abrirConfirmarRechazoUno;
+
+    initLayout('REVISIÓN DE INFORMES / DETALLE IR-00050', '../components').then(() => {
+      setupAprobadorSidebar();
+      highlightBandejaInformes();
+      initGastosTableInteractions();
+      renderTabla();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Nuevo gasto múltiple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291200">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-32">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 max-w-[1600px] mx-auto space-y-3">
+      <nav class="text-xs text-ink-muted uppercase font-semibold"><a href="gastos-listar.html" class="text-primary hover:underline">Mis gastos</a> / Nuevo gasto múltiple</nav>
+      <div>
+        <h1 class="text-xl font-extrabold uppercase">Nuevo gasto múltiple</h1>
+        <p class="text-sm text-ink-muted mt-1">Registra varios gastos de una sola vez</p>
+      </div>
+
+      <article class="theme-surface rd-card p-4 bg-primary-light/40 border-primary/20">
+        <h2 class="table-panel-title">Contexto global del registro</h2>
+        <p class="text-xs text-ink-muted mb-3">Define la política (moneda y catálogo de impuestos/descuentos vienen de ella), proyecto, centro de costo y solicitud. El tipo de impuesto o descuento es opcional (por defecto <strong>null</strong>); si eliges uno, aplica a todas las filas. Si cambias de política, se reinicia la selección.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div>
+            <label class="rd-label block mb-1">Política *</label>
+            <select id="sharedPolitica" class="rd-select w-full h-9 px-2 text-xs uppercase">
+              <option value="">SELECCIONA POLÍTICA</option>
+              <option value="POL-001">POL-001 · POLÍTICA GENERAL PEN</option>
+              <option value="POL-003">POL-003 · POLÍTICA USD INTERNACIONAL</option>
+              <option value="POL-007">POL-007 · POLÍTICA OPERACIONES</option>
+            </select>
+          </div>
+          <div>
+            <label class="rd-label block mb-1">Moneda (según política)</label>
+            <div id="monedaPoliticaMultDisplay" class="flex items-center min-h-9 px-2 rounded-lg border border-border bg-bg text-xs font-semibold uppercase text-ink-muted">— Selecciona una política</div>
+          </div>
+          <div id="wrapImpuestoPoliticaMult" class="opacity-60">
+            <label class="rd-label block mb-1">Tipo de impuesto / descuento</label>
+            <select id="sharedImpuestoPolitica" class="rd-select w-full h-9 px-2 text-xs" disabled>
+              <option value="">Primero selecciona una política</option>
+            </select>
+          </div>
+          <div>
+            <label class="rd-label block mb-1">Proyecto</label>
+            <select id="sharedProy" class="rd-select w-full h-9 px-2 text-xs uppercase">
+              <option value="">—</option>
+              <option>Proyecto Sur</option>
+              <option>Proyecto Norte</option>
+            </select>
+          </div>
+          <div>
+            <label class="rd-label block mb-1">Centro de costo</label>
+            <select id="sharedCc" class="rd-select w-full h-9 px-2 text-xs uppercase">
+              <option value="">—</option>
+              <option>Operaciones Lima</option>
+              <option>Administración Central</option>
+            </select>
+          </div>
+          <div>
+            <label class="rd-label block mb-1">Solicitud de compra</label>
+            <select id="sharedSolicitud" class="rd-select w-full h-9 px-2 text-xs uppercase">
+              <option value="">SIN SOLICITUD</option>
+              <option>SOL-0088 — Útiles Q2 (aprobada)</option>
+              <option>SOL-0077 — Viáticos Selva (aprobada)</option>
+            </select>
+          </div>
+        </div>
+        <div id="resumenTotalesMult" class="hidden mt-3 rounded-lg border border-primary/25 bg-primary-light/25 px-3 py-2 text-xs">
+          <p class="font-semibold uppercase text-ink-muted mb-1">Resumen de montos (todas las filas)</p>
+          <p class="tabular-nums"><span class="text-ink-muted">Subtotal:</span> <span id="multSubtotal">S/ 0.00</span></p>
+          <p class="tabular-nums"><span class="text-ink-muted">Impuesto o descuento estimado:</span> <span id="multImpuesto">S/ 0.00</span></p>
+          <p class="font-extrabold text-primary tabular-nums mt-1"><span class="text-ink">Total:</span> <span id="multTotal">S/ 0.00</span></p>
+        </div>
+      </article>
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
+        <div class="xl:col-span-12 space-y-2">
+          <div id="erroresBox" class="hidden rounded-lg border border-danger/40 bg-danger-light/40 text-danger text-sm p-3 space-y-1"></div>
+          <article class="theme-surface rd-card overflow-hidden p-2">
+            <div class="overflow-x-auto">
+              <table class="rd-table w-full min-w-[1250px] text-sm" id="tablaMult">
+                <thead>
+                  <tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted">
+                    <th class="py-2 px-1 w-8">#</th>
+                    <th class="py-2 px-1">Fecha</th>
+                    <th class="py-2 px-1">Proveedor *</th>
+                    <th class="py-2 px-1">Categoría</th>
+                    <th class="py-2 px-1">Tipo factura *</th>
+                    <th class="py-2 px-1">Nro. documento *</th>
+                    <th class="py-2 px-1">Monto *</th>
+                    <th class="py-2 px-1 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMult"></tbody>
+              </table>
+            </div>
+            <button type="button" id="btnAddFila" class="btn btn-outline border-primary text-primary w-full mt-2" onclick="addFila()">+ Agregar fila</button>
+            <p id="notaMax" class="hidden text-xs text-warning font-semibold mt-2 text-center">Máximo 20 gastos por carga múltiple</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="fixed bottom-0 left-0 right-0 md:left-[220px] z-30 bg-white border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,.06)] px-3 py-3">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap justify-end gap-2">
+      <a href="gastos-listar.html" class="btn btn-muted">Cancelar</a>
+      <button type="button" class="btn btn-primary" onclick="guardarGastos()">Guardar gastos</button>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const today = new Date().toISOString().slice(0, 10);
+    let filas = [];
+    const MAX = 20;
+
+    const POLITICAS_CONFIG = {
+      'POL-001': {
+        currency: 'PEN',
+        taxes: [
+          { id: 'igv', label: 'IGV 18%', pct: 18 },
+          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
+          { id: 'ret_3', label: 'Retención / detracción referencial (3%)', pct: 3 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_com', label: 'Descuento comercial (−3%)', pct: -3 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
+        ]
+      },
+      'POL-003': {
+        currency: 'USD',
+        taxes: [
+          { id: 'loc', label: 'Cargo / impuesto referencial (10%)', pct: 10 },
+          { id: 'sin_cargo', label: 'Sin cargo adicional (0%)', pct: 0 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−4%)', pct: -4 },
+          { id: 'dto_linea', label: 'Descuento en línea (−1,5%)', pct: -1.5 }
+        ]
+      },
+      'POL-007': {
+        currency: 'PEN',
+        taxes: [
+          { id: 'igv', label: 'IGV 18%', pct: 18 },
+          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
+        ]
+      }
+    };
+
+    function symForCurrency(c) {
+      if (c === 'USD') return 'US$';
+      if (c === 'CLP') return 'CLP$';
+      return 'S/';
+    }
+
+    function labelMonedaPolitica(c) {
+      if (c === 'USD') return 'US$ USD — Dólares';
+      if (c === 'CLP') return 'CLP$ — Pesos chilenos';
+      return 'S/ PEN — Soles';
+    }
+
+    function getPolicyKeyMult() {
+      return document.getElementById('sharedPolitica').value;
+    }
+
+    function getCurrencyFromPolicyMult() {
+      const key = getPolicyKeyMult();
+      return (key && POLITICAS_CONFIG[key]) ? POLITICAS_CONFIG[key].currency : 'PEN';
+    }
+
+    function sym() {
+      return symForCurrency(getCurrencyFromPolicyMult());
+    }
+
+    function onPoliticaChangeMult() {
+      const key = getPolicyKeyMult();
+      const impSel = document.getElementById('sharedImpuestoPolitica');
+      const wrap = document.getElementById('wrapImpuestoPoliticaMult');
+      const monedaEl = document.getElementById('monedaPoliticaMultDisplay');
+
+      if (!key || !POLITICAS_CONFIG[key]) {
+        monedaEl.textContent = '— Selecciona una política';
+        monedaEl.classList.add('text-ink-muted');
+        impSel.innerHTML = '<option value="">Primero selecciona una política</option>';
+        impSel.disabled = true;
+        impSel.value = '';
+        wrap.classList.add('opacity-60');
+        document.getElementById('resumenTotalesMult').classList.add('hidden');
+        render();
+        return;
+      }
+
+      const cfg = POLITICAS_CONFIG[key];
+      monedaEl.textContent = `${labelMonedaPolitica(cfg.currency)} · ${cfg.currency}`;
+      monedaEl.classList.remove('text-ink-muted');
+      impSel.disabled = false;
+      wrap.classList.remove('opacity-60');
+      impSel.innerHTML = '<option value="">Sin seleccionar (null)</option>' +
+        cfg.taxes.map((t) => `<option value="${t.id}">${t.label}</option>`).join('');
+      impSel.value = '';
+      render();
+    }
+
+    function getTaxPctMult() {
+      const key = getPolicyKeyMult();
+      const taxId = document.getElementById('sharedImpuestoPolitica').value;
+      if (!key || !taxId || !POLITICAS_CONFIG[key]) return null;
+      const t = POLITICAS_CONFIG[key].taxes.find((x) => x.id === taxId);
+      return t ? t.pct : null;
+    }
+
+    function updateResumenTotalesMult() {
+      const box = document.getElementById('resumenTotalesMult');
+      const taxId = document.getElementById('sharedImpuestoPolitica').value;
+      const symb = sym();
+      const subtotal = filas.reduce((s, f) => s + (parseFloat(f.monto) || 0), 0);
+      if (!taxId || getTaxPctMult() === null) {
+        box.classList.add('hidden');
+        return;
+      }
+      const pct = getTaxPctMult();
+      const imp = subtotal * (pct / 100);
+      const total = subtotal + imp;
+      box.classList.remove('hidden');
+      document.getElementById('multSubtotal').textContent =
+        `${symb} ${subtotal.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+      document.getElementById('multImpuesto').textContent =
+        `${symb} ${imp.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+      document.getElementById('multTotal').textContent =
+        `${symb} ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+    }
+
+    function addFila(data = {}) {
+      if (filas.length >= MAX) return;
+      filas.push({
+        id: 'f' + Date.now() + Math.random(),
+        fecha: data.fecha || today,
+        prov: data.prov || '',
+        cat: data.cat || '',
+        tipo: data.tipo || '',
+        num: data.num || '',
+        monto: data.monto || ''
+      });
+      render();
+    }
+
+    function removeFila(id) {
+      filas = filas.filter((f) => f.id !== id);
+      render();
+    }
+
+    function rowValid(f) {
+      return f.fecha && f.prov.trim() && f.tipo && f.num.trim() && f.monto !== '' && !isNaN(parseFloat(f.monto));
+    }
+
+    function render() {
+      const tbody = document.getElementById('tbodyMult');
+      tbody.innerHTML = filas.map((f, i) => {
+        const ok = rowValid(f);
+        const missing = !f.fecha || !f.prov.trim() || !f.tipo || !f.num.trim() || f.monto === '';
+        const rowBorder = ok ? '' : 'border-l-4 border-warning';
+        const cellProv = !f.prov.trim() && f.prov !== '' ? 'bg-danger-light/40' : (!f.prov.trim() ? 'bg-danger-light/20' : '');
+        const cellMonto = (f.monto === '' || isNaN(parseFloat(f.monto))) ? 'bg-danger-light/20' : '';
+        const cellTipo = !f.tipo ? 'bg-danger-light/20' : '';
+        const cellNum = !f.num.trim() ? 'bg-danger-light/20' : '';
+        return `<tr class="${rowBorder} border-b border-[#ECEEF4]">
+          <td class="py-1.5 px-1 text-ink-muted">${i + 1}</td>
+          <td class="py-1.5 px-1"><input type="date" data-id="${f.id}" data-k="fecha" class="rd-input h-8 w-full px-1 text-xs" value="${f.fecha}"></td>
+          <td class="py-1.5 px-1 ${cellProv}"><input type="text" data-id="${f.id}" data-k="prov" class="rd-input h-8 w-full px-2 text-xs" placeholder="Proveedor" value="${f.prov}"></td>
+          <td class="py-1.5 px-1"><select data-id="${f.id}" data-k="cat" class="rd-select h-8 w-full px-1 text-xs">
+            <option value="">—</option>
+            <option ${f.cat === 'Combustible' ? 'selected' : ''}>Combustible</option>
+            <option ${f.cat === 'Alimentación' ? 'selected' : ''}>Alimentación</option>
+            <option ${f.cat === 'Hospedaje' ? 'selected' : ''}>Hospedaje</option>
+            <option ${f.cat === 'Movilidad' ? 'selected' : ''}>Movilidad</option>
+          </select></td>
+          <td class="py-1.5 px-1 ${cellTipo}"><select data-id="${f.id}" data-k="tipo" class="rd-select h-8 w-full px-1 text-xs uppercase">
+            <option value="">—</option>
+            <option ${f.tipo === 'Factura De Compra' ? 'selected' : ''}>Factura De Compra</option>
+            <option ${f.tipo === 'Factura Electronica' ? 'selected' : ''}>Factura Electronica</option>
+            <option ${f.tipo === 'Factura Exenta' ? 'selected' : ''}>Factura Exenta</option>
+            <option ${f.tipo === 'Boleta' ? 'selected' : ''}>Boleta</option>
+            <option ${f.tipo === 'Boleta Electrónica' ? 'selected' : ''}>Boleta Electrónica</option>
+            <option ${f.tipo === 'Vale Por Olitel' ? 'selected' : ''}>Vale Por Olitel</option>
+          </select></td>
+          <td class="py-1.5 px-1 ${cellNum}"><input type="text" data-id="${f.id}" data-k="num" class="rd-input h-8 w-full px-2 text-xs uppercase" placeholder="F001-12345" value="${f.num}"></td>
+          <td class="py-1.5 px-1 ${cellMonto}"><div class="flex items-center gap-1"><span class="text-[10px] font-bold w-8">${sym()}</span><input type="number" step="0.01" data-id="${f.id}" data-k="monto" class="rd-input h-8 w-full px-1 text-xs" placeholder="0.00" value="${f.monto}"></div></td>
+          <td class="py-1.5 px-1"><button type="button" class="text-danger p-1" onclick="removeFila('${f.id}')" title="Quitar fila"><i data-lucide="x" class="w-4 h-4"></i></button></td>
+        </tr>`;
+      }).join('');
+
+      tbody.querySelectorAll('input,select').forEach((el) => {
+        el.addEventListener('change', onCell);
+        el.addEventListener('input', onCell);
+      });
+
+      document.getElementById('btnAddFila').disabled = filas.length >= MAX;
+      document.getElementById('notaMax').classList.toggle('hidden', filas.length < MAX);
+
+      updateResumenTotalesMult();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function onCell(e) {
+      const id = e.target.dataset.id;
+      const k = e.target.dataset.k;
+      if (!id || !k) return;
+      const f = filas.find((x) => x.id === id);
+      if (!f) return;
+      f[k] = e.target.value;
+      render();
+    }
+
+    document.getElementById('sharedPolitica').addEventListener('change', onPoliticaChangeMult);
+    document.getElementById('sharedImpuestoPolitica').addEventListener('change', updateResumenTotalesMult);
+
+    function guardarGastos() {
+      const valid = filas.filter(rowValid);
+      if (!valid.length) {
+        document.getElementById('erroresBox').classList.remove('hidden');
+        document.getElementById('erroresBox').innerHTML = '<p>No hay filas completas para guardar (fecha, proveedor, tipo, número y monto).</p>';
+        showToast('No hay gastos válidos', 'warning');
+        return;
+      }
+      const pol = document.getElementById('sharedPolitica').value;
+      if (!pol) {
+        showToast('Selecciona una política antes de guardar', 'warning');
+        return;
+      }
+      document.getElementById('erroresBox').classList.add('hidden');
+      showToast(`${valid.length} gasto(s) guardado(s) en BORRADOR`, 'success');
+      setTimeout(() => { location.href = 'gastos-listar.html'; }, 500);
+    }
+
+    for (let i = 0; i < 2; i++) addFila();
+
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+
+    initLayout('MIS GASTOS / NUEVO GASTO MÚLTIPLE', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      onPoliticaChangeMult();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Políticas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#F5F7FA] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <article class="theme-surface kpi-card kpi-primary"><p class="kpi-value">4</p><p class="kpi-title">Total políticas</p><p class="kpi-subtitle">Registradas en el sistema</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p class="kpi-value">3</p><p class="kpi-title">Activas</p><p class="kpi-subtitle">En uso por rendidores</p></article>
+        <article class="theme-surface kpi-card kpi-danger"><p class="kpi-value">1</p><p class="kpi-title">Inactivas</p><p class="kpi-subtitle">Deshabilitadas</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Tabla de políticas</h1>
+            <p class="table-panel-subtitle">Gestiona las políticas de gasto de la empresa</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="refreshPolicies()" class="btn btn-outline"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+            <button onclick="openModal('modal-exportar-politicas')" class="btn btn-outline"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> Exportar</button>
+            <button onclick="openModal('modal-importar-politicas')" class="btn btn-outline"><i data-lucide="download" class="w-3.5 h-3.5"></i> Importar</button>
+            <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nueva política</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <div class="relative md:col-span-2 flex gap-2">
+            <label class="relative flex-1"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="filtroTexto" type="text" placeholder="BUSCAR POR NOMBRE O CÓDIGO..." class="rd-input w-full h-10 pl-9 pr-3 text-[13px] uppercase"></label>
+            <button type="button" onclick="searchPolicies()" class="btn btn-primary h-10">Buscar</button>
+          </div>
+          <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los estados</option><option value="activo">Activas</option><option value="inactivo">Inactivas</option></select>
+          <select id="filtroMoneda" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todas las monedas</option><option value="PEN">PEN</option><option value="USD">USD</option><option value="CLP">CLP</option></select>
+        </div>
+        <div><span id="resultadosChip" class="inline-flex h-8 items-center gap-1.5 px-3 rounded-md bg-primary-light text-primary text-[12px] font-semibold uppercase tracking-wide"><i data-lucide="chevrons-down" class="w-3.5 h-3.5"></i> 4 resultados</span></div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de políticas</h2>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1100px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Código</th>
+                <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">Moneda</th>
+                <th class="py-2.5 px-2">Flujo de revisión</th>
+                <th class="py-2.5 px-2">Rendidores</th>
+                <th class="py-2.5 px-2">Impuestos</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="politicasTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">1-4 de 4</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage - 1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage + 1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-detalle-politica" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header bg-gradient-to-r from-primary-light/70 via-info-light/50 to-success-light/50 border-b border-primary/15">
+        <div class="flex items-start justify-between">
+          <div class="flex items-start gap-3">
+            <span class="w-11 h-11 rounded-xl bg-white/85 border border-primary/20 inline-flex items-center justify-center text-primary shadow-sm">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <span id="dCodigoBadge" class="inline-flex px-2 py-1 rounded bg-primary text-white text-xs font-semibold">POL-001</span>
+              <h3 id="dTitulo" class="rd-modal-title mt-2">POLÍTICA GENERAL PEN</h3>
+              <span id="dEstadoBadge" class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold mt-1">ACTIVO</span>
+            </div>
+          </div>
+          <button class="rd-modal-close bg-white/85" onclick="closeModal('modal-detalle-politica')"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="p-5 space-y-4 text-sm overflow-y-auto bg-[#FCFCFE]">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="rounded-xl border border-primary/20 bg-gradient-to-br from-primary-light/50 to-white p-3"><p class="text-[11px] uppercase text-primary font-semibold tracking-wide">Código</p><p id="dCodigo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-info/20 bg-gradient-to-br from-info-light/50 to-white p-3"><p class="text-[11px] uppercase text-info font-semibold tracking-wide">Moneda</p><p id="dMoneda" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-warning/20 bg-gradient-to-br from-warning-light/50 to-white p-3"><p class="text-[11px] uppercase text-warning font-semibold tracking-wide">Flujo revisión</p><p id="dFlujo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">Impuestos</p><p id="dTaxStatus" class="text-base font-semibold mt-1">ACTIVO</p></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 rd-card p-4 border border-primary/15">
+            <p class="rd-label mb-3 text-primary">Rendidores asignados</p>
+            <div class="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p id="dUsersCount" class="text-4xl font-extrabold text-primary leading-none">12</p>
+                <p class="text-xs text-ink-muted uppercase mt-1 tracking-wide">Rendidores usando esta política</p>
+              </div>
+              <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-light text-primary text-xs font-semibold">
+                <i data-lucide="users" class="w-3.5 h-3.5"></i> Equipo activo
+              </div>
+            </div>
+            <div class="mt-3 rounded-lg border border-border p-3 bg-bg/70">
+              <p class="rd-label mb-2">Listado</p>
+              <ul id="dUsersNames" class="text-sm text-ink-muted space-y-1"></ul>
+            </div>
+          </div>
+          <div class="rd-card p-4 border border-info/15">
+            <p class="rd-label mb-3 text-info">Indicadores</p>
+            <div class="space-y-2">
+              <div class="rounded-lg border border-border bg-white p-2.5"><p class="text-[11px] uppercase text-ink-muted">Gastos (6 meses)</p><p class="text-xl font-bold text-primary">342</p></div>
+              <div class="rounded-lg border border-border bg-white p-2.5"><p class="text-[11px] uppercase text-ink-muted">Informes cerrados</p><p class="text-xl font-bold text-info">89</p></div>
+              <div class="rounded-lg border border-border bg-white p-2.5"><p class="text-[11px] uppercase text-ink-muted">Monto aprobado</p><p class="text-xl font-bold text-success">S/ 48,250</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rd-card p-4 border border-warning/15 bg-gradient-to-br from-warning-light/20 to-white">
+          <p class="rd-label mb-2 text-warning">Descripción de la política</p>
+          <p id="dDescripcion" class="text-sm leading-relaxed text-ink"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-crear-politica" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">NUEVA POLÍTICA</h3><p class="rd-modal-subtitle">CONFIGURA UNA NUEVA POLÍTICA DE GASTOS</p></div><button onclick="closeModal('modal-crear-politica')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="formCrearPolitica" class="p-5 space-y-4 overflow-y-auto">
+        <div id="modal-politica-crear-container">
+          <div class="border-b border-border mb-4">
+            <nav class="flex items-center gap-4 text-xs font-semibold uppercase">
+              <button type="button" data-modal-tab="general" onclick="switchModalTab('modal-politica-crear-container','general')" class="pb-2 text-primary border-b-2 border-primary">General</button>
+              <button type="button" data-modal-tab="rendidores" onclick="switchModalTab('modal-politica-crear-container','rendidores')" class="pb-2 text-ink-muted">Rendidores</button>
+              <button type="button" data-modal-tab="categorias" onclick="switchModalTab('modal-politica-crear-container','categorias')" class="pb-2 text-ink-muted">Categorías</button>
+              <button type="button" data-modal-tab="impuestos" onclick="switchModalTab('modal-politica-crear-container','impuestos')" class="pb-2 text-ink-muted">Impuestos</button>
+            </nav>
+          </div>
+          <section data-modal-content="general" class="space-y-3">
+            <div><label class="rd-label block mb-1">Nombre *</label><input id="crearNombre" required class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: POLÍTICA EMPLEADOS LIMA"></div>
+            <div><label class="rd-label block mb-1">Código</label><input id="crearCodigo" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: POL-001"></div>
+            <div><label class="rd-label block mb-1">Descripción</label><textarea id="crearDesc" rows="3" class="rd-textarea w-full px-3 py-2 text-sm" placeholder="DESCRIPCIÓN DE LA POLÍTICA (OPCIONAL)"></textarea></div>
+            <div><label class="rd-label block mb-1">Flujo de revisión</label><select id="crearFlujo" class="rd-select w-full h-10 px-3 text-sm"><option value="">Sin flujo asignado</option><option>Flujo Standard 2 Niveles</option><option>Flujo Gerencia 3 Niveles</option><option>Flujo Internacional</option></select><p id="crearFlujoWarn" class="text-xs text-warning mt-1 hidden">⚠️ Sin flujo asignado, los rendidores no podrán enviar informes</p></div>
+            <div><label class="rd-label block mb-1">Moneda *</label><select id="crearMoneda" class="rd-select w-full h-10 px-3 text-sm"><option value="PEN">S/ PEN — Soles</option><option value="USD">US$ USD — Dólares</option><option value="CLP">CLP$ — Pesos chilenos</option></select></div>
+            <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las políticas activas pueden ser usadas</p></div><span class="rd-switch"><input id="crearEstado" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="rendidores" class="space-y-3 hidden">
+            <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+              <label class="rd-label block mb-2">Agregar rendidor</label>
+              <div class="flex gap-2 flex-wrap items-stretch">
+                <select id="crearRendidoresSelect" class="rd-select flex-1 min-w-[220px] h-10 px-3 text-sm">
+                  <option value="">Seleccionar usuario…</option>
+                </select>
+                <button type="button" class="btn btn-primary h-10 shrink-0" onclick="addPolicyRendidor('crear')">Agregar</button>
+              </div>
+              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-bg">
+                    <tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Estado usuario</th><th class="text-right px-3 py-2">Acción</th></tr>
+                  </thead>
+                  <tbody id="crearRendidoresList"></tbody>
+                </table>
+              </div>
+              <p class="text-xs text-ink-muted mt-2">Solo aparecen usuarios con rol Rendidor activo</p>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="categorias" class="space-y-3 hidden">
+            <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+              <label class="rd-label block mb-2">Seleccionar categoría</label>
+              <div class="flex gap-2">
+              <select id="crearCategoriasSelect" class="rd-select w-full h-10 px-3 text-sm">
+                <option value="">SELECCIONAR CATEGORÍA</option>
+                <option value="CB-001">CB-001 - COMBUSTIBLE</option>
+                <option value="AL-001">AL-001 - ALIMENTACIÓN</option>
+                <option value="VJS-001">VJS-001 - VIAJES</option>
+                <option value="VJS-002">VJS-002 - HOSPEDAJE</option>
+                <option value="VJS-003">VJS-003 - MOVILIDAD</option>
+                <option value="OF-001">OF-001 - ÚTILES DE OFICINA</option>
+                <option value="CP-001">CP-001 - CAPACITACIÓN</option>
+              </select>
+              <button type="button" class="btn btn-primary h-10" onclick="addPolicyCategory('crear')">Agregar</button>
+              </div>
+              <div class="mt-3 rounded-lg border border-border bg-white p-3">
+                <p class="rd-label mb-2 text-primary">Categorías agregadas a esta política</p>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Código</th><th class="text-left px-3 py-2">Categoría</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
+                    <tbody id="crearCategoriasList"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="impuestos" class="space-y-3 hidden">
+            <div class="rounded-xl border border-success/20 p-4 bg-gradient-to-br from-success-light/20 to-white">
+              <p class="rd-label mb-3 text-success">Configuración de impuestos</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input id="crearTaxNombre" class="rd-input h-10 px-3 text-sm" placeholder="NOMBRE IMPUESTO">
+                <input id="crearTaxPct" type="number" step="0.01" class="rd-input h-10 px-3 text-sm" placeholder="%">
+                <input id="crearTaxCodigo" class="rd-input h-10 px-3 text-sm" placeholder="CÓDIGO">
+              </div>
+              <button type="button" onclick="addPolicyTax('crear')" class="btn btn-outline w-full mt-3 text-success border-success hover:bg-success-light">+ AGREGAR IMPUESTO</button>
+              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">%</th><th class="text-left px-3 py-2">Código</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
+                  <tbody id="crearTaxList"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR</button></div>
+          </section>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-editar-politica" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">EDITAR POLÍTICA</h3><p class="rd-modal-subtitle">MODIFICA LA CONFIGURACIÓN DE LA POLÍTICA</p></div><button onclick="closeModal('modal-editar-politica')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="formEditarPolitica" class="p-5 space-y-4 overflow-y-auto">
+        <input id="editarId" type="hidden">
+        <div id="modal-politica-editar-container">
+          <div class="border-b border-border mb-4">
+            <nav class="flex items-center gap-4 text-xs font-semibold uppercase">
+              <button type="button" data-modal-tab="general" onclick="switchModalTab('modal-politica-editar-container','general')" class="pb-2 text-primary border-b-2 border-primary">General</button>
+              <button type="button" data-modal-tab="rendidores" onclick="switchModalTab('modal-politica-editar-container','rendidores')" class="pb-2 text-ink-muted">Rendidores</button>
+              <button type="button" data-modal-tab="categorias" onclick="switchModalTab('modal-politica-editar-container','categorias')" class="pb-2 text-ink-muted">Categorías</button>
+              <button type="button" data-modal-tab="impuestos" onclick="switchModalTab('modal-politica-editar-container','impuestos')" class="pb-2 text-ink-muted">Impuestos</button>
+            </nav>
+          </div>
+          <section data-modal-content="general" class="space-y-3">
+            <div><label class="rd-label block mb-1">Nombre * <span id="editModifiedBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-warning-light text-warning text-[10px] align-middle">MODIFICADO</span></label><input id="editarNombre" required class="rd-input w-full h-10 px-3 text-sm"></div>
+            <div><label class="rd-label block mb-1">Código</label><input id="editarCodigo" class="rd-input w-full h-10 px-3 text-sm"></div>
+            <div><label class="rd-label block mb-1">Descripción</label><textarea id="editarDesc" rows="3" class="rd-textarea w-full px-3 py-2 text-sm"></textarea></div>
+            <div><label class="rd-label block mb-1">Flujo de revisión</label><select id="editarFlujo" class="rd-select w-full h-10 px-3 text-sm"><option value="">Sin flujo asignado</option><option>Flujo Standard 2 Niveles</option><option>Flujo Gerencia 3 Niveles</option><option>Flujo Internacional</option></select><p id="editarFlujoWarn" class="text-xs text-warning mt-1 hidden">⚠️ Sin flujo asignado, los rendidores no podrán enviar informes</p></div>
+            <div><label class="rd-label block mb-1">Moneda *</label><select id="editarMoneda" class="rd-select w-full h-10 px-3 text-sm"><option value="PEN">S/ PEN — Soles</option><option value="USD">US$ USD — Dólares</option><option value="CLP">CLP$ — Pesos chilenos</option></select></div>
+            <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las políticas activas pueden ser usadas</p></div><span class="rd-switch"><input id="editarEstado" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="rendidores" class="space-y-3 hidden">
+            <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+              <label class="rd-label block mb-2">Agregar rendidor</label>
+              <div class="flex gap-2 flex-wrap items-stretch">
+                <select id="editarRendidoresSelect" class="rd-select flex-1 min-w-[220px] h-10 px-3 text-sm">
+                  <option value="">Seleccionar usuario…</option>
+                </select>
+                <button type="button" class="btn btn-primary h-10 shrink-0" onclick="addPolicyRendidor('editar')">Agregar</button>
+              </div>
+              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-bg">
+                    <tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Estado usuario</th><th class="text-right px-3 py-2">Acción</th></tr>
+                  </thead>
+                  <tbody id="editarRendidoresList"></tbody>
+                </table>
+              </div>
+              <p class="text-xs text-ink-muted mt-2">Solo aparecen usuarios con rol Rendidor activo</p>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="categorias" class="space-y-3 hidden">
+            <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+              <label class="rd-label block mb-2">Seleccionar categoría</label>
+              <div class="flex gap-2">
+              <select id="editarCategoriasSelect" class="rd-select w-full h-10 px-3 text-sm">
+                <option value="">SELECCIONAR CATEGORÍA</option>
+                <option value="CB-001">CB-001 - COMBUSTIBLE</option>
+                <option value="AL-001">AL-001 - ALIMENTACIÓN</option>
+                <option value="VJS-001">VJS-001 - VIAJES</option>
+                <option value="VJS-002">VJS-002 - HOSPEDAJE</option>
+                <option value="VJS-003">VJS-003 - MOVILIDAD</option>
+                <option value="OF-001">OF-001 - ÚTILES DE OFICINA</option>
+                <option value="CP-001">CP-001 - CAPACITACIÓN</option>
+              </select>
+              <button type="button" class="btn btn-primary h-10" onclick="addPolicyCategory('editar')">Agregar</button>
+              </div>
+              <div class="mt-3 rounded-lg border border-border bg-white p-3">
+                <p class="rd-label mb-2 text-primary">Categorías agregadas a esta política</p>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Código</th><th class="text-left px-3 py-2">Categoría</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
+                    <tbody id="editarCategoriasList"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button></div>
+          </section>
+          <section data-modal-content="impuestos" class="space-y-3 hidden">
+            <div class="rounded-xl border border-success/20 p-4 bg-gradient-to-br from-success-light/20 to-white">
+              <p class="rd-label mb-3 text-success">Configuración de impuestos</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input id="editarTaxNombre" class="rd-input h-10 px-3 text-sm" placeholder="NOMBRE IMPUESTO">
+                <input id="editarTaxPct" type="number" step="0.01" class="rd-input h-10 px-3 text-sm" placeholder="%">
+                <input id="editarTaxCodigo" class="rd-input h-10 px-3 text-sm" placeholder="CÓDIGO">
+              </div>
+              <button type="button" onclick="addPolicyTax('editar')" class="btn btn-outline w-full mt-3 text-success border-success hover:bg-success-light">+ AGREGAR IMPUESTO</button>
+              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
+                <table class="w-full text-sm">
+                  <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">%</th><th class="text-left px-3 py-2">Código</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
+                  <tbody id="editarTaxList"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
+          </section>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-eliminar-politica" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-white border border-danger/40 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 text-danger mt-0.5"></i><div><h3 class="rd-modal-title">DESACTIVAR POLÍTICA</h3><p class="rd-modal-subtitle">LA POLÍTICA NO SE ELIMINARÁ, SOLO SE DESACTIVARÁ</p></div></div><button onclick="closeModal('modal-eliminar-politica')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p class="text-sm">¿Estás seguro de desactivar la política <strong id="deletePolicyName">"POLÍTICA GENERAL PEN"</strong>?</p>
+        <div class="rd-card p-3 text-sm"><p><strong>CÓDIGO:</strong> <span id="deletePolicyCode">POL-001</span></p><p><strong>NOMBRE:</strong> <span id="deletePolicyName2">Política General PEN</span></p><p><strong>MONEDA:</strong> <span id="deletePolicyCurrency">S/ PEN</span></p><p><strong>RENDIDORES ASIGNADOS:</strong> <span id="deletePolicyUsers">12</span></p><p><strong>ESTADO ACTUAL:</strong> <span class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold">ACTIVO</span></p></div>
+        <div class="rounded-lg border border-info/30 bg-info-light/40 px-3 py-2 text-sm text-[#1D4ED8]">ℹ️ Esta política tiene 12 rendidores asignados. Al desactivarla, no podrán crear nuevos gastos bajo esta política.</div>
+        <label class="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"><input id="deactivateConfirm" type="checkbox" class="h-4 w-4"> Entiendo que los rendidores no podrán usar esta política</label>
+        <div class="rd-modal-footer border-0 pt-0"><button type="button" onclick="closeModal('modal-eliminar-politica')" class="btn btn-muted">CANCELAR</button><button id="btnDesactivar" type="button" disabled onclick="confirmDeactivatePolicy()" class="btn btn-danger disabled:opacity-50 disabled:cursor-not-allowed">DESACTIVAR</button></div>
+        <p class="text-[11px] text-ink-soft">Para eliminar permanentemente una política, contacta al administrador del sistema.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-usuarios-politica" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="users" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">RENDIDORES DE LA POLÍTICA</h3><p class="rd-modal-subtitle">GESTIONA QUÉ RENDIDORES USAN ESTA POLÍTICA</p></div></div><div class="flex items-center gap-2"><span id="usersPolicyBadge" class="text-xs bg-primary-light text-primary px-2 py-1 rounded font-semibold">POL-001 — Política General PEN</span><button onclick="closeModal('modal-usuarios-politica')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p class="rd-label" id="usersAssignedLabel">Rendidores asignados</p>
+        <div class="overflow-x-auto border border-border rounded-lg">
+          <table class="w-full text-sm">
+            <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Estado</th><th class="text-right px-3 py-2">Acción</th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+        <p class="text-xs text-ink-muted uppercase text-center">Agregar rendidores</p>
+        <div class="flex gap-2 flex-wrap items-stretch">
+          <select id="newUserSelect" class="rd-select h-10 px-3 flex-1 min-w-[220px] text-sm">
+            <option value="">Seleccionar usuario…</option>
+          </select>
+          <button id="btnAsignarUsuario" type="button" class="btn btn-primary h-10 shrink-0" onclick="addUserToPolicyModal()">Agregar</button>
+        </div>
+        <div class="rd-modal-footer"><p class="text-xs text-ink-muted mr-auto">Los cambios se aplican inmediatamente</p><button type="button" onclick="closeModal('modal-usuarios-politica')" class="btn btn-muted">CERRAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-importar-politicas" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="upload" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">IMPORTAR POLÍTICAS (EXCEL)</h3><p class="rd-modal-subtitle">CARGA MASIVA DESDE ARCHIVO EXCEL</p></div></div><button onclick="closeModal('modal-importar-politicas')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="rounded-lg border border-primary-light border-l-4 border-l-primary bg-primary-light/40 p-4"><div class="flex items-start gap-2"><i data-lucide="info" class="w-4 h-4 mt-0.5 text-primary"></i><div><p class="rd-label mb-2">INSTRUCCIONES:</p><ul class="list-disc pl-4 text-sm text-ink-muted space-y-1"><li>Solo se acepta Excel (.xlsx o .xls). Tamaño máximo: 10 MB.</li><li>Usa el formato de columnas definido. Descarga la plantilla para ver el formato correcto.</li><li>Opción "continuar con errores": si está desactivada, un error en una fila puede revertir toda la importación; si está activada, se procesan el resto de filas y se listan los fallos.</li></ul></div></div></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-bg"><div><p class="text-sm font-semibold uppercase">CONTINUAR PROCESANDO AUNQUE HAYA ERRORES (SKIP_ERRORS)</p><p class="text-xs text-ink-muted">Cuando está activo, omite filas con error y continúa con el resto.</p></div><span class="rd-switch"><input id="importSkipErrors" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <label class="block border-dashed border-2 border-border rounded-xl bg-bg/60 p-6 text-center cursor-pointer hover:bg-bg"><input id="importPolicyFileInput" type="file" accept=".xlsx,.xls" class="hidden"><i data-lucide="cloud-upload" class="w-10 h-10 mx-auto text-ink-soft"></i><p class="mt-3 text-base font-semibold uppercase">ARRASTRA Y SUELTA TU ARCHIVO</p><p class="text-xs text-ink-muted mt-1">O HAZ CLIC PARA SELECCIONAR</p><span class="inline-flex mt-3 px-2 py-1 rounded-full bg-gray-100 text-ink-muted text-xs font-semibold">.XLSX, .XLS</span><p id="importPolicyFileName" class="text-xs text-primary font-semibold mt-2"></p></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modal-importar-politicas')" class="btn btn-muted"><i data-lucide="x" class="w-3.5 h-3.5"></i> CANCELAR</button><button id="btnImportarPoliticas" type="button" disabled onclick="confirmImportPolicies()" class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"><i data-lucide="upload" class="w-3.5 h-3.5"></i> IMPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-exportar-politicas" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EXPORTAR POLÍTICAS</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div></div><button onclick="closeModal('modal-exportar-politicas')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="rounded-lg border border-border bg-bg p-3 flex items-center gap-2 text-sm"><i data-lucide="file-spreadsheet" class="w-5 h-5 text-success"></i><p>Se exportarán <strong>4 políticas</strong> en formato Excel (.xlsx).</p></div>
+        <div><p class="rd-label mb-2">FORMATO:</p><div class="space-y-2"><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypePolicies" value="xlsx" checked> EXCEL (.XLSX)</label><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypePolicies" value="csv"> CSV (.CSV)</label></div></div>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modal-exportar-politicas')" class="btn btn-muted">CANCELAR</button><button id="btnExportarPoliticas" type="button" onclick="confirmExportPolicies()" class="btn btn-primary"><i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const politicas = [
+      { id: 1, code: 'POL-001', name: 'Política General PEN', description: 'Política estándar para empleados de Lima', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 12, status: true, taxes_enabled: true },
+      { id: 2, code: 'POL-002', name: 'Política Gerencia', description: 'Política para viáticos de gerencia', workflow: 'Flujo Gerencia 3 Niveles', workflow_id: 2, currency: 'PEN', users: 3, status: true, taxes_enabled: true },
+      { id: 3, code: 'POL-003', name: 'Política USD Internacional', description: 'Política para viajes internacionales', workflow: 'Flujo Internacional', workflow_id: 3, currency: 'USD', users: 5, status: true, taxes_enabled: false },
+      { id: 4, code: 'POL-004', name: 'Política Temporal 2024', description: '', workflow: '', workflow_id: null, currency: 'PEN', users: 0, status: false, taxes_enabled: false },
+      { id: 5, code: 'POL-005', name: 'Política Proyecto Sur', description: 'Uso exclusivo proyecto sur', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 4, status: true, taxes_enabled: true },
+      { id: 6, code: 'POL-006', name: 'Política Chile CLP', description: 'Rendición para filial Chile', workflow: 'Flujo Internacional', workflow_id: 3, currency: 'CLP', users: 2, status: true, taxes_enabled: false },
+      { id: 7, code: 'POL-007', name: 'Política Operaciones Norte', description: 'Operaciones Trujillo', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 6, status: true, taxes_enabled: true },
+      { id: 8, code: 'POL-008', name: 'Política Ejecutivo USD', description: 'Gastos ejecutivos en dólares', workflow: '', workflow_id: null, currency: 'USD', users: 1, status: false, taxes_enabled: false }
+    ];
+    let currentPage = 1;
+    let pageSize = 15;
+    let lastPage = 1;
+    let selectedPolicyId = 1;
+    let editingPolicyId = null;
+    let editInitialData = null;
+
+    const CATALOGO_RENDIDORES = [
+      { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
+      { id: 'u-carlos', name: 'Carlos Mendoza Torres', email: 'carlos.mendoza@empresa.com.pe' },
+      { id: 'u-pedro', name: 'Pedro Morales Quispe', email: 'pedro.morales@empresa.com.pe' },
+      { id: 'u-maria', name: 'María Torres Salas', email: 'maria.torres@empresa.com.pe' },
+      { id: 'u-luis', name: 'Luis Ramos León', email: 'luis.ramos@empresa.com.pe' },
+      { id: 'u-rosa', name: 'Rosa Flores Rojas', email: 'rosa.flores@empresa.com.pe' },
+      { id: 'u-jorge', name: 'Jorge Paredes Soto', email: 'jorge.paredes@empresa.com.pe' }
+    ];
+    const policyRendidores = { crear: [], editar: [] };
+    let usuariosPoliticaModal = [];
+
+    function currencyLabel(currency) {
+      if (currency === 'USD') return 'US$ USD';
+      if (currency === 'CLP') return 'CLP$';
+      return 'S/ PEN';
+    }
+
+    function getFilteredPolicies() {
+      const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const estado = document.getElementById('filtroEstado').value;
+      const moneda = document.getElementById('filtroMoneda').value;
+      return politicas.filter((p) => {
+        const byText = !txt || p.name.toLowerCase().includes(txt) || p.code.toLowerCase().includes(txt);
+        const byState = estado === 'todos' || (estado === 'activo' ? p.status : !p.status);
+        const byCurrency = moneda === 'todos' || p.currency === moneda;
+        return byText && byState && byCurrency;
+      });
+    }
+
+    function renderPoliciesTable() {
+      const rows = getFilteredPolicies();
+      document.getElementById('resultadosChip').innerHTML = `<i data-lucide="chevrons-down" class="w-3.5 h-3.5"></i> ${rows.length} resultados`;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      lastPage = totalPages;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const paged = rows.slice(start, start + pageSize);
+      document.getElementById('politicasTbody').innerHTML = paged.map((p) => `
+        <tr class="border-b border-[#ECEEF4] last:border-0">
+          <td class="py-2.5 px-2">${p.code}</td>
+          <td class="py-2.5 px-2">${p.name}</td>
+          <td class="py-2.5 px-2">${currencyLabel(p.currency)}</td>
+          <td class="py-2.5 px-2">${p.workflow_id ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-info-light text-info text-xs font-semibold"><i data-lucide="git-branch" class="w-3.5 h-3.5"></i>${p.workflow}</span>` : `<span class="inline-flex px-2 py-0.5 rounded bg-warning-light text-warning text-xs font-semibold">SIN FLUJO ⚠️</span>`}</td>
+          <td class="py-2.5 px-2">${p.users > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-light text-primary text-xs font-semibold"><i data-lucide="users" class="w-3.5 h-3.5"></i>${p.users}</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold"><i data-lucide="users" class="w-3.5 h-3.5"></i>0</span>`}</td>
+          <td class="py-2.5 px-2">${p.taxes_enabled ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>ACTIVO</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>NO</span>`}</td>
+          <td class="py-2.5 px-2">${p.status ? '<span class="status-pill status-active">ACTIVO</span>' : '<span class="status-pill status-inactive">INACTIVO</span>'}</td>
+          <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${p.id})" class="rd-action-btn" title="Ver detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${p.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${p.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
+        </tr>
+      `).join('');
+      const from = rows.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, rows.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${rows.length}`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('btnLastPage').disabled = currentPage === totalPages;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goToPage(page) {
+      if (page < 1) page = 1;
+      if (page > lastPage) page = lastPage;
+      currentPage = page;
+      renderPoliciesTable();
+    }
+
+    function refreshPolicies() {
+      currentPage = 1;
+      renderPoliciesTable();
+      showToast('Políticas actualizadas', 'info');
+    }
+
+    function searchPolicies() {
+      currentPage = 1;
+      renderPoliciesTable();
+    }
+
+    function openDetailModal(id) {
+      selectedPolicyId = id;
+      const p = politicas.find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById('dCodigoBadge').textContent = p.code;
+      document.getElementById('dTitulo').textContent = p.name.toUpperCase();
+      document.getElementById('dEstadoBadge').textContent = p.status ? 'ACTIVO' : 'INACTIVO';
+      document.getElementById('dEstadoBadge').className = `inline-flex px-2 py-0.5 rounded text-xs font-semibold mt-1 ${p.status ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}`;
+      document.getElementById('dCodigo').textContent = p.code;
+      document.getElementById('dMoneda').textContent = `${currencyLabel(p.currency)} — ${p.currency === 'PEN' ? 'Soles' : (p.currency === 'USD' ? 'Dólares' : 'Pesos chilenos')}`;
+      document.getElementById('dFlujo').textContent = p.workflow || 'Sin flujo asignado';
+      document.getElementById('dTaxStatus').textContent = p.taxes_enabled ? 'ACTIVO' : 'NO ACTIVO';
+      document.getElementById('dUsersCount').textContent = p.users;
+      document.getElementById('dDescripcion').textContent = p.description || 'Sin descripción';
+      openModal('modal-detalle-politica');
+    }
+
+    function openCreateModal() {
+      document.getElementById('formCrearPolitica').reset();
+      document.getElementById('crearEstado').checked = true;
+      document.getElementById('crearFlujoWarn').classList.add('hidden');
+      policyTaxes.crear = [
+        { name: 'EXENTO', pct: '0.00', codigo: 'EX' },
+        { name: 'IGV', pct: '18.00', codigo: 'IGV' }
+      ];
+      policyCategories.crear = [];
+      renderPolicyTaxes('crear');
+      renderSelectedCategories('crear');
+      policyRendidores.crear = [
+        { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
+        { id: 'u-carlos', name: 'Carlos Mendoza Torres', email: 'carlos.mendoza@empresa.com.pe' }
+      ].map((u) => ({ ...u }));
+      renderPolicyRendidores('crear');
+      switchModalTab('modal-politica-crear-container', 'general');
+      openModal('modal-crear-politica');
+    }
+
+    function submitCreatePolicy() {
+      const name = document.getElementById('crearNombre').value.trim();
+      if (!name) return showToast('El nombre es obligatorio', 'warning');
+      showToast('Política creada', 'success');
+      closeModal('modal-crear-politica');
+    }
+
+    function openEditModal(id) {
+      selectedPolicyId = id;
+      editingPolicyId = id;
+      const p = politicas.find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById('editarId').value = String(p.id);
+      document.getElementById('editarNombre').value = p.name;
+      document.getElementById('editarCodigo').value = p.code;
+      document.getElementById('editarDesc').value = p.description;
+      document.getElementById('editarFlujo').value = p.workflow || '';
+      document.getElementById('editarMoneda').value = p.currency;
+      document.getElementById('editarEstado').checked = !!p.status;
+      document.getElementById('editarFlujoWarn').classList.toggle('hidden', !!p.workflow_id);
+      editInitialData = {
+        name: p.name, code: p.code, description: p.description, workflow: p.workflow || '',
+        currency: p.currency, status: !!p.status
+      };
+      document.getElementById('editModifiedBadge').classList.add('hidden');
+      policyTaxes.editar = [
+        { name: 'EXENTO', pct: '0.00', codigo: 'EX' },
+        { name: 'IGV', pct: '18.00', codigo: 'IGV' }
+      ];
+      policyCategories.editar = [
+        { code: 'CB-001', name: 'CB-001 - COMBUSTIBLE' },
+        { code: 'AL-001', name: 'AL-001 - ALIMENTACIÓN' }
+      ];
+      renderPolicyTaxes('editar');
+      renderSelectedCategories('editar');
+      policyRendidores.editar = [
+        { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
+        { id: 'u-carlos', name: 'Carlos Mendoza Torres', email: 'carlos.mendoza@empresa.com.pe' }
+      ].map((u) => ({ ...u }));
+      renderPolicyRendidores('editar');
+      switchModalTab('modal-politica-editar-container', 'general');
+      openModal('modal-editar-politica');
+    }
+
+    function openUsersModal(id) {
+      selectedPolicyId = id;
+      const p = politicas.find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById('usersPolicyBadge').textContent = `${p.code} — ${p.name}`;
+      usuariosPoliticaModal = [
+        { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
+        { id: 'u-carlos', name: 'Carlos Mendoza Torres', email: 'carlos.mendoza@empresa.com.pe' },
+        { id: 'u-pedro', name: 'Pedro Morales Quispe', email: 'pedro.morales@empresa.com.pe' },
+        { id: 'u-maria', name: 'María Torres Salas', email: 'maria.torres@empresa.com.pe' },
+        { id: 'u-luis', name: 'Luis Ramos León', email: 'luis.ramos@empresa.com.pe' }
+      ].map((u) => ({ ...u }));
+      renderUsersPolicyModal();
+      openModal('modal-usuarios-politica');
+    }
+
+    function openDeleteModal(id) {
+      selectedPolicyId = id;
+      const p = politicas.find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById('deletePolicyName').textContent = `"${p.name}"`;
+      document.getElementById('deletePolicyName2').textContent = p.name;
+      document.getElementById('deletePolicyCode').textContent = p.code;
+      document.getElementById('deletePolicyCurrency').textContent = currencyLabel(p.currency);
+      document.getElementById('deletePolicyUsers').textContent = String(p.users);
+      document.getElementById('deactivateConfirm').checked = false;
+      document.getElementById('btnDesactivar').disabled = true;
+      openModal('modal-eliminar-politica');
+    }
+
+    function confirmDeactivatePolicy() {
+      const p = politicas.find((x) => x.id === selectedPolicyId);
+      if (!p) return;
+      p.status = false;
+      showToast('Política desactivada', 'warning');
+      closeModal('modal-eliminar-politica');
+      renderPoliciesTable();
+    }
+
+    function confirmImportPolicies() {
+      showToast('Importación de políticas completada', 'success');
+      closeModal('modal-importar-politicas');
+    }
+
+    function confirmExportPolicies() {
+      const button = document.getElementById('btnExportarPoliticas');
+      button.disabled = true;
+      button.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> GENERANDO...';
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        showToast('Exportación de políticas completada', 'success');
+        closeModal('modal-exportar-politicas');
+        button.disabled = false;
+        button.innerHTML = '<i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR';
+        if (window.lucide) lucide.createIcons();
+      }, 1500);
+    }
+
+    document.getElementById('filtroTexto').addEventListener('input', () => { currentPage = 1; renderPoliciesTable(); });
+    document.getElementById('filtroEstado').addEventListener('change', () => { currentPage = 1; renderPoliciesTable(); });
+    document.getElementById('filtroMoneda').addEventListener('change', () => { currentPage = 1; renderPoliciesTable(); });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderPoliciesTable(); });
+    document.getElementById('deactivateConfirm').addEventListener('change', (e) => { document.getElementById('btnDesactivar').disabled = !e.target.checked; });
+    document.getElementById('crearFlujo').addEventListener('change', (e) => { document.getElementById('crearFlujoWarn').classList.toggle('hidden', !!e.target.value); });
+    document.getElementById('editarFlujo').addEventListener('change', (e) => { document.getElementById('editarFlujoWarn').classList.toggle('hidden', !!e.target.value); updateEditModifiedBadge(); });
+    document.getElementById('importPolicyFileInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      document.getElementById('btnImportarPoliticas').disabled = !file;
+      document.getElementById('importPolicyFileName').textContent = file ? `Archivo seleccionado: ${file.name}` : '';
+    });
+
+    document.getElementById('formCrearPolitica').addEventListener('submit', (e) => { e.preventDefault(); submitCreatePolicy(); });
+    document.getElementById('formEditarPolitica').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const p = politicas.find((x) => x.id === editingPolicyId);
+      if (!p) return;
+      p.name = document.getElementById('editarNombre').value.trim();
+      p.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
+      p.description = document.getElementById('editarDesc').value.trim();
+      p.workflow = document.getElementById('editarFlujo').value;
+      p.workflow_id = p.workflow ? 1 : null;
+      p.currency = document.getElementById('editarMoneda').value;
+      p.status = document.getElementById('editarEstado').checked;
+      showToast('Política actualizada', 'success');
+      closeModal('modal-editar-politica');
+      renderPoliciesTable();
+    });
+
+    function updateEditModifiedBadge() {
+      if (!editInitialData) return;
+      const hasChanges = (
+        document.getElementById('editarNombre').value !== editInitialData.name ||
+        document.getElementById('editarCodigo').value !== editInitialData.code ||
+        document.getElementById('editarDesc').value !== editInitialData.description ||
+        document.getElementById('editarFlujo').value !== editInitialData.workflow ||
+        document.getElementById('editarMoneda').value !== editInitialData.currency ||
+        document.getElementById('editarEstado').checked !== editInitialData.status
+      );
+      document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
+    }
+
+    ['editarNombre', 'editarCodigo', 'editarDesc', 'editarFlujo', 'editarMoneda', 'editarEstado'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
+      document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
+    });
+
+    const policyTaxes = { crear: [], editar: [] };
+    const policyCategories = { crear: [], editar: [] };
+
+    function refreshRendSelect(mode) {
+      const select = document.getElementById(`${mode}RendidoresSelect`);
+      if (!select) return;
+      const taken = new Set(policyRendidores[mode].map((u) => u.id));
+      select.innerHTML = '<option value="">Seleccionar usuario…</option>' +
+        CATALOGO_RENDIDORES.filter((u) => !taken.has(u.id))
+          .map((u) => `<option value="${u.id}">${u.name} — ${u.email}</option>`)
+          .join('');
+    }
+
+    function renderPolicyRendidores(mode) {
+      const list = document.getElementById(`${mode}RendidoresList`);
+      if (!list) return;
+      list.innerHTML = policyRendidores[mode].length
+        ? policyRendidores[mode].map((u) => `<tr class="border-t border-border">
+            <td class="px-3 py-2 font-medium">${u.name}</td>
+            <td class="px-3 py-2 text-ink-muted">${u.email}</td>
+            <td class="px-3 py-2"><span class="status-pill status-active">ACTIVO</span></td>
+            <td class="px-3 py-2 text-right"><button type="button" class="rd-action-btn" onclick="removePolicyRendidor('${mode}','${u.id}')" title="Quitar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+          </tr>`).join('')
+        : '<tr><td colspan="4" class="px-3 py-3 text-center text-ink-muted">Sin rendidores agregados</td></tr>';
+      refreshRendSelect(mode);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addPolicyRendidor(mode) {
+      const select = document.getElementById(`${mode}RendidoresSelect`);
+      if (!select || !select.value) return showToast('Selecciona un usuario', 'warning');
+      const u = CATALOGO_RENDIDORES.find((x) => x.id === select.value);
+      if (!u) return;
+      if (policyRendidores[mode].some((x) => x.id === u.id)) return showToast('El usuario ya está en la lista', 'warning');
+      policyRendidores[mode].push({ ...u });
+      select.value = '';
+      renderPolicyRendidores(mode);
+      showToast('Rendidor agregado', 'success');
+    }
+
+    function removePolicyRendidor(mode, userId) {
+      policyRendidores[mode] = policyRendidores[mode].filter((x) => x.id !== userId);
+      renderPolicyRendidores(mode);
+    }
+
+    function refreshNewUserSelectForModal() {
+      const select = document.getElementById('newUserSelect');
+      if (!select) return;
+      const taken = new Set(usuariosPoliticaModal.map((u) => u.id));
+      select.innerHTML = '<option value="">Seleccionar usuario…</option>' +
+        CATALOGO_RENDIDORES.filter((u) => !taken.has(u.id))
+          .map((u) => `<option value="${u.id}">${u.name} — ${u.email}</option>`)
+          .join('');
+    }
+
+    function renderUsersPolicyModal() {
+      const tbody = document.getElementById('usersTableBody');
+      const label = document.getElementById('usersAssignedLabel');
+      if (label) label.textContent = `Rendidores asignados (${usuariosPoliticaModal.length})`;
+      if (!tbody) return;
+      tbody.innerHTML = usuariosPoliticaModal.length
+        ? usuariosPoliticaModal.map((u) => `<tr class="border-t border-border">
+            <td class="px-3 py-2 font-medium">${u.name}</td>
+            <td class="px-3 py-2 text-ink-muted">${u.email}</td>
+            <td class="px-3 py-2"><span class="status-pill status-active">Activo</span></td>
+            <td class="px-3 py-2 text-right"><button type="button" class="rd-action-btn" onclick="removeUserFromPolicyModal('${u.id}')" title="Quitar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+          </tr>`).join('')
+        : '<tr><td colspan="4" class="px-3 py-3 text-center text-ink-muted">Sin rendidores asignados</td></tr>';
+      refreshNewUserSelectForModal();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addUserToPolicyModal() {
+      const select = document.getElementById('newUserSelect');
+      if (!select || !select.value) return showToast('Selecciona un usuario', 'warning');
+      const u = CATALOGO_RENDIDORES.find((x) => x.id === select.value);
+      if (!u) return;
+      if (usuariosPoliticaModal.some((x) => x.id === u.id)) return showToast('El usuario ya está asignado', 'warning');
+      usuariosPoliticaModal.push({ ...u });
+      select.value = '';
+      renderUsersPolicyModal();
+      showToast('Rendidor agregado', 'success');
+    }
+
+    function removeUserFromPolicyModal(userId) {
+      usuariosPoliticaModal = usuariosPoliticaModal.filter((x) => x.id !== userId);
+      renderUsersPolicyModal();
+    }
+
+    window.addPolicyRendidor = addPolicyRendidor;
+    window.removePolicyRendidor = removePolicyRendidor;
+    window.addUserToPolicyModal = addUserToPolicyModal;
+    window.removeUserFromPolicyModal = removeUserFromPolicyModal;
+
+    function switchModalTab(containerId, tabId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.querySelectorAll('[data-modal-tab]').forEach((t) => {
+        const isActive = t.dataset.modalTab === tabId;
+        t.classList.toggle('text-primary', isActive);
+        t.classList.toggle('border-b-2', isActive);
+        t.classList.toggle('border-primary', isActive);
+        t.classList.toggle('text-ink-muted', !isActive);
+      });
+      container.querySelectorAll('[data-modal-content]').forEach((c) => {
+        c.classList.toggle('hidden', c.dataset.modalContent !== tabId);
+      });
+    }
+
+    function addPolicyCategory(mode) {
+      const select = document.getElementById(`${mode}CategoriasSelect`);
+      if (!select || !select.value) return showToast('Selecciona una categoría', 'warning');
+      const code = select.value;
+      const name = select.options[select.selectedIndex].textContent;
+      if (policyCategories[mode].some((item) => item.code === code)) return showToast('La categoría ya fue agregada', 'warning');
+      policyCategories[mode].push({ code, name });
+      renderSelectedCategories(mode);
+    }
+
+    function removePolicyCategory(mode, code) {
+      policyCategories[mode] = policyCategories[mode].filter((item) => item.code !== code);
+      renderSelectedCategories(mode);
+    }
+
+    function renderSelectedCategories(mode) {
+      const select = document.getElementById(`${mode}CategoriasSelect`);
+      const list = document.getElementById(`${mode}CategoriasList`);
+      if (!select || !list) return;
+      list.innerHTML = policyCategories[mode].length
+        ? policyCategories[mode].map((item) => `<tr class="border-t border-border"><td class="px-3 py-2">${item.code}</td><td class="px-3 py-2">${item.name.replace(`${item.code} - `, '')}</td><td class="px-3 py-2 text-right"><button type="button" class="text-danger" onclick="removePolicyCategory('${mode}','${item.code}')"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('')
+        : '<tr><td colspan="3" class="px-3 py-3 text-center text-ink-muted">Sin categorías agregadas</td></tr>';
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function addPolicyTax(mode) {
+      const name = document.getElementById(`${mode}TaxNombre`).value.trim();
+      const pct = document.getElementById(`${mode}TaxPct`).value.trim();
+      const codigo = document.getElementById(`${mode}TaxCodigo`).value.trim();
+      if (!name || !pct) return showToast('Completa nombre y porcentaje del impuesto', 'warning');
+      policyTaxes[mode].push({ name, pct, codigo });
+      ['TaxNombre', 'TaxPct', 'TaxCodigo'].forEach((key) => { document.getElementById(`${mode}${key}`).value = ''; });
+      renderPolicyTaxes(mode);
+    }
+
+    function renderPolicyTaxes(mode) {
+      const wrap = document.getElementById(`${mode}TaxList`);
+      if (!wrap) return;
+      if (!policyTaxes[mode].length) {
+        wrap.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-ink-muted">Sin impuestos agregados.</td></tr>';
+        return;
+      }
+      wrap.innerHTML = policyTaxes[mode].map((t, idx) => `<tr class="border-t border-border"><td class="px-3 py-2 font-semibold">${t.name}</td><td class="px-3 py-2">${t.pct}</td><td class="px-3 py-2">${t.codigo || '—'}</td><td class="px-3 py-2 text-right"><button type="button" class="text-danger" onclick="removePolicyTax('${mode}',${idx})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removePolicyTax(mode, idx) {
+      policyTaxes[mode].splice(idx, 1);
+      renderPolicyTaxes(mode);
+    }
+
+    initLayout('RINDE GASTOS / POLÍTICAS', '../components').then(() => {
+      renderPoliciesTable();
+    });
+  </script>
+</body>
+</html>

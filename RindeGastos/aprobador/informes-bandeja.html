@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Revisión de informes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, info: { DEFAULT: '#3B82F6', light: '#DBEAFE' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291400">
+  <style>
+    @keyframes bandeja-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
+    .kpi-urgente-pulse { animation: bandeja-pulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <article id="kpiUrgente" class="theme-surface kpi-card kpi-danger kpi-urgente-pulse border-2 border-danger/30">
+          <p class="kpi-value">5</p>
+          <p class="kpi-title">Por revisar</p>
+          <p class="kpi-subtitle">En mi bandeja ahora</p>
+        </article>
+        <article class="theme-surface kpi-card" style="border-left:3px solid #F59E0B">
+          <p class="kpi-value flex items-center gap-2" style="color:#F59E0B">2 <span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold uppercase">Alerta</span></p>
+          <p class="kpi-title">Pendientes +3 días</p>
+          <p class="kpi-subtitle">Sin revisar hace más de 3 días</p>
+        </article>
+        <article class="theme-surface kpi-card kpi-success">
+          <p class="kpi-value">34</p>
+          <p class="kpi-title">Revisados</p>
+          <p class="kpi-subtitle">Total histórico</p>
+        </article>
+        <article class="theme-surface kpi-card" style="border-left:3px solid #3B82F6">
+          <p class="kpi-value text-xl md:text-2xl text-info">S/ 28,450</p>
+          <p class="kpi-title">Monto aprobado</p>
+          <p class="kpi-subtitle">Acumulado histórico</p>
+        </article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Revisión de informes</h1>
+            <p class="table-panel-subtitle">Pedro Morales Quispe — pedro.morales@empresa.com.pe</p>
+          </div>
+          <button type="button" class="btn btn-outline border-primary text-primary inline-flex items-center gap-2" onclick="aplicarFiltrosB(); showToast('Lista actualizada','success');"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Actualizar lista</button>
+        </div>
+        <div id="tabsB" class="flex flex-wrap gap-1 border-b border-border items-center">
+          <button type="button" data-tb="revisar" class="tb px-3 py-2 text-sm font-semibold uppercase border-b-2 border-primary text-primary inline-flex items-center gap-1.5">Por revisar (5)<span id="dotRojo" class="w-2 h-2 rounded-full bg-danger"></span></button>
+          <button type="button" data-tb="revisados" class="tb px-3 py-2 text-sm font-semibold uppercase border-b-2 border-transparent text-ink-muted">Revisados (34)</button>
+          <button type="button" data-tb="todos" class="tb px-3 py-2 text-sm font-semibold uppercase border-b-2 border-transparent text-ink-muted">Todos (39)</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
+          <label class="relative md:col-span-2">
+            <i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="qB" type="text" placeholder="BUSCAR POR TÍTULO, RENDIDOR O NÚMERO" class="rd-input w-full h-10 pl-9 pr-3 text-[11px] uppercase">
+          </label>
+          <select id="tipoB" class="rd-select h-10 px-3 text-[11px] uppercase">
+            <option value="">TODOS LOS TIPOS</option>
+            <option>REEMBOLSO</option>
+            <option>FONDO POR RENDIR</option>
+          </select>
+          <select id="polB" class="rd-select h-10 px-3 text-[11px] uppercase">
+            <option value="">TODAS LAS POLÍTICAS</option>
+            <option>Política General PEN</option>
+            <option>Política Operaciones</option>
+          </select>
+          <button type="button" id="btnBuscarB" class="btn btn-primary h-10">Buscar</button>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h2 id="tituloTabla" class="table-panel-title">Informes por revisar</h2>
+          <span id="lblRes" class="text-xs text-primary font-bold uppercase"></span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1080px] text-sm">
+            <thead id="theadB"></thead>
+            <tbody id="tbodyB"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted"><span>Elementos por página:</span><select id="rowsB" class="rd-select h-8 px-2 text-sm"><option selected>10</option><option>15</option><option>25</option></select></div>
+          <div id="rangeB" class="text-sm text-ink-muted">1-10 de 10</div>
+          <div class="inline-flex items-center gap-2">
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" id="bFirst" onclick="goB(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" id="bPrev" onclick="goB(pageB-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" id="bNext" onclick="goB(pageB+1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" id="bLast" onclick="goB(lastB)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs text-ink-muted max-w-3xl">Si un informe está en el turno de otro aprobador, solo podrás abrirlo en modo lectura (sin acciones). Ejemplo en pestaña «Todos»: IR-00041.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const porRevisar = [
+      { nro: 'IR-00050', rend: 'Ana Guevara M.', titulo: 'Reembolso Mayo - Lima', tipo: 'reembolso', ng: 5, monto: 702.8, dias: 5, pasoCur: 1, pasoTot: 2, flujo: 'FLU-001 · 2 niveles', urgente: true },
+      { nro: 'IR-00049', rend: 'Carlos Mendoza T.', titulo: 'Gastos Proyecto Norte', tipo: 'reembolso', ng: 3, monto: 455, dias: 2, pasoCur: 1, pasoTot: 3, flujo: 'FLU-002 · Gerencia', urgente: false },
+      { nro: 'IR-00048', rend: 'Ana Guevara M.', titulo: 'Rendición Fondo Cusco', tipo: 'fondo', ng: 8, monto: 1700, dias: 0, pasoCur: 2, pasoTot: 3, flujo: 'FLU-002 · Gerencia', urgente: false },
+      { nro: 'IR-00047', rend: 'Rosa Flores C.', titulo: 'Viaje Trujillo Abril', tipo: 'reembolso', ng: 4, monto: 890, dias: 3, pasoCur: 1, pasoTot: 4, flujo: 'FLU-003 · Operaciones', urgente: false },
+      { nro: 'IR-00046', rend: 'Luis Ramos G.', titulo: 'Gastos Emergencia', tipo: 'reembolso', ng: 2, monto: 180, dias: 0, pasoCur: 1, pasoTot: 1, flujo: 'FLU-004 · Solo cierre', urgente: false }
+    ];
+    const revisadosBase = [
+      { nro: 'IR-00045', rend: 'Ana Guevara', titulo: 'Reembolso Abril', monto: 455.5, aprob: 'S/ 430.00', dec: 'aprobo_avance', fecha: '20/04/2026' },
+      { nro: 'IR-00043', rend: 'Ana Guevara', titulo: 'Reembolso Marzo', monto: 320, aprob: '—', dec: 'devolvi', fecha: '20/03/2026' },
+      { nro: 'IR-00042', rend: 'Carlos Mendoza', titulo: 'Gastos Q1', monto: 1200, aprob: 'S/ 1,200.00', dec: 'cerre', fecha: '15/03/2026' },
+      { nro: 'IR-00040', rend: 'Luis Ramos', titulo: 'Viaje Lima-Cusco', monto: 2300, aprob: 'S/ 2,100.00', dec: 'aprobo_avance', fecha: '10/03/2026' },
+      { nro: 'IR-00038', rend: 'Rosa Flores', titulo: 'Reembolso Feb', monto: 445, aprob: '—', dec: 'devolvi', fecha: '28/02/2026' }
+    ];
+    const revisados = [...revisadosBase];
+    for (let i = 6; i <= 34; i++) {
+      revisados.push({ nro: 'IR-00' + (820 + i), rend: ['Ana Guevara', 'Carlos Mendoza', 'Rosa Flores', 'Luis Ramos'][i % 4], titulo: 'Informe histórico ' + i, monto: 200 + i * 12, aprob: 'S/ ' + (180 + i * 10).toFixed(2), dec: i % 3 === 0 ? 'devolvi' : (i % 3 === 1 ? 'cerre' : 'aprobo_avance'), fecha: (i % 28 + 1) + '/01/2026' });
+    }
+    const soloLectura = [{ nro: 'IR-00041', rend: 'Carlos Mendoza T.', titulo: 'Viáticos Iquitos', tipo: 'reembolso', ng: 6, monto: 1120, dias: 1, pasoCur: 2, pasoTot: 2, flujo: 'FLU-001 · 2 niveles', turnoOtro: 'María Rojas Salas', miTurno: false }];
+
+    let tabB = 'revisar';
+    let pageB = 1;
+    let lastB = 1;
+    let pszB = 10;
+    let qAppliedB = '';
+    let tipoAppliedB = '';
+    let polAppliedB = '';
+
+    function badgeDias(d) {
+      if (d === 0) return '<span class="text-[10px] bg-gray-100 text-ink-muted px-2 py-0.5 rounded font-bold">HOY</span>';
+      if (d <= 2) return '<span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold">' + d + ' DÍAS</span>';
+      if (d <= 4) return '<span class="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-bold">' + d + ' DÍAS</span>';
+      return '<span class="text-[10px] bg-danger-light text-danger px-2 py-0.5 rounded font-bold">' + d + '+ DÍAS</span>';
+    }
+    function tipoB(t) {
+      if (t === 'fondo') return '<span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-bold">FONDO X RENDIR</span>';
+      return '<span class="text-[10px] bg-info-light text-info px-2 py-0.5 rounded font-bold">REEMBOLSO</span>';
+    }
+    function decB(d) {
+      if (d === 'aprobo_avance') return '<span class="text-[10px] bg-success-light text-success px-2 py-0.5 rounded font-bold">APROBÉ Y AVANCÉ</span>';
+      if (d === 'cerre') return '<span class="text-[10px] bg-emerald-800 text-white px-2 py-0.5 rounded font-bold">CERRÉ EL INFORME</span>';
+      return '<span class="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-bold">DEVOLVÍ</span>';
+    }
+
+    function celdaGastosNg(r) {
+      const n = r.ng != null ? r.ng : '—';
+      return `<span class="inline-flex items-center gap-1.5 text-[10px] bg-bg px-2 py-0.5 rounded font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5 text-ink-soft shrink-0"></i>${n} gastos</span>`;
+    }
+    function celdaPasoRevisar(r) {
+      if (r.pasoCur != null && r.pasoTot != null) {
+        return `<div class="text-xs leading-tight"><span class="font-semibold">Paso ${r.pasoCur} de ${r.pasoTot}</span><span class="block text-[10px] text-ink-muted mt-0.5">${r.flujo || ''}</span></div>`;
+      }
+      return `<span class="text-xs text-ink-muted">—</span>`;
+    }
+    function filtrarB(list, mode) {
+      const q = qAppliedB;
+      const tipo = tipoAppliedB;
+      const pol = polAppliedB;
+      return list.filter((r) => {
+        if (q && !r.nro.toLowerCase().includes(q) && !r.titulo.toLowerCase().includes(q) && !r.rend.toLowerCase().includes(q)) return false;
+        if (tipo === 'REEMBOLSO' && r.tipo === 'fondo') return false;
+        if (tipo === 'FONDO POR RENDIR' && r.tipo !== 'fondo') return false;
+        if (pol && mode !== 'rev') { /* política mock */ }
+        return true;
+      });
+    }
+    function aplicarFiltrosB() {
+      qAppliedB = document.getElementById('qB').value.trim().toLowerCase();
+      tipoAppliedB = document.getElementById('tipoB').value;
+      polAppliedB = document.getElementById('polB').value;
+      pageB = 1;
+      render();
+    }
+
+    function render() {
+      const thead = document.getElementById('theadB');
+      const tbody = document.getElementById('tbodyB');
+      let data = [];
+      if (tabB === 'revisar') {
+        document.getElementById('tituloTabla').textContent = 'Informes por revisar';
+        thead.innerHTML = '<tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted"><th class="py-2.5 px-2">Nro</th><th class="py-2.5 px-2">Rendidor</th><th class="py-2.5 px-2">Título</th><th class="py-2.5 px-2">Tipo</th><th class="py-2.5 px-2">Gastos</th><th class="py-2.5 px-2">Monto</th><th class="py-2.5 px-2">Días esperando</th><th class="py-2.5 px-2">Paso</th><th class="py-2.5 px-2 text-right">Acciones</th></tr>';
+        data = filtrarB(porRevisar, 'rev');
+        lastB = Math.max(1, Math.ceil(data.length / pszB));
+        if (pageB > lastB) pageB = lastB;
+        const s = (pageB - 1) * pszB;
+        tbody.innerHTML = data.slice(s, s + pszB).map((r) => {
+          const rowBg = r.urgente ? 'bg-warning-light/40' : '';
+          const href = r.nro === 'IR-00050' ? 'informes-revisar.html' : 'informes-revisar.html';
+          const btn = `<a href="${href}" title="Abrir para revisar" class="btn btn-primary h-9 px-3 text-xs inline-flex items-center gap-1 shrink-0"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> Revisar ahora</a>`;
+          return `<tr class="border-b border-[#ECEEF4] ${rowBg}"><td class="py-2.5 px-2 font-mono text-xs font-bold">${r.nro}</td><td class="py-2.5 px-2">${r.rend}</td><td class="py-2.5 px-2 font-medium">${r.titulo}</td><td class="py-2.5 px-2">${tipoB(r.tipo)}</td><td class="py-2.5 px-2">${celdaGastosNg(r)}</td><td class="py-2.5 px-2 font-semibold">S/ ${r.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td><td class="py-2.5 px-2">${badgeDias(r.dias)}</td><td class="py-2.5 px-2">${celdaPasoRevisar(r)}</td><td class="py-2.5 px-2 text-right">${btn}</td></tr>`;
+        }).join('');
+      } else if (tabB === 'revisados') {
+        document.getElementById('tituloTabla').textContent = 'Informes revisados';
+        thead.innerHTML = '<tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted"><th class="py-2.5 px-2">Nro</th><th class="py-2.5 px-2">Rendidor</th><th class="py-2.5 px-2">Título</th><th class="py-2.5 px-2">Monto</th><th class="py-2.5 px-2">Aprobado</th><th class="py-2.5 px-2">Mi decisión</th><th class="py-2.5 px-2">Fecha</th><th class="py-2.5 px-2 text-right">Acciones</th></tr>';
+        data = filtrarB(revisados.map((r) => ({ ...r, tipo: 'reembolso' })), 'rev');
+        lastB = Math.max(1, Math.ceil(data.length / pszB));
+        if (pageB > lastB) pageB = lastB;
+        const s = (pageB - 1) * pszB;
+        tbody.innerHTML = data.slice(s, s + pszB).map((r) => `<tr class="border-b border-[#ECEEF4]"><td class="py-2.5 px-2 font-mono text-xs">${r.nro}</td><td class="py-2.5 px-2">${r.rend}</td><td class="py-2.5 px-2">${r.titulo}</td><td class="py-2.5 px-2 font-semibold">S/ ${r.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td><td class="py-2.5 px-2">${r.aprob}</td><td class="py-2.5 px-2">${decB(r.dec)}</td><td class="py-2.5 px-2">${r.fecha}</td><td class="py-2.5 px-2 text-right"><button type="button" class="rd-action-btn" onclick="showToast('Vista solo lectura','info')"><i data-lucide="eye" class="w-4 h-4"></i></button></td></tr>`).join('');
+      } else {
+        document.getElementById('tituloTabla').textContent = 'Todos los informes';
+        thead.innerHTML = '<tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted"><th class="py-2.5 px-2">Nro</th><th class="py-2.5 px-2">Rendidor</th><th class="py-2.5 px-2">Título</th><th class="py-2.5 px-2">Estado bandeja</th><th class="py-2.5 px-2">Monto</th><th class="py-2.5 px-2 text-right">Acciones</th></tr>';
+        const mix = [
+          ...porRevisar.map((r) => ({ ...r, estado: 'Por revisar (tu turno)' })),
+          ...soloLectura.map((r) => ({ ...r, estado: 'Turno de otro aprobador' })),
+          ...revisados.slice(0, 33).map((r) => ({ nro: r.nro, rend: r.rend, titulo: r.titulo, monto: r.monto, tipo: 'reembolso', estado: 'Revisado' }))
+        ];
+        data = filtrarB(mix.map((r) => ({ ...r, tipo: r.tipo || 'reembolso' })), 'all');
+        lastB = Math.max(1, Math.ceil(data.length / pszB));
+        if (pageB > lastB) pageB = lastB;
+        const s = (pageB - 1) * pszB;
+        tbody.innerHTML = data.slice(s, s + pszB).map((r) => {
+          const acc = r.estado === 'Turno de otro aprobador'
+            ? '<button type="button" class="rd-action-btn" title="Solo lectura"><i data-lucide="eye" class="w-4 h-4"></i></button>'
+            : (r.estado === 'Revisado' ? '<button type="button" class="rd-action-btn"><i data-lucide="eye" class="w-4 h-4"></i></button>' : `<a href="informes-revisar.html" class="btn btn-primary h-8 px-2 text-[10px]">Revisar</a>`);
+          return `<tr class="border-b border-[#ECEEF4]"><td class="py-2.5 px-2 font-mono text-xs">${r.nro}</td><td class="py-2.5 px-2">${r.rend}</td><td class="py-2.5 px-2">${r.titulo}</td><td class="py-2.5 px-2 text-xs">${r.estado}</td><td class="py-2.5 px-2 font-semibold">S/ ${Number(r.monto).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td><td class="py-2.5 px-2 text-right">${acc}</td></tr>`;
+        }).join('');
+      }
+      const from = data.length === 0 ? 0 : (pageB - 1) * pszB + 1;
+      const to = Math.min(pageB * pszB, data.length);
+      document.getElementById('rangeB').textContent = data.length ? `${from}-${to} de ${data.length}` : '0 de 0';
+      document.getElementById('lblRes').textContent = tabB.toUpperCase();
+      document.getElementById('bFirst').disabled = pageB <= 1;
+      document.getElementById('bPrev').disabled = pageB <= 1;
+      document.getElementById('bNext').disabled = pageB >= lastB;
+      document.getElementById('bLast').disabled = pageB >= lastB;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function setTabB(t) {
+      tabB = t;
+      pageB = 1;
+      document.querySelectorAll('.tb').forEach((b) => {
+        const on = b.getAttribute('data-tb') === t;
+        b.classList.toggle('border-primary', on);
+        b.classList.toggle('text-primary', on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('text-ink-muted', !on);
+      });
+      render();
+    }
+
+    document.querySelectorAll('.tb').forEach((b) => b.addEventListener('click', () => setTabB(b.getAttribute('data-tb'))));
+    document.getElementById('btnBuscarB').addEventListener('click', aplicarFiltrosB);
+    document.getElementById('qB').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aplicarFiltrosB(); } });
+    document.getElementById('rowsB').addEventListener('change', (e) => { pszB = Number(e.target.value); pageB = 1; render(); });
+
+    function goB(p) {
+      if (p < 1) p = 1;
+      if (p > lastB) p = lastB;
+      pageB = p;
+      render();
+    }
+
+    function setupAprobadorSidebar() {
+      ['rendidor', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const aItems = document.querySelector('[data-group="aprobador"] .group-items');
+      const aIcon = document.querySelector('[data-group="aprobador"] .group-icon');
+      if (aItems) aItems.classList.remove('hidden');
+      if (aIcon) aIcon.classList.add('rotate-90');
+    }
+
+    initLayout('REVISIÓN DE INFORMES', '../components').then(() => {
+      setupAprobadorSidebar();
+      setActiveSidebarItem();
+      aplicarFiltrosB();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

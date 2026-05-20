@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendición Digital | Detalle de categoría</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen p-4">
+    <section class="rd-card p-5">
+      <h1 class="rd-modal-title">Detalle de categoría</h1>
+      <p class="rd-modal-subtitle">Vista lateral de referencia</p>
+      <button class="btn btn-primary mt-4" onclick="abrirDrawerDetalle()">Abrir drawer de detalle</button>
+      <a class="btn btn-muted mt-4 ml-2" href="./categorias-listar.html">Volver a listar</a>
+    </section>
+  </main>
+
+  <div class="hidden fixed inset-0 z-50" id="drawerContenedor">
+    <div class="absolute inset-0 bg-black/30" onclick="closeDrawer('drawerCategoria')"></div>
+    <aside id="drawerCategoria" class="drawer-slide translate-x-full ml-auto h-full w-full max-w-xl bg-white p-5 overflow-y-auto">
+      <div class="flex items-start justify-between">
+        <div><h3 class="rd-modal-title">Categoría MOVILIDAD</h3><p class="rd-modal-subtitle">Información general, instrucciones, hijas, estadísticas e historial</p></div>
+        <button class="rd-modal-close" onclick="closeDrawer('drawerCategoria')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="mt-4 space-y-4 text-sm">
+        <div class="rd-card p-3"><p class="rd-label mb-2">Información general</p><p><strong>Código:</strong> VJS-003</p><p><strong>Cuenta contable:</strong> 3202070</p><p><strong>Estado:</strong> Activo</p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Instrucciones</p><p class="text-ink-muted">Taxis, bus o movilidad local.</p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Categorías hijas</p><ul class="list-disc pl-4"><li>TAXIS</li></ul></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Estadísticas</p><p>Hijas: 1 | Gastos asociados: 18 | En políticas activas: Sí</p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Historial</p><p class="text-ink-muted">Creado por María Rojas el 2026-01-12. Actualizado por Pedro Morales el 2026-04-29.</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    initLayout('TABLAS GENERALES / CATEGORÍAS / DETALLE', '../components');
+    function abrirDrawerDetalle() {
+      document.getElementById('drawerContenedor').classList.remove('hidden');
+      openDrawer('drawerCategoria');
+    }
+    const closeOrig = closeDrawer;
+    closeDrawer = function (id) {
+      closeOrig(id);
+      setTimeout(() => document.getElementById('drawerContenedor').classList.add('hidden'), 300);
+    };
+  </script>
+</body>
+</html>

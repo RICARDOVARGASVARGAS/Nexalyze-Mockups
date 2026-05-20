@@ -1,0 +1,247 @@
+
+--------------------------------------------------------------------------------
+ TABLAS EXISTENTES QUE SE REUTILIZAN (NO SON NUEVAS DEL MÓDULO)
+--------------------------------------------------------------------------------
+
+Users (public) — Laravel
+  * id
+  * (campos típicos de users: nombre, email, password, etc. según proyecto base)
+
+Roles, Permissions (public) — Spatie Laravel Permission
+  * (estructura estándar Spatie: roles, permissions, model_has_roles, etc.)
+
+Centro de costo — cost_centers (nos_gpc)
+  * (tabla ya existente en NOS; el gasto referencia cost_center_id)
+
+Proyecto — projects (nos_gpc)
+  * (tabla ya existente; el gasto referencia project_id)
+
+Solicitud de compra — purchase_requests (nos_gpc)
+  * (tabla ya existente; el gasto referencia purchase_request_id)
+
+Moneda — currencies (nos_gpc)
+  * id
+  * (código/nombre según definición actual en NOS; usada en gastos, fondos, políticas)
+
+--------------------------------------------------------------------------------
+3. ENTIDADES DEL MÓDULO — CAMPOS (FORMATO REVISIÓN)
+--------------------------------------------------------------------------------
+
+Categoría de gasto (tabla: expense_categories)
+  * id
+  * nombre (name)
+  * codigo (code)
+  * cuenta_contable (accounting_account).
+  * instrucciones_rendidor (instructions)
+  * categoria_padre_id (parent_id)
+  * activo (status)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+
+Flujo de aprobación (tabla: expense_review_workflows)
+  * id
+  * nombre (name)
+  * codigo (code)
+  * descripcion (description)
+  * omitir_aprobadores_duplicados (skip_approvers)
+  * activo (status)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+
+Paso del flujo (tabla: expense_review_workflow_steps)
+  * id
+  * flujo_id (workflow_id)
+  * usuario_aprobador_id (user_id)
+  * orden (order)
+  * es_paso_cierre (is_closing_step)
+  * creado_en (created_at)
+
+Política de gastos (tabla: expense_policies)
+  * id
+  * nombre (name)
+  * codigo (code)
+  * descripcion (description)
+  * flujo_id (workflow_id)
+  * moneda_id (currency_id)
+  * deteccion_duplicados (duplicate_detection)
+  * porcentaje_similitud_duplicados (duplicate_similarity_pct)
+  * permitir_reabrir_informe_cerrado (allow_report_reopen)
+  * activo (status)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+  * eliminado_en (deleted_at)
+
+Usuario–política (tabla: expense_policy_users)
+  * id
+  * politica_id (policy_id)
+  * usuario_id (user_id)
+  * creado_en (created_at)
+
+Gasto (tabla: expenses)
+  * id
+  * usuario_rendidor_id (user_id)
+  * politica_id (policy_id)
+  * moneda_id (currency_id)
+  * informe_id (expense_report_id)
+  * categoria_id (category_id)
+  * tipo_creacion (creation_type) — simple | multiple | scanit
+  * proveedor (supplier)
+  * fecha_gasto (expense_date)
+  * monto_base (amount)
+  * tiene_impuesto (has_tax)
+  * monto_total (total_amount)
+  * estado (status) — borrador | en_informe | aprobado | rechazado
+  * nota (note)
+  * numero_documento (document_number)
+  * documento_proveedor (supplier_document) — ej. RUC
+  * documento_receptor (receiver_document) — ej. RUC
+  * centro_costo_id (cost_center_id)
+  * proyecto_id (project_id)
+  * solicitud_compra_id (purchase_request_id)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+  * eliminado_en (deleted_at)
+
+Adjunto (tabla: expense_attachments)
+  * id
+  * usuario_subida_id (user_id)
+  * adjuntable_id (attachable_id)
+  * adjuntable_tipo (attachable_type)
+  * ruta_archivo (file_path)
+  * nombre_archivo (file_name)
+  * tipo_mime (mime_type)
+  * tamano_bytes (size_bytes)
+  * origen (origin) — manual | scanit
+  * archivado (is_archived)
+  * archivado_en (archived_at)
+  * creado_en (created_at)
+
+Informe de gastos (tabla: expense_reports)
+  * id
+  * usuario_id (user_id)
+  * politica_id (policy_id)
+  * flujo_id (workflow_id)
+  * paso_actual_id (current_step_id)
+  * fondo_id (fund_id)
+  * titulo (title)
+  * numero_correlativo (correlative_number)
+  * nota (note)
+  * tipo_informe (report_type) — reembolso | fondo_por_rendir
+  * estado (status) — borrador | en_proceso | con_observaciones | cerrado | pagado | cancelado
+  * monto_total (total_amount)
+  * monto_aprobado (approved_amount)
+  * enviado_en (sent_at)
+  * cerrado_en (closed_at)
+  * pagado_en (paid_at)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+  * eliminado_en (deleted_at)
+
+Historial del informe (tabla: expense_report_history)
+  * id
+  * informe_id (expense_report_id)
+  * usuario_id (user_id)
+  * tipo_evento (event_type)
+  * descripcion (description)
+  * comentario (comment)
+  * gasto_id (expense_id)
+  * creado_en (created_at)
+
+Solicitud de fondo (tabla: expense_fund_requests)
+  * id
+  * usuario_id (user_id)
+  * politica_id (policy_id)
+  * flujo_id (workflow_id)
+  * paso_actual_id (current_step_id)
+  * moneda_id (currency_id)
+  * fondo_id (fund_id)
+  * titulo (title)
+  * tipo_fondo (fund_type) — fondo_por_rendir
+  * monto_solicitado (requested_amount)
+  * nota (note)
+  * estado (status) — borrador | en_proceso | aprobado | devuelto | cancelado
+  * enviado_en (sent_at)
+  * aprobado_en (approved_at)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+  * eliminado_en (deleted_at)
+
+Historial solicitud de fondo (tabla: expense_fund_request_history)
+  * id
+  * solicitud_fondo_id (fund_request_id)
+  * usuario_id (user_id)
+  * tipo_evento (event_type)
+  * descripcion (description)
+  * comentario (comment)
+  * creado_en (created_at)
+
+Fondo (tabla: funds)
+  * id
+  * usuario_titular_id (user_id)
+  * creador_id (creator_id)
+  * solicitud_fondo_id (fund_request_id)
+  * moneda_id (currency_id)
+  * nombre (name)
+  * codigo (code)
+  * tipo_fondo (fund_type)
+  * monto_inicial (initial_amount)
+  * total_cargos (total_charges)
+  * monto_en_revision (amount_in_review)
+  * saldo_disponible (available_balance)
+  * estado (status) — activo | cerrado
+  * es_flexible (is_flexible)
+  * auto_bloqueo_al_cero (auto_block_on_zero)
+  * fecha_vencimiento (expiration_date)
+  * uso_fondo_completo_primer_informe (use_full_fund)
+  * nota (note)
+  * cerrado_en (closed_at)
+  * creado_por_id (created_by)
+  * actualizado_por_id (updated_by)
+  * creado_en (created_at)
+  * actualizado_en (updated_at)
+
+Movimiento de fondo (tabla: fund_movements)
+  * id
+  * fondo_id (fund_id)
+  * usuario_id (user_id)
+  * informe_id (expense_report_id)
+  * tipo_movimiento (movement_type)
+  * concepto (concept)
+  * monto (amount)
+  * saldo_despues (balance_after)
+  * fecha (date)
+  * creado_en (created_at)
+
+--------------------------------------------------------------------------------
+4. REFERENCIA RÁPIDA — MAPEO MOCKUP «GASTO SIMPLE» → TABLA expenses (conceptual)
+--------------------------------------------------------------------------------
+  proveedor          → supplier
+  fechaGasto         → expense_date
+  politica           → policy_id (en producción: ID, no texto del option)
+  categoria          → category_id
+  moneda             → currency_id
+  monto / montoImp   → amount, has_tax, total_amount
+  tipoComprobante    → (tipo comprobante puede vivir en nota o campo extendido;
+                        la BD base documenta número y RUC; confirmar si se añade
+                        tipo de comprobante explícito en expenses)
+  numeroDocumento    → document_number
+  rucProv            → supplier_document
+  nota               → note
+  proyecto / cc / SOL→ project_id, cost_center_id, purchase_request_id
+  archivos           → expense_attachments (polimórfico a Expense)
+
+--------------------------------------------------------------------------------
+FIN DEL DOCUMENTO — Revisar entidad por entidad según prioridad del equipo.
+================================================================================

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendición Digital | Crear categoría</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen p-4">
+    <section class="rd-card p-5 max-w-3xl">
+      <h1 class="rd-modal-title">Registra una nueva categoría de gasto</h1>
+      <p class="rd-modal-subtitle">Formulario independiente de creación</p>
+      <form class="mt-4 space-y-3" onsubmit="event.preventDefault(); showToast('Categoría creada', 'success');">
+        <div><label class="rd-label block mb-1">Nombre *</label><input required class="rd-input w-full h-10 px-3"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="rd-label block mb-1">Código</label><input class="rd-input w-full h-10 px-3"></div><div><label class="rd-label block mb-1">Cuenta contable</label><input class="rd-input w-full h-10 px-3"></div></div>
+        <div><label class="rd-label block mb-1">Categoría padre</label><select class="rd-select w-full h-10 px-3"><option>Sin categoría padre</option></select></div>
+        <div><label class="rd-label block mb-1">Instrucciones</label><textarea maxlength="250" rows="3" class="rd-textarea w-full px-3 py-2"></textarea></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><span class="text-sm font-semibold uppercase">Estado activo</span><span class="rd-switch"><input checked type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><a href="./categorias-listar.html" class="btn btn-muted">Cancelar</a><button class="btn btn-primary">Guardar</button></div>
+      </form>
+    </section>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>initLayout('TABLAS GENERALES / CATEGORÍAS / CREAR', '../components');</script>
+</body>
+</html>

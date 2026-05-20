@@ -1,0 +1,87 @@
+<header class="h-14 bg-[#F8F8FB] border-b border-[#E6E8EE] fixed top-0 right-0 left-[220px] flex items-center justify-between px-5 z-30">
+
+  <!-- Breadcrumb dinamico -->
+  <div id="breadcrumb" class="text-[13px] font-semibold uppercase text-ink tracking-wide">
+    TABLAS GENERALES / CONECTORES
+  </div>
+
+  <!-- Acciones derecha -->
+  <div class="flex items-center gap-2.5">
+    <button class="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center text-ink-muted transition-colors">
+      <i data-lucide="search" class="w-4 h-4"></i>
+    </button>
+    <div class="relative">
+      <button onclick="toggleThemeMenu()" class="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center text-ink-muted transition-colors">
+        <i data-lucide="moon-star" class="w-4 h-4"></i>
+      </button>
+      <div id="themeMenu" class="hidden absolute right-0 top-full mt-2 w-44 bg-white border border-border rounded-lg shadow-lg p-2 z-50">
+        <button onclick="setThemePreference('light')" data-theme-option="light" class="theme-option">
+          <i data-lucide="sun" class="w-4 h-4"></i>
+          <span>Claro</span>
+        </button>
+        <button onclick="setThemePreference('dark')" data-theme-option="dark" class="theme-option">
+          <i data-lucide="moon-star" class="w-4 h-4"></i>
+          <span>Oscuro</span>
+        </button>
+        <button onclick="setThemePreference('system')" data-theme-option="system" class="theme-option">
+          <i data-lucide="monitor" class="w-4 h-4"></i>
+          <span>Sistema</span>
+        </button>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center text-ink-muted relative transition-colors">
+      <i data-lucide="bell" class="w-4 h-4"></i>
+      <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+    </button>
+    <button class="w-8 h-8 rounded-full hover:bg-white flex items-center justify-center text-ink-muted transition-colors">
+      <i data-lucide="layout-grid" class="w-4 h-4"></i>
+    </button>
+
+    <!-- User avatar dropdown -->
+    <div class="relative">
+      <button onclick="toggleUserMenu()" class="flex items-center gap-2 hover:bg-white rounded-full px-1 py-1 transition-colors">
+        <div class="relative">
+          <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs">AG</div>
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-white"></span>
+        </div>
+      </button>
+      <div id="userMenu" class="hidden absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-lg shadow-lg py-1 z-50">
+        <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-bg text-sm text-ink">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          <span>MI PERFIL</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-bg text-sm text-ink">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>CONFIGURACIÓN</span>
+        </a>
+        <hr class="my-1 border-border">
+        <a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-bg text-sm text-danger">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>CERRAR SESIÓN</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .theme-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    color: #4B5161;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .theme-option:hover {
+    background: #F3F4FA;
+  }
+  .theme-option.active {
+    background: #EDE9FE;
+    color: #6B5BFF;
+    font-weight: 600;
+  }
+</style>

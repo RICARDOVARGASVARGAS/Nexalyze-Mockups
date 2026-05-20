@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rendición Digital | Categorías</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291043">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <article class="theme-surface kpi-card kpi-primary"><p id="cardTotal" class="kpi-value">0</p><p class="kpi-title">Total categorías</p><p class="kpi-subtitle">Registradas en el sistema</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p id="cardActivas" class="kpi-value">0</p><p class="kpi-title">Activas</p><p class="kpi-subtitle">Con estado activo</p></article>
+        <article class="theme-surface kpi-card kpi-danger"><p id="cardInactivas" class="kpi-value">0</p><p class="kpi-title">Inactivas</p><p class="kpi-subtitle">Con estado inactivo</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Tabla de categorías</h1>
+            <p class="table-panel-subtitle">Gestiona las categorías de gasto de la empresa</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="renderCards(); currentPage = 1; renderTable(); showToast('Categorías actualizadas', 'info')" class="btn btn-outline"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+            <button onclick="openImportModal()" class="btn btn-outline"><i data-lucide="download" class="w-3.5 h-3.5"></i> Importar</button>
+            <button onclick="openModal('modalExportar')" class="btn btn-outline"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Exportar</button>
+            <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nueva categoría</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <label class="relative md:col-span-2"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="filtroTexto" type="text" placeholder="Buscar por nombre o código..." class="rd-input w-full h-10 pl-9 pr-3 text-[13px]"></label>
+          <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px]"><option value="todos">Estado: Todos</option><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select>
+          <select id="filtroPadre" class="rd-select h-10 px-3 text-[13px]"><option value="todos">Categoría padre: Todas</option></select>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de categorías</h2>
+          <span id="resultadosLabel" class="text-[12px] text-primary font-semibold uppercase"></span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[900px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Código</th><th class="py-2.5 px-2">Nombre</th><th class="py-2.5 px-2">Cuenta contable</th><th class="py-2.5 px-2">Categoría padre</th><th class="py-2.5 px-2">Estado</th><th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categoriasTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">0-0 de 0</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)">
+              <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+            </button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage - 1)">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage + 1)">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)">
+              <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalCrear" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">Nueva categoría</h3><p class="rd-modal-subtitle">Registra una nueva categoría de gasto</p></div><button onclick="closeModal('modalCrear')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="formCrear" class="p-5 space-y-4 overflow-y-auto">
+        <div><label class="rd-label block mb-1">Nombre *</label><input id="crearNombre" required maxlength="100" class="rd-input w-full h-10 px-3 text-sm"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="rd-label block mb-1">Código</label><input id="crearCodigo" maxlength="50" class="rd-input w-full h-10 px-3 text-sm"></div><div><label class="rd-label block mb-1">Cuenta contable</label><input id="crearCuenta" maxlength="50" class="rd-input w-full h-10 px-3 text-sm"></div></div>
+        <div><label class="rd-label block mb-1">Categoría padre</label><select id="crearPadre" class="rd-select w-full h-10 px-3 text-sm"></select></div>
+        <div><label class="rd-label block mb-1">Instrucciones</label><textarea id="crearInstrucciones" maxlength="250" rows="3" class="rd-textarea w-full px-3 py-2 text-sm"></textarea></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Disponible para nuevas rendiciones</p></div><span class="rd-switch"><input id="crearActivo" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalCrear')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEditar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">EDITAR CATEGORÍA</h3><p class="rd-modal-subtitle">MODIFICA LOS DATOS DE LA CATEGORÍA</p></div><button onclick="closeModal('modalEditar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="formEditar" class="p-5 space-y-4 overflow-y-auto">
+        <input id="editarId" type="hidden">
+        <div><label class="rd-label block mb-1">Nombre * <span id="editModifiedBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-warning-light text-warning text-[10px] align-middle">MODIFICADO</span></label><input id="editarNombre" required maxlength="100" class="rd-input w-full h-10 px-3 text-sm"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><label class="rd-label block mb-1">Código</label><input id="editarCodigo" maxlength="50" class="rd-input w-full h-10 px-3 text-sm"></div><div><label class="rd-label block mb-1">Cuenta contable</label><input id="editarCuenta" maxlength="50" class="rd-input w-full h-10 px-3 text-sm"></div></div>
+        <div><label class="rd-label block mb-1">Categoría padre</label><select id="editarPadre" class="rd-select w-full h-10 px-3 text-sm"></select></div>
+        <div><label class="rd-label block mb-1">Instrucciones</label><textarea id="editarInstrucciones" maxlength="250" rows="3" class="rd-textarea w-full px-3 py-2 text-sm"></textarea></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Disponible para nuevas rendiciones</p></div><span class="rd-switch"><input id="editarActivo" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalEditar')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEliminar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-danger/40 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">Eliminar categoría</h3><p class="rd-modal-subtitle">Esta acción no se puede deshacer</p></div><button onclick="closeModal('modalEliminar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p id="deleteQuestion" class="text-sm"></p>
+        <div id="deleteScenario" class="rounded-lg border border-warning/30 bg-warning-light/40 px-3 py-2 text-sm text-[#A16207]"></div>
+        <label class="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"><input id="deleteConfirm" type="checkbox" class="h-4 w-4"> ¿Estás de acuerdo con ejecutar esta eliminación?</label>
+        <div class="rd-modal-footer border-0 pt-0"><button onclick="closeModal('modalEliminar')" class="btn btn-muted">Cancelar</button><button id="btnConfirmDelete" onclick="confirmDelete()" disabled class="btn btn-danger">Eliminar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalDetalle" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="eye" class="w-5 h-5"></i></span>
+          <div><h3 class="rd-modal-title">DETALLE DE CATEGORÍA</h3><p class="rd-modal-subtitle">INFORMACIÓN GENERAL, HIJAS, ESTADÍSTICAS E HISTORIAL</p></div>
+        </div>
+        <button onclick="closeModal('modalDetalle')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-sm max-h-[75vh] overflow-y-auto">
+        <div class="rd-card p-3"><p class="rd-label mb-2">Información general</p><p><strong>Nombre:</strong> <span id="dNombre"></span></p><p><strong>Código:</strong> <span id="dCodigo"></span></p><p><strong>Cuenta contable:</strong> <span id="dCuenta"></span></p><p><strong>Estado:</strong> <span id="dEstado"></span></p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Instrucciones</p><p id="dInstrucciones" class="text-ink-muted"></p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Categorías hijas</p><ul id="dHijas" class="list-disc pl-4 space-y-1"></ul></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Estadísticas</p><p id="dStats"></p></div>
+        <div class="rd-card p-3"><p class="rd-label mb-2">Historial</p><p id="dHistorial" class="text-ink-muted"></p></div>
+      </div>
+      <div class="rd-modal-footer px-5 pb-5 border-0 pt-0">
+        <button type="button" onclick="closeModal('modalDetalle')" class="btn btn-muted">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalImportar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="upload" class="w-5 h-5"></i></span>
+          <div><h3 class="rd-modal-title">IMPORTAR CATEGORÍAS (EXCEL)</h3><p class="rd-modal-subtitle">CARGA MASIVA DESDE ARCHIVO EXCEL</p></div>
+        </div>
+        <button onclick="closeModal('modalImportar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="rounded-lg border border-primary-light border-l-4 border-l-primary bg-primary-light/40 p-4">
+          <div class="flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 mt-0.5 text-primary"></i>
+            <div>
+              <p class="rd-label mb-2">INSTRUCCIONES:</p>
+              <ul class="list-disc pl-4 text-sm text-ink-muted space-y-1">
+                <li>Solo se acepta Excel (.xlsx o .xls). Tamaño máximo: 10 MB.</li>
+                <li>Usa el formato de columnas definido. Descarga la plantilla para ver el formato correcto.</li>
+                <li>Opción "continuar con errores": si está desactivada, un error en una fila puede revertir toda la importación; si está activada, se procesan el resto de filas y se listan los fallos.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-bg">
+          <div>
+            <p class="text-sm font-semibold uppercase">CONTINUAR PROCESANDO AUNQUE HAYA ERRORES (SKIP_ERRORS)</p>
+            <p class="text-xs text-ink-muted">Cuando está activo, omite filas con error y continúa con el resto.</p>
+          </div>
+          <span class="rd-switch"><input id="skipErrors" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span>
+        </label>
+        <label class="block border-dashed border-2 border-border rounded-xl bg-bg/60 p-6 text-center cursor-pointer hover:bg-bg">
+          <input id="importFileInput" type="file" accept=".xlsx,.xls" class="hidden">
+          <i data-lucide="cloud-upload" class="w-10 h-10 mx-auto text-ink-soft"></i>
+          <p class="mt-3 text-base font-semibold uppercase">ARRASTRA Y SUELTA TU ARCHIVO</p>
+          <p class="text-xs text-ink-muted mt-1">O HAZ CLIC PARA SELECCIONAR</p>
+          <span class="inline-flex mt-3 px-2 py-1 rounded-full bg-gray-100 text-ink-muted text-xs font-semibold">.XLSX, .XLS</span>
+          <p id="importFileName" class="text-xs text-primary font-semibold mt-2"></p>
+        </label>
+        <div class="rd-modal-footer">
+          <button type="button" onclick="closeModal('modalImportar')" class="btn btn-muted"><i data-lucide="x" class="w-3.5 h-3.5"></i> CANCELAR</button>
+          <button id="btnImportar" type="button" disabled onclick="confirmImport()" class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"><i data-lucide="upload" class="w-3.5 h-3.5"></i> IMPORTAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalExportar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span>
+          <div><h3 class="rd-modal-title">EXPORTAR CATEGORÍAS</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div>
+        </div>
+        <button onclick="closeModal('modalExportar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="rounded-lg border border-border bg-bg p-3 flex items-center gap-2 text-sm">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5 text-success"></i>
+          <p>Se exportarán <strong>12 categorías</strong> en formato Excel (.xlsx).</p>
+        </div>
+        <div>
+          <p class="rd-label mb-2">FORMATO:</p>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportType" value="xlsx" checked> EXCEL (.XLSX)</label>
+            <label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportType" value="csv"> CSV (.CSV)</label>
+          </div>
+        </div>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalExportar')" class="btn btn-muted">CANCELAR</button><button id="btnExportar" type="button" onclick="confirmExport()" class="btn btn-primary"><i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const categorias = [
+      { id: 1, name: 'VIAJES', code: 'VJS-001', accounting_account: '3202000', parent_id: null, instructions: 'Gastos de viaje laboral.', status: true, created_by: 'María Rojas', updated_by: 'María Rojas', created_at: '2026-01-10', updated_at: '2026-01-10', hasExpenses: false, inPolicies: false },
+      { id: 2, name: 'HOSPEDAJE', code: 'VJS-002', accounting_account: '3202060', parent_id: 1, instructions: 'Incluye hoteles y alojamientos.', status: true, created_by: 'María Rojas', updated_by: 'Ana Guevara', created_at: '2026-01-11', updated_at: '2026-02-01', hasExpenses: true, inPolicies: false },
+      { id: 3, name: 'MOVILIDAD', code: 'VJS-003', accounting_account: '3202070', parent_id: 1, instructions: 'Taxis, bus o movilidad local.', status: true, created_by: 'María Rojas', updated_by: 'María Rojas', created_at: '2026-01-12', updated_at: '2026-01-12', hasExpenses: true, inPolicies: true },
+      { id: 4, name: 'TAXIS', code: 'VJS-004', accounting_account: '3202075', parent_id: 3, instructions: 'Servicios de taxi por app o calle.', status: false, created_by: 'María Rojas', updated_by: 'Pedro Morales', created_at: '2026-01-13', updated_at: '2026-03-10', hasExpenses: false, inPolicies: false },
+      { id: 5, name: 'COMBUSTIBLE', code: 'CB-001', accounting_account: '3202030', parent_id: null, instructions: 'Cargas de gasolina y diésel.', status: true, created_by: 'María Rojas', updated_by: 'Carlos Mendoza', created_at: '2026-01-14', updated_at: '2026-03-18', hasExpenses: true, inPolicies: false },
+      { id: 6, name: 'ALIMENTACIÓN', code: 'AL-001', accounting_account: '3202050', parent_id: null, instructions: 'Consumos de alimentación en comisión.', status: true, created_by: 'María Rojas', updated_by: 'María Rojas', created_at: '2026-01-15', updated_at: '2026-01-15', hasExpenses: false, inPolicies: false }
+    ];
+    let deleteId = null;
+    let currentPage = 1;
+    let pageSize = 15;
+    let lastPage = 1;
+    let editInitialData = null;
+
+    function parentName(parentId) { return !parentId ? '—' : (categorias.find((c) => c.id === parentId)?.name || '—'); }
+    function childrenCount(id) { return categorias.filter((c) => c.parent_id === id).length; }
+    function fillParentSelects() {
+      const options = categorias.filter((c) => !c.parent_id).map((c) => `<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('filtroPadre').innerHTML = `<option value="todos">Categoría padre: Todas</option><option value="sin">Sin categoría padre</option>${options}`;
+      document.getElementById('crearPadre').innerHTML = `<option value="">Sin categoría padre</option>${options}`;
+      document.getElementById('editarPadre').innerHTML = `<option value="">Sin categoría padre</option>${options}`;
+    }
+    function renderCards() {
+      const total = categorias.length;
+      const activas = categorias.filter((c) => c.status).length;
+      document.getElementById('cardTotal').textContent = total;
+      document.getElementById('cardActivas').textContent = activas;
+      document.getElementById('cardInactivas').textContent = total - activas;
+    }
+    function getFiltered() {
+      const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const estado = document.getElementById('filtroEstado').value;
+      const padre = document.getElementById('filtroPadre').value;
+      return categorias.filter((c) => {
+        const matchTxt = !txt || c.name.toLowerCase().includes(txt) || (c.code || '').toLowerCase().includes(txt);
+        const matchEstado = estado === 'todos' || (estado === 'activo' ? c.status : !c.status);
+        const matchPadre = padre === 'todos' || (padre === 'sin' && !c.parent_id) || String(c.parent_id) === padre;
+        return matchTxt && matchEstado && matchPadre;
+      });
+    }
+    function renderTable() {
+      const rows = getFiltered();
+      const tbody = document.getElementById('categoriasTbody');
+      document.getElementById('resultadosLabel').textContent = `${rows.length} resultados`;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      lastPage = totalPages;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const pagedRows = rows.slice(start, start + pageSize);
+      tbody.innerHTML = pagedRows.map((c) => `
+        <tr class="border-b border-[#ECEEF4] last:border-0">
+          <td class="py-2.5 px-2">${c.code || '—'}</td>
+          <td class="py-2.5 px-2">${c.parent_id ? '&boxur; ' : ''}${c.name}</td>
+          <td class="py-2.5 px-2">${c.accounting_account || '—'}</td>
+          <td class="py-2.5 px-2">${parentName(c.parent_id)}</td>
+          <td class="py-2.5 px-2">${c.status ? '<span class="status-pill status-active">Activo</span>' : '<span class="status-pill status-inactive">Inactivo</span>'}</td>
+          <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${c.id})" class="rd-action-btn" title="Detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${c.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${c.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
+        </tr>`).join('');
+      const from = rows.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, rows.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${rows.length}`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('btnLastPage').disabled = currentPage === totalPages;
+      if (window.lucide) lucide.createIcons();
+    }
+    function goToPage(page) {
+      if (page < 1) page = 1;
+      if (page > lastPage) page = lastPage;
+      currentPage = page;
+      renderTable();
+    }
+    function readCreatePayload() {
+      return { name: document.getElementById('crearNombre').value.trim().toUpperCase(), code: document.getElementById('crearCodigo').value.trim().toUpperCase(), accounting_account: document.getElementById('crearCuenta').value.trim(), parent_id: document.getElementById('crearPadre').value ? Number(document.getElementById('crearPadre').value) : null, instructions: document.getElementById('crearInstrucciones').value.trim(), status: document.getElementById('crearActivo').checked };
+    }
+    function openCreateModal() { document.getElementById('formCrear').reset(); document.getElementById('crearActivo').checked = true; fillParentSelects(); openModal('modalCrear'); }
+    function submitCreate() {
+      const payload = readCreatePayload();
+      if (!payload.name) return showToast('El nombre es obligatorio', 'warning');
+      categorias.push({ id: Math.max(...categorias.map((c) => c.id)) + 1, ...payload, created_by: 'María Rojas', updated_by: 'María Rojas', created_at: '2026-04-29', updated_at: '2026-04-29', hasExpenses: false, inPolicies: false });
+      showToast('Categoría creada', 'success');
+      fillParentSelects(); renderCards(); renderTable();
+      closeModal('modalCrear');
+    }
+    function openEditModal(id) {
+      const c = categorias.find((x) => x.id === id); if (!c) return;
+      fillParentSelects();
+      document.getElementById('editarId').value = String(c.id);
+      document.getElementById('editarNombre').value = c.name;
+      document.getElementById('editarCodigo').value = c.code || '';
+      document.getElementById('editarCuenta').value = c.accounting_account || '';
+      document.getElementById('editarPadre').value = c.parent_id ? String(c.parent_id) : '';
+      document.getElementById('editarInstrucciones').value = c.instructions || '';
+      document.getElementById('editarActivo').checked = !!c.status;
+      editInitialData = {
+        name: c.name,
+        code: c.code || '',
+        accounting_account: c.accounting_account || '',
+        parent_id: c.parent_id ? String(c.parent_id) : '',
+        instructions: c.instructions || '',
+        status: !!c.status
+      };
+      document.getElementById('editModifiedBadge').classList.add('hidden');
+      openModal('modalEditar');
+    }
+    function openDetailModal(id) {
+      const c = categorias.find((x) => x.id === id); if (!c) return;
+      document.getElementById('dNombre').textContent = c.name;
+      document.getElementById('dCodigo').textContent = c.code || '—';
+      document.getElementById('dCuenta').textContent = c.accounting_account || '—';
+      document.getElementById('dEstado').textContent = c.status ? 'Activo' : 'Inactivo';
+      document.getElementById('dInstrucciones').textContent = c.instructions || 'Sin instrucciones';
+      const hijas = categorias.filter((x) => x.parent_id === c.id);
+      document.getElementById('dHijas').innerHTML = hijas.length ? hijas.map((h) => `<li>${h.name}</li>`).join('') : '<li>Sin categorías hijas</li>';
+      document.getElementById('dStats').textContent = `Total hijas: ${hijas.length} | Tiene gastos: ${c.hasExpenses ? 'Sí' : 'No'} | En políticas activas: ${c.inPolicies ? 'Sí' : 'No'}`;
+      document.getElementById('dHistorial').textContent = `Creado por ${c.created_by} el ${c.created_at}. Última modificación por ${c.updated_by} el ${c.updated_at}.`;
+      openModal('modalDetalle');
+    }
+    function getDeleteScenario(cat) {
+      const hasChildren = childrenCount(cat.id) > 0;
+      if (cat.inPolicies) return { code: 'D', msg: 'Escenario D: categoría usada en políticas activas. Debes reasignar políticas antes de eliminar.' };
+      if (hasChildren) return { code: 'C', msg: 'Escenario C: categoría con hijas. Debes mover o eliminar categorías hijas primero.' };
+      if (cat.hasExpenses) return { code: 'B', msg: 'Escenario B: categoría con gastos históricos. Se recomienda inactivar en lugar de eliminar.' };
+      return { code: 'A', msg: 'Escenario A: categoría sin uso. Eliminación permitida.' };
+    }
+    function openDeleteModal(id) {
+      deleteId = id;
+      const cat = categorias.find((c) => c.id === id); if (!cat) return;
+      const scenario = getDeleteScenario(cat);
+      document.getElementById('deleteQuestion').innerHTML = `¿Estás seguro de eliminar la categoría <strong>"${cat.name}"</strong>?`;
+      document.getElementById('deleteScenario').textContent = scenario.msg;
+      document.getElementById('deleteConfirm').checked = false;
+      document.getElementById('btnConfirmDelete').disabled = true;
+      openModal('modalEliminar');
+    }
+    function confirmDelete() {
+      if (!deleteId) return;
+      const cat = categorias.find((c) => c.id === deleteId); if (!cat) return;
+      const scenario = getDeleteScenario(cat);
+      if (scenario.code !== 'A') return showToast('No se puede eliminar en este escenario', 'warning');
+      const idx = categorias.findIndex((c) => c.id === deleteId);
+      if (idx >= 0) categorias.splice(idx, 1);
+      closeModal('modalEliminar');
+      deleteId = null;
+      fillParentSelects(); renderCards(); renderTable();
+      showToast('Categoría eliminada', 'danger');
+    }
+    function openImportModal() { openModal('modalImportar'); }
+    function confirmImport() {
+      showToast('Importación completada', 'success');
+      closeModal('modalImportar');
+    }
+    function confirmExport() {
+      const button = document.getElementById('btnExportar');
+      button.disabled = true;
+      button.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> GENERANDO...';
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        showToast('Exportación completada', 'success');
+        closeModal('modalExportar');
+        button.disabled = false;
+        button.innerHTML = '<i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR';
+        if (window.lucide) lucide.createIcons();
+      }, 1500);
+    }
+    document.getElementById('formCrear').addEventListener('submit', (e) => { e.preventDefault(); submitCreate(); });
+    document.getElementById('formEditar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById('editarId').value);
+      const cat = categorias.find((c) => c.id === id); if (!cat) return;
+      cat.name = document.getElementById('editarNombre').value.trim().toUpperCase();
+      cat.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
+      cat.accounting_account = document.getElementById('editarCuenta').value.trim();
+      cat.parent_id = document.getElementById('editarPadre').value ? Number(document.getElementById('editarPadre').value) : null;
+      cat.instructions = document.getElementById('editarInstrucciones').value.trim();
+      cat.status = document.getElementById('editarActivo').checked;
+      cat.updated_by = 'María Rojas';
+      cat.updated_at = '2026-04-29';
+      closeModal('modalEditar'); fillParentSelects(); renderCards(); renderTable(); showToast('Categoría actualizada', 'success');
+    });
+    function updateEditModifiedBadge() {
+      if (!editInitialData) return;
+      const hasChanges = (
+        document.getElementById('editarNombre').value !== editInitialData.name ||
+        document.getElementById('editarCodigo').value !== editInitialData.code ||
+        document.getElementById('editarCuenta').value !== editInitialData.accounting_account ||
+        document.getElementById('editarPadre').value !== editInitialData.parent_id ||
+        document.getElementById('editarInstrucciones').value !== editInitialData.instructions ||
+        document.getElementById('editarActivo').checked !== editInitialData.status
+      );
+      document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
+    }
+    ['editarNombre', 'editarCodigo', 'editarCuenta', 'editarPadre', 'editarInstrucciones', 'editarActivo'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
+      document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
+    });
+    document.getElementById('deleteConfirm').addEventListener('change', (e) => { document.getElementById('btnConfirmDelete').disabled = !e.target.checked; });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderTable(); });
+    document.getElementById('importFileInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      document.getElementById('btnImportar').disabled = !file;
+      document.getElementById('importFileName').textContent = file ? `Archivo seleccionado: ${file.name}` : '';
+    });
+    ['filtroTexto', 'filtroEstado', 'filtroPadre'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => { currentPage = 1; renderTable(); });
+      document.getElementById(id).addEventListener('change', () => { currentPage = 1; renderTable(); });
+    });
+    initLayout('TABLAS GENERALES / CATEGORÍAS', '../components').then(() => { fillParentSelects(); renderCards(); renderTable(); });
+  </script>
+</body>
+</html>

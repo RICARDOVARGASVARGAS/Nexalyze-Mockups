@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Revisar solicitud SF-00045</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, info: { DEFAULT: '#3B82F6', light: '#DBEAFE' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291400">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-40">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 max-w-[1200px] mx-auto space-y-4">
+      <nav class="text-xs text-ink-muted uppercase font-semibold"><a href="solicitudes-bandeja.html" class="text-primary hover:underline">Bandeja de solicitudes</a> / Revisar SF-00045</nav>
+
+      <header class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs bg-primary-light text-primary px-2 py-1 rounded font-mono font-bold">SF-00045</span>
+            <span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-extrabold uppercase">Fondo por rendir</span>
+          </div>
+          <h1 class="text-2xl font-extrabold uppercase mt-2">Fondo viaje Cusco mayo</h1>
+          <p class="text-sm text-ink-muted mt-1">Ana Guevara Muñoz · Enviado: 21/04/2026 · Paso 1 de 2</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="btn btn-outline border-orange-500 text-orange-700 h-10 text-sm" onclick="prepararDevolucion()">↩ Devolver al rendidor</button>
+          <button type="button" class="btn bg-success text-white border-0 h-10 text-sm inline-flex items-center gap-2" onclick="prepararAprobacion()"><i data-lucide="check" class="w-4 h-4"></i> Aprobar solicitud</button>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div class="lg:col-span-7 space-y-4">
+          <article class="theme-surface rd-card p-4">
+            <h2 class="table-panel-title mb-3">Detalle de la solicitud</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="text-[10px] uppercase text-ink-muted font-bold">Rendidor</p>
+                <p class="font-extrabold uppercase">Ana Guevara Muñoz</p>
+                <p class="text-xs text-ink-muted">ana.guevara@empresa.com.pe</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase text-ink-muted font-bold">Tipo de fondo</p>
+                <p class="font-semibold">Fondo por rendir</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase text-ink-muted font-bold">Moneda</p>
+                <p>S/ PEN — Soles</p>
+              </div>
+              <div class="sm:col-span-2">
+                <p class="text-[10px] uppercase text-ink-muted font-bold">Monto solicitado</p>
+                <p class="text-3xl font-extrabold text-primary">S/ 2,000.00</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="theme-surface rd-card p-4 bg-bg/80">
+            <h3 class="font-extrabold uppercase text-xs mb-2 inline-flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4"></i> Motivo y nota del rendidor</h3>
+            <p class="text-sm text-ink leading-relaxed">El monto solicitado es para cubrir hospedaje (S/ 800), alimentación (S/ 400) y transporte (S/ 800) para el viaje de trabajo a Cusco del 15 al 18 de mayo de 2026.</p>
+            <div class="mt-4 pt-3 border-t border-border">
+              <p class="text-xs font-bold uppercase text-ink-muted mb-2">📎 Documentos adjuntos (1)</p>
+              <div class="flex items-center justify-between gap-2 flex-wrap bg-white rounded-lg border border-border px-3 py-2">
+                <span class="text-xs truncate">itinerario_cusco.pdf (245 KB)</span>
+                <button type="button" class="btn btn-outline h-8 text-xs" onclick="showToast('Vista previa (mockup)','info')">Ver</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="theme-surface rd-card p-4">
+            <h3 class="font-extrabold uppercase text-xs mb-3">Historial de esta solicitud</h3>
+            <div class="relative pl-4 border-l-2 border-primary-light space-y-4 text-xs">
+              <div><span class="absolute -left-[9px] w-3 h-3 rounded-full bg-primary top-0.5"></span><p class="font-bold">Solicitud creada</p><p class="text-ink-muted">Ana Guevara — 20/04/2026</p></div>
+              <div><span class="absolute -left-[9px] w-3 h-3 rounded-full bg-info top-0.5"></span><p class="font-bold">Solicitud enviada</p><p class="text-ink-muted">Ana Guevara — 21/04/2026</p></div>
+              <div><span class="absolute -left-[9px] w-3 h-3 rounded-full bg-warning top-0.5"></span><p class="font-bold">En tu bandeja</p><p class="text-ink-muted">Sistema — 21/04/2026</p></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <article class="theme-surface rd-card p-4 text-sm">
+            <h3 class="font-extrabold uppercase text-xs mb-3">Información del rendidor</h3>
+            <div class="flex items-center gap-3">
+              <span class="w-14 h-14 rounded-full bg-primary-light text-primary flex items-center justify-center text-lg font-extrabold">AG</span>
+              <div>
+                <p class="font-bold">Ana Guevara Muñoz</p>
+                <p class="text-xs text-ink-muted">Política General PEN</p>
+              </div>
+            </div>
+            <ul class="mt-3 space-y-1 text-xs text-ink-muted">
+              <li><strong class="text-ink">Historial:</strong> 12 solicitudes previas</li>
+              <li><strong class="text-ink">Fondos activos:</strong> 2 actualmente</li>
+              <li><strong class="text-ink">Total aprobado histórico:</strong> S/ 8,500</li>
+            </ul>
+          </article>
+
+          <article class="theme-surface rd-card p-4 text-sm">
+            <h3 class="font-extrabold uppercase text-xs mb-2">Fondos activos del rendidor</h3>
+            <ul class="space-y-2 text-xs">
+              <li class="flex justify-between border-b border-border pb-2"><span>FXR - Marzo - Ana</span><span class="text-success font-semibold">S/ 200 disponible</span></li>
+              <li class="flex justify-between"><span>Fondo USD</span><span class="text-success font-semibold">US$ 500 disponible</span></li>
+            </ul>
+            <p class="text-[11px] text-warning mt-2 font-medium">El rendidor ya tiene 2 fondos activos. Considera esto al evaluar el monto solicitado.</p>
+          </article>
+
+          <article class="theme-surface rd-card p-4">
+            <h3 class="font-extrabold uppercase text-xs mb-3">Flujo de aprobación</h3>
+            <div class="relative pl-4 border-l-2 border-primary-light space-y-4 text-xs">
+              <div>
+                <span class="absolute -left-[9px] w-3 h-3 rounded-full bg-primary top-0.5"></span>
+                <p class="font-bold">Paso 1: Pedro Morales</p>
+                <span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-bold">Tú estás aquí</span>
+              </div>
+              <div>
+                <span class="absolute -left-[9px] w-3 h-3 rounded-full bg-gray-300 top-0.5"></span>
+                <p class="font-bold text-ink-muted">Paso 2: María Rojas</p>
+                <p class="text-ink-muted">Aprueba final y crea el fondo</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="rounded-xl border border-info/30 bg-info-light/50 p-4 text-sm">
+            <h3 class="font-extrabold text-info text-xs mb-2">¿Qué pasa si apruebo?</h3>
+            <p class="text-xs text-ink">Al aprobar, la solicitud pasará a <strong>María Rojas Salas</strong> para su revisión final.</p>
+            <!-- Variante último paso (mockup): mostrar card verde con creación automática de fondo FXR - Mayo - Ana -->
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="fixed bottom-0 left-0 right-0 md:left-[220px] z-20 bg-white border-t border-border shadow-[0_-8px_30px_rgba(0,0,0,.08)] px-3 py-4">
+    <div class="max-w-[1200px] mx-auto flex flex-col lg:flex-row lg:items-end gap-4">
+      <div class="flex-1 min-w-0">
+        <label class="rd-label block mb-1 text-xs">Comentario (obligatorio al devolver, opcional al aprobar)</label>
+        <textarea id="comSol" maxlength="500" rows="2" class="rd-textarea w-full px-3 py-2 text-sm" placeholder="Ej: Monto aprobado según política de viáticos vigente"></textarea>
+        <p class="text-xs text-ink-muted mt-1"><span id="cntSol">0</span>/500</p>
+        <p id="errSol" class="text-xs text-danger font-semibold mt-1 hidden">Ingresa un comentario para devolver la solicitud</p>
+      </div>
+      <div class="flex flex-wrap gap-2 shrink-0">
+        <button type="button" class="btn btn-outline border-orange-500 text-orange-700 text-sm" onclick="prepararDevolucion()">↩ Devolver al rendidor</button>
+        <button type="button" class="btn bg-success text-white border-0 text-sm inline-flex items-center gap-2" onclick="prepararAprobacion()"><i data-lucide="wallet" class="w-4 h-4"></i> Aprobar solicitud</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-confirmar-aprobacion-solicitud" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 class="rd-modal-title">Aprobar solicitud</h3>
+          <p class="rd-modal-subtitle">Confirmación</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-confirmar-aprobacion-solicitud')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto text-sm space-y-3">
+        <p>La solicitud pasará a <strong>María Rojas Salas</strong> para la aprobación final.</p>
+        <div class="rd-card p-3 bg-bg font-mono text-xs"><strong>SF-00045</strong> · Fondo Viaje Cusco Mayo · S/ 2,000.00</div>
+        <p class="text-ink-muted">Comentario: <span id="apComRes">—</span></p>
+      </div>
+      <div class="rd-modal-footer px-5 pb-5 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-aprobacion-solicitud')">Cancelar</button>
+        <button type="button" class="btn bg-success text-white border-0" onclick="closeModal('modal-confirmar-aprobacion-solicitud'); showToast('Solicitud aprobada en tu paso (mockup)','success')">Confirmar aprobación</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-confirmar-devolucion-solicitud" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 class="rd-modal-title">↩ Devolver solicitud</h3>
+          <p class="rd-modal-subtitle">Confirmación</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-confirmar-devolucion-solicitud')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 overflow-y-auto text-sm space-y-3">
+        <p>La solicitud volverá a <strong>Ana Guevara Muñoz</strong> para que realice las correcciones necesarias.</p>
+        <div class="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm" id="devComRes"></div>
+        <p class="text-xs text-ink-muted">Ana podrá editar la solicitud y reenviarla.</p>
+      </div>
+      <div class="rd-modal-footer px-5 pb-5 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-confirmar-devolucion-solicitud')">Cancelar</button>
+        <button type="button" class="btn border-0 text-white" style="background:#EA580C" onclick="closeModal('modal-confirmar-devolucion-solicitud'); showToast('Solicitud devuelta (mockup)','success')">Confirmar devolución</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    document.getElementById('comSol').addEventListener('input', (e) => {
+      document.getElementById('cntSol').textContent = e.target.value.length;
+      document.getElementById('errSol').classList.add('hidden');
+    });
+
+    function prepararAprobacion() {
+      const c = document.getElementById('comSol').value.trim();
+      document.getElementById('apComRes').textContent = c || '—';
+      document.getElementById('errSol').classList.add('hidden');
+      openModal('modal-confirmar-aprobacion-solicitud');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function prepararDevolucion() {
+      const c = document.getElementById('comSol').value.trim();
+      if (!c) {
+        document.getElementById('errSol').classList.remove('hidden');
+        document.getElementById('comSol').classList.add('border-danger');
+        return;
+      }
+      document.getElementById('comSol').classList.remove('border-danger');
+      document.getElementById('devComRes').textContent = c;
+      openModal('modal-confirmar-devolucion-solicitud');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function setupAprobadorSidebar() {
+      ['rendidor', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const aItems = document.querySelector('[data-group="aprobador"] .group-items');
+      const aIcon = document.querySelector('[data-group="aprobador"] .group-icon');
+      if (aItems) aItems.classList.remove('hidden');
+      if (aIcon) aIcon.classList.add('rotate-90');
+    }
+
+    function highlightBandejaSolicitudes() {
+      document.querySelectorAll('.sidebar-item').forEach((el) => el.classList.remove('active'));
+      const item = document.querySelector('[data-group="aprobador"] a[href*="solicitudes-bandeja"]');
+      if (item) item.classList.add('active');
+    }
+
+    initLayout('SOLICITUDES / REVISAR SF-00045', '../components').then(() => {
+      setupAprobadorSidebar();
+      highlightBandejaSolicitudes();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

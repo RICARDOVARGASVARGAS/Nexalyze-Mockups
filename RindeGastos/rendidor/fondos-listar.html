@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Mis fondos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, info: { DEFAULT: '#3B82F6', light: '#DBEAFE' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604301800">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <!-- Resumen global -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <article class="theme-surface kpi-card relative overflow-hidden" style="border-left:3px solid #6B5BFF">
+          <div class="absolute right-3 top-3 text-primary-light rounded-full p-2 bg-primary-light/50">
+            <i data-lucide="wallet" class="w-5 h-5 text-primary"></i>
+          </div>
+          <p id="kpiActivos" class="kpi-value">2</p>
+          <p class="kpi-title">FONDOS ACTIVOS</p>
+          <p class="kpi-subtitle">ASIGNADOS A TI</p>
+        </article>
+        <article class="theme-surface kpi-card relative overflow-hidden kpi-success" style="border-left:3px solid #22C55E">
+          <div class="absolute right-3 top-3 rounded-full p-2 bg-success-light/80">
+            <i data-lucide="trending-up" class="w-5 h-5 text-success"></i>
+          </div>
+          <p id="kpiDisponible" class="kpi-value text-2xl md:text-[34px]">S/ 1.700,00</p>
+          <p class="kpi-title">SALDO DISPONIBLE</p>
+          <p class="kpi-subtitle">SUMA DE FONDOS ACTIVOS</p>
+        </article>
+        <article class="theme-surface kpi-card relative overflow-hidden" style="border-left:3px solid #F59E0B">
+          <div class="absolute right-3 top-3 rounded-full p-2 bg-warning-light/80">
+            <i data-lucide="clock" class="w-5 h-5 text-warning"></i>
+          </div>
+          <p id="kpiRevision" class="kpi-value text-2xl md:text-[34px]" style="color:#F59E0B">S/ 300,00</p>
+          <p class="kpi-title">EN REVISIÓN</p>
+          <p class="kpi-subtitle">EN INFORMES PENDIENTES</p>
+        </article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div>
+          <h1 class="table-panel-title">Mis fondos</h1>
+          <p class="table-panel-subtitle">Vista solo lectura: consulta saldos, vencimientos, movimientos e informes vinculados</p>
+        </div>
+
+        <div id="tabsF" class="flex flex-wrap gap-2 border-b border-border">
+          <button type="button" data-tf="activos" class="tf relative px-3 py-2 text-xs font-bold uppercase border-b-2 border-primary text-primary inline-flex items-center gap-2">
+            <span class="tf-dot w-2 h-2 rounded-full bg-success shrink-0"></span> Activos (<span id="cntActivos">2</span>)
+          </button>
+          <button type="button" data-tf="cerrados" class="tf px-3 py-2 text-xs font-bold uppercase border-b-2 border-transparent text-ink-muted inline-flex items-center gap-2">
+            <span class="tf-dot w-2 h-2 rounded-full bg-success shrink-0 opacity-0"></span> Cerrados (<span id="cntCerrados">3</span>)
+          </button>
+          <button type="button" data-tf="todos" class="tf px-3 py-2 text-xs font-bold uppercase border-b-2 border-transparent text-ink-muted inline-flex items-center gap-2">
+            <span class="tf-dot w-2 h-2 rounded-full bg-success shrink-0 opacity-0"></span> Todos (<span id="cntTodos">5</span>)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <label class="relative md:col-span-2">
+            <i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="qF" type="text" placeholder="BUSCAR FONDO POR NOMBRE" class="rd-input w-full h-10 pl-9 pr-3 text-[12px] uppercase">
+          </label>
+          <select id="monF" class="rd-select h-10 px-3 text-[12px] uppercase">
+            <option value="">TODAS LAS MONEDAS</option>
+            <option value="PEN">S/ PEN</option>
+            <option value="USD">US$ USD</option>
+            <option value="CLP">CLP$</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-border"><h2 class="table-panel-title">Mis fondos</h2></div>
+
+        <div id="emptyActivos" class="hidden px-6 py-14 text-center">
+          <i data-lucide="wallet" class="w-16 h-16 text-ink-soft mx-auto mb-4"></i>
+          <p class="font-extrabold text-ink text-lg uppercase">No tienes fondos activos asignados</p>
+          <p class="text-sm text-ink-muted mt-2 max-w-md mx-auto">Cuando el administrador te asigne un fondo, aparecerá aquí.</p>
+        </div>
+        <div id="emptyCerrados" class="hidden px-6 py-14 text-center">
+          <p class="font-bold text-ink-muted">No tienes fondos cerrados aún</p>
+        </div>
+
+        <div id="wrapTablaFondos" class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1180px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted">
+                <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">Tipo</th>
+                <th class="py-2.5 px-2">Saldo inicial</th>
+                <th class="py-2.5 px-2">Disponible</th>
+                <th class="py-2.5 px-2">En revisión</th>
+                <th class="py-2.5 px-2">Vencimiento</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbF"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted"><span>Elementos por página:</span><select id="rowsF" class="rd-select h-8 px-2 text-sm"><option selected>10</option><option>15</option><option>25</option></select></div>
+          <div id="rangeF" class="text-sm text-ink-muted">1-2 de 2</div>
+          <div class="inline-flex items-center gap-2">
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" id="btnFirstF" onclick="goF(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" id="btnPrevF" onclick="goF(pg-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" id="btnNextF" onclick="goF(pg+1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" id="btnLastF" onclick="goF(lastF)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-detalle-fondo-rendidor" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header shrink-0">
+        <div class="min-w-0 flex-1">
+          <span id="mdCodigo" class="inline-flex text-xs bg-primary-light text-primary px-2 py-1 rounded font-bold font-mono">FX-001</span>
+          <h3 id="mdNombre" class="rd-modal-title mt-2 text-left break-words">FXR - MAYO - ANA</h3>
+          <div id="mdEstadoBadge" class="mt-2"></div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" class="rd-modal-close" onclick="closeModal('modal-detalle-fondo-rendidor')"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div id="mdBannerVenc" class="hidden shrink-0 mx-5 mt-3 rounded-lg border border-warning/40 bg-warning-light/50 px-4 py-2 text-sm text-amber-900 font-medium"></div>
+      <div class="p-5 overflow-y-auto flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 text-sm">
+        <div class="lg:col-span-7 space-y-4">
+          <div class="rd-card p-4 border border-border">
+            <p class="rd-label mb-3">RESUMEN DE SALDO</p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p id="mdIni" class="text-xl font-extrabold text-ink">S/ 2.000,00</p>
+                <p class="text-[10px] font-bold uppercase text-ink-muted mt-1">MONTO INICIAL</p>
+              </div>
+              <div>
+                <p id="mdDisp" class="text-xl font-extrabold text-success">S/ 1.200,00</p>
+                <p class="text-[10px] font-bold uppercase text-ink-muted mt-1">DISPONIBLE</p>
+              </div>
+              <div>
+                <p id="mdGast" class="text-xl font-extrabold text-ink-muted">S/ 500,00</p>
+                <p class="text-[10px] font-bold uppercase text-ink-muted mt-1">GASTADO</p>
+              </div>
+              <div>
+                <p id="mdRev" class="text-xl font-extrabold text-warning">S/ 300,00</p>
+                <p class="text-[10px] font-bold uppercase text-ink-muted mt-1">EN REVISIÓN</p>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-border">
+              <p class="text-[11px] font-bold uppercase text-ink-muted mb-2">Uso del fondo</p>
+              <div class="fund-bar-track max-w-md">
+                <div id="mdBarUso" class="fund-bar-fill fund-bar-fill--high" style="width:40%"></div>
+              </div>
+              <p id="mdUsoTxt" class="text-xs font-semibold text-ink mt-2">40% utilizado</p>
+              <p id="mdUsoSub" class="text-xs text-ink-muted mt-1">S/ 1.200,00 disponible de S/ 2.000,00 iniciales</p>
+            </div>
+          </div>
+          <div class="rd-card p-4 border border-border">
+            <p class="rd-label mb-2">ÚLTIMOS MOVIMIENTOS</p>
+            <div class="max-h-52 overflow-y-auto border border-border rounded-lg">
+              <table class="w-full text-xs">
+                <thead class="bg-bg sticky top-0">
+                  <tr class="text-left text-ink-muted uppercase font-bold border-b border-border">
+                    <th class="py-2 px-2">Fecha</th>
+                    <th class="py-2 px-2">Concepto</th>
+                    <th class="py-2 px-2">Tipo</th>
+                    <th class="py-2 px-2 text-right">Monto</th>
+                    <th class="py-2 px-2 text-right">Saldo después</th>
+                  </tr>
+                </thead>
+                <tbody id="mdMovs"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-5 space-y-4">
+          <div class="rd-card p-4 border border-border">
+            <p class="rd-label mb-2">INFORMES DE ESTE FONDO</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="text-left border-b text-ink-muted uppercase font-bold">
+                    <th class="py-2 px-1">Nro</th>
+                    <th class="py-2 px-1">Estado</th>
+                    <th class="py-2 px-1 text-right">Monto</th>
+                  </tr>
+                </thead>
+                <tbody id="mdInformes"></tbody>
+              </table>
+            </div>
+            <p id="mdInformesPie" class="text-xs font-semibold text-ink mt-2">4 informes • S/ 1.900,00 total</p>
+            <p class="text-[11px] text-ink-muted mt-2 leading-relaxed">Los informes EN PROCESO tienen el saldo en revisión. Al cerrarse, el saldo se descuenta definitivamente.</p>
+          </div>
+          <div class="rd-card p-4 border border-border space-y-2 text-sm">
+            <p class="rd-label mb-1">INFORMACIÓN DEL FONDO</p>
+            <p><span class="text-ink-muted font-semibold text-[10px] uppercase">Asignado por</span><br><span id="mdAsignado">—</span></p>
+            <p><span class="text-ink-muted font-semibold text-[10px] uppercase">Fecha de asignación</span><br><span id="mdFechaAsig">—</span></p>
+            <p><span class="text-ink-muted font-semibold text-[10px] uppercase">Vencimiento</span><br><span id="mdVenInfo">—</span></p>
+            <p><span class="text-ink-muted font-semibold text-[10px] uppercase">Origen del fondo</span><br><span id="mdOrigen">—</span></p>
+            <div class="pt-2 border-t border-border space-y-1">
+              <p class="text-[10px] font-bold uppercase text-ink-muted">Configuración</p>
+              <p class="flex flex-wrap items-center gap-2"><span class="text-ink-muted text-[11px] uppercase">Fondo flexible</span> <span id="mdFlex"></span></p>
+              <p class="flex flex-wrap items-center gap-2"><span class="text-ink-muted text-[11px] uppercase">Bloqueo al llegar a cero</span> <span id="mdBloqueo"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rd-modal-footer shrink-0 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-detalle-fondo-rendidor')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    /* Fecha de referencia del mockup (26-may-2026 → vence 31-may = 5 días, como en la especificación) */
+    const HOY = new Date(2026, 4, 26);
+
+    const fondos = [
+      {
+        id: 'fx1',
+        codigo: 'FX-001',
+        nombre: 'FXR - MAYO - ANA',
+        tipo: 'FONDO X RENDIR',
+        mon: 'PEN',
+        inicial: 2000,
+        disponible: 1200,
+        gastado: 500,
+        enRevision: 300,
+        vencimiento: '31/05/2026',
+        sinVencimiento: false,
+        estado: 'ACTIVO',
+        tab: 'activos',
+        asignadoPor: 'María Rojas Salas (Admin)',
+        fechaAsignacion: '01/05/2026',
+        flexible: true,
+        bloqueoCero: true,
+        origen: 'directo',
+        solicitudCodigo: null,
+        informes: [
+          { nro: 'IR-00039', estado: 'cerrado', monto: 500 },
+          { nro: 'IR-00045', estado: 'proceso', monto: 800 },
+          { nro: 'IR-00048', estado: 'cancelado', monto: 300 },
+          { nro: 'IR-00051', estado: 'proceso', monto: 300 }
+        ],
+        movimientos: [
+          { fecha: '01/05/2026', concepto: 'Saldo inicial del fondo', tipo: 'abono_inicial', monto: 2000, signo: 1, saldo: 2000 },
+          { fecha: '10/05/2026', concepto: 'Reserva por informe IR-00051', tipo: 'cargo_reserva', monto: 300, signo: -1, saldo: 1700 },
+          { fecha: '15/05/2026', concepto: 'Cierre de informe IR-00039', tipo: 'cargo_definitivo', monto: 500, signo: -1, saldo: 1200 },
+          { fecha: '18/05/2026', concepto: 'Devolución por informe IR-00048', tipo: 'liberacion_reserva', monto: 300, signo: 1, saldo: 1500 },
+          { fecha: '20/05/2026', concepto: 'Reserva por informe IR-00045', tipo: 'cargo_reserva', monto: 300, signo: -1, saldo: 1200 }
+        ]
+      },
+      {
+        id: 'fx2',
+        codigo: 'FX-002',
+        nombre: 'FONDO USD PROYECTO',
+        tipo: 'FONDO X RENDIR',
+        mon: 'USD',
+        inicial: 500,
+        disponible: 500,
+        gastado: 0,
+        enRevision: 0,
+        vencimiento: null,
+        sinVencimiento: true,
+        estado: 'ACTIVO',
+        tab: 'activos',
+        asignadoPor: 'María Rojas Salas (Admin)',
+        fechaAsignacion: '10/04/2026',
+        flexible: false,
+        bloqueoCero: true,
+        origen: 'solicitud',
+        solicitudCodigo: 'SF-045',
+        informes: [],
+        movimientos: [
+          { fecha: '10/04/2026', concepto: 'Saldo inicial del fondo', tipo: 'abono_inicial', monto: 500, signo: 1, saldo: 500 }
+        ]
+      },
+      {
+        id: 'fx3',
+        codigo: 'FX-003',
+        nombre: 'FXR - ABRIL - ANA',
+        tipo: 'FONDO X RENDIR',
+        mon: 'PEN',
+        inicial: 1500,
+        disponible: 0,
+        gastado: 1500,
+        enRevision: 0,
+        vencimiento: '30/04/2026',
+        sinVencimiento: false,
+        estado: 'CERRADO',
+        tab: 'cerrados',
+        asignadoPor: 'María Rojas Salas (Admin)',
+        fechaAsignacion: '01/04/2026',
+        flexible: true,
+        bloqueoCero: false,
+        origen: 'directo',
+        solicitudCodigo: null,
+        informes: [{ nro: 'IR-00030', estado: 'cerrado', monto: 1500 }],
+        movimientos: [
+          { fecha: '01/04/2026', concepto: 'Saldo inicial del fondo', tipo: 'abono_inicial', monto: 1500, signo: 1, saldo: 1500 },
+          { fecha: '28/04/2026', concepto: 'Cierre de informe IR-00030', tipo: 'cargo_definitivo', monto: 1500, signo: -1, saldo: 0 }
+        ]
+      },
+      {
+        id: 'fx4',
+        codigo: 'FX-004',
+        nombre: 'FXR - Q1 OPERACIONES',
+        tipo: 'FONDO X RENDIR',
+        mon: 'PEN',
+        inicial: 900,
+        disponible: 0,
+        gastado: 900,
+        enRevision: 0,
+        vencimiento: '15/03/2026',
+        sinVencimiento: false,
+        estado: 'CERRADO',
+        tab: 'cerrados',
+        asignadoPor: 'Pedro Morales Quispe (Admin)',
+        fechaAsignacion: '05/01/2026',
+        flexible: false,
+        bloqueoCero: true,
+        origen: 'solicitud',
+        solicitudCodigo: 'SF-012',
+        informes: [{ nro: 'IR-00012', estado: 'cerrado', monto: 900 }],
+        movimientos: [
+          { fecha: '05/01/2026', concepto: 'Saldo inicial del fondo', tipo: 'abono_inicial', monto: 900, signo: 1, saldo: 900 },
+          { fecha: '20/03/2026', concepto: 'Ajuste manual administrativo', tipo: 'ajuste_manual', monto: 50, signo: -1, saldo: 850 },
+          { fecha: '25/03/2026', concepto: 'Cierre de informe IR-00012', tipo: 'cargo_definitivo', monto: 850, signo: -1, saldo: 0 }
+        ]
+      },
+      {
+        id: 'fx5',
+        codigo: 'FX-005',
+        nombre: 'FONDO EVENTOS 2025',
+        tipo: 'FONDO X RENDIR',
+        mon: 'PEN',
+        inicial: 400,
+        disponible: 0,
+        gastado: 400,
+        enRevision: 0,
+        vencimiento: null,
+        sinVencimiento: true,
+        estado: 'CERRADO',
+        tab: 'cerrados',
+        asignadoPor: 'María Rojas Salas (Admin)',
+        fechaAsignacion: '01/11/2025',
+        flexible: true,
+        bloqueoCero: true,
+        origen: 'directo',
+        solicitudCodigo: null,
+        informes: [{ nro: 'IR-00999', estado: 'cancelado', monto: 400 }],
+        movimientos: [
+          { fecha: '01/11/2025', concepto: 'Saldo inicial del fondo', tipo: 'abono_inicial', monto: 400, signo: 1, saldo: 400 },
+          { fecha: '10/12/2025', concepto: 'Cierre de informe IR-00999', tipo: 'cargo_definitivo', monto: 400, signo: -1, saldo: 0 }
+        ]
+      }
+    ];
+
+    let tf = 'activos';
+    let pg = 1;
+    let lastF = 1;
+    let psz = 10;
+    const movTipoLabel = {
+      abono_inicial: 'ABONO INICIAL',
+      cargo_reserva: 'CARGO RESERVA',
+      cargo_definitivo: 'CARGO DEFINITIVO',
+      liberacion_reserva: 'LIBERACIÓN',
+      ajuste_manual: 'AJUSTE MANUAL'
+    };
+
+    function movBadgeStyle(tipo) {
+      const map = {
+        abono_inicial: 'background:#D1FAE5;color:#15803D',
+        cargo_reserva: 'background:#FEF3C7;color:#B45309',
+        cargo_definitivo: 'background:#FEE2E2;color:#B91C1C',
+        liberacion_reserva: 'background:#DBEAFE;color:#1D4ED8',
+        ajuste_manual: 'background:#FFEDD5;color:#C2410C'
+      };
+      return map[tipo] || 'background:#F3F4F6;color:#4B5563';
+    }
+
+    function parseDMY(s) {
+      if (!s || s === '—') return null;
+      const p = String(s).trim().split('/');
+      if (p.length !== 3) return null;
+      const d = Number(p[0]); const m = Number(p[1]) - 1; const y = Number(p[2]);
+      if (!y || m < 0) return null;
+      return new Date(y, m, d);
+    }
+
+    function diasHastaVencimiento(f) {
+      if (f.sinVencimiento || !f.vencimiento) return null;
+      const v = parseDMY(f.vencimiento);
+      if (!v) return null;
+      const a = new Date(HOY.getFullYear(), HOY.getMonth(), HOY.getDate());
+      const b = new Date(v.getFullYear(), v.getMonth(), v.getDate());
+      return Math.round((b - a) / 86400000);
+    }
+
+    function money(n, mon) {
+      const opts = { minimumFractionDigits: 2 };
+      if (mon === 'CLP') return `${Math.round(n).toLocaleString('es-PE')} CLP$`;
+      const p = mon === 'USD' ? 'US$ ' : 'S/ ';
+      return p + n.toLocaleString('es-PE', opts);
+    }
+
+    function pctDisponible(f) {
+      if (!f.inicial || f.inicial <= 0) return 0;
+      return Math.min(100, Math.max(0, Math.round((f.disponible / f.inicial) * 100)));
+    }
+
+    function barFillClass(pctDisp) {
+      if (pctDisp > 50) return 'fund-bar-fill--high';
+      if (pctDisp >= 20) return 'fund-bar-fill--mid';
+      return 'fund-bar-fill--low';
+    }
+
+    function availAmtClass(pct) {
+      if (pct <= 0) return 'fund-avail-amt--low';
+      if (pct > 50) return 'fund-avail-amt--high';
+      if (pct >= 20) return 'fund-avail-amt--mid';
+      return 'fund-avail-amt--low';
+    }
+
+    function celdaVencimiento(f) {
+      if (f.sinVencimiento) return '<span class="text-ink-muted">—</span>';
+      const fecha = f.vencimiento || '—';
+      const d = diasHastaVencimiento(f);
+      if (d === null) return `<span>${fecha}</span>`;
+      if (d < 0) return `<div class="flex flex-col gap-1"><span>${fecha}</span><span class="text-[10px] bg-danger-light text-danger px-2 py-0.5 rounded font-bold w-fit">VENCIDO</span></div>`;
+      if (d === 0) return `<div class="flex flex-col gap-1"><span>${fecha}</span><span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold w-fit">VENCE HOY</span></div>`;
+      if (d <= 7) return `<div class="flex flex-col gap-1"><span>${fecha}</span><span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold w-fit">VENCE EN ${d} DÍAS</span></div>`;
+      return `<span>${fecha}</span>`;
+    }
+
+    function badgeEstadoFondo(est) {
+      if (est === 'ACTIVO') return '<span class="fund-status fund-status--activo"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i>ACTIVO</span>';
+      return '<span class="fund-status fund-status--cerrado"><i data-lucide="archive" class="w-3.5 h-3.5"></i>CERRADO</span>';
+    }
+
+    function badgeInformeEstado(e) {
+      if (e.estado === 'cerrado') return '<span class="status-pill status-active">CERRADO</span>';
+      if (e.estado === 'proceso') return '<span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold">EN PROCESO</span>';
+      return '<span class="text-[10px] bg-gray-100 text-ink-muted px-2 py-0.5 rounded font-bold">CANCELADO</span>';
+    }
+
+    function filtrarFondos() {
+      const q = document.getElementById('qF').value.trim().toLowerCase();
+      const mon = document.getElementById('monF').value;
+      return fondos.filter((f) => {
+        if (tf === 'activos' && f.tab !== 'activos') return false;
+        if (tf === 'cerrados' && f.tab !== 'cerrados') return false;
+        if (q && !f.nombre.toLowerCase().includes(q)) return false;
+        if (mon && f.mon !== mon) return false;
+        return true;
+      });
+    }
+
+    function actualizarKpis() {
+      const activos = fondos.filter((f) => f.tab === 'activos');
+      const n = activos.length;
+      let sumDisp = 0;
+      let sumRev = 0;
+      activos.forEach((f) => {
+        if (f.mon === 'PEN') {
+          sumDisp += f.disponible;
+          sumRev += f.enRevision;
+        }
+      });
+      document.getElementById('kpiActivos').textContent = String(n);
+      document.getElementById('kpiDisponible').textContent = money(sumDisp, 'PEN');
+      document.getElementById('kpiRevision').textContent = money(sumRev, 'PEN');
+      document.getElementById('cntActivos').textContent = String(fondos.filter((x) => x.tab === 'activos').length);
+      document.getElementById('cntCerrados').textContent = String(fondos.filter((x) => x.tab === 'cerrados').length);
+      document.getElementById('cntTodos').textContent = String(fondos.length);
+    }
+
+    function renderF() {
+      actualizarKpis();
+      const data = filtrarFondos();
+      lastF = Math.max(1, Math.ceil(data.length / psz));
+      if (pg > lastF) pg = lastF;
+      const s = (pg - 1) * psz;
+      const sl = data.slice(s, s + psz);
+
+      const emptyAct = document.getElementById('emptyActivos');
+      const emptyCer = document.getElementById('emptyCerrados');
+      const wrap = document.getElementById('wrapTablaFondos');
+      emptyAct.classList.add('hidden');
+      emptyCer.classList.add('hidden');
+      wrap.classList.remove('hidden');
+
+      if (data.length === 0) {
+        if (tf === 'activos') {
+          wrap.classList.add('hidden');
+          emptyAct.classList.remove('hidden');
+          document.getElementById('tbF').innerHTML = '';
+        } else if (tf === 'cerrados') {
+          wrap.classList.add('hidden');
+          emptyCer.classList.remove('hidden');
+          document.getElementById('tbF').innerHTML = '';
+        } else {
+          wrap.classList.remove('hidden');
+          emptyAct.classList.add('hidden');
+          emptyCer.classList.add('hidden');
+          document.getElementById('tbF').innerHTML = '<tr><td colspan="8" class="py-10 text-center text-ink-muted font-medium">Sin resultados para los filtros actuales</td></tr>';
+        }
+      } else {
+        document.getElementById('tbF').innerHTML = sl.map((f) => {
+          const pct = pctDisponible(f);
+          const barClass = pct <= 0 ? '' : barFillClass(pct);
+          const fillW = pct <= 0 ? 0 : pct;
+          const tipo = `<span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-bold">${f.tipo}</span>`;
+          const dispCell = `<div>
+            <p class="fund-avail-amt ${availAmtClass(pct)}">${money(f.disponible, f.mon)}</p>
+            <div class="fund-bar-track" style="width:100px;max-width:100%">
+              ${pct <= 0 ? '' : `<div class="fund-bar-fill ${barClass}" style="width:${fillW}%"></div>`}
+            </div>
+          </div>`;
+          const rev = f.enRevision > 0
+            ? `<span class="inline-flex items-center gap-1 font-semibold text-warning"><i data-lucide="clock" class="w-3.5 h-3.5"></i>${money(f.enRevision, f.mon)}</span>`
+            : '<span class="text-ink-muted">—</span>';
+          const acc = `<button type="button" class="rd-action-btn" title="Ver detalle" onclick="openDetalleFondo('${f.id}')"><i data-lucide="eye" class="w-4 h-4"></i></button>`;
+          return `<tr class="border-b border-[#ECEEF4]">
+            <td class="py-2.5 px-2 font-medium">${f.nombre}</td>
+            <td class="py-2.5 px-2">${tipo}</td>
+            <td class="py-2.5 px-2">${money(f.inicial, f.mon)}</td>
+            <td class="py-2.5 px-2">${dispCell}</td>
+            <td class="py-2.5 px-2">${rev}</td>
+            <td class="py-2.5 px-2 text-sm">${celdaVencimiento(f)}</td>
+            <td class="py-2.5 px-2">${badgeEstadoFondo(f.estado)}</td>
+            <td class="py-2.5 px-2"><div class="flex justify-end gap-1">${acc}</div></td>
+          </tr>`;
+        }).join('');
+      }
+
+      const from = data.length === 0 ? 0 : s + 1;
+      const to = Math.min(s + psz, data.length);
+      document.getElementById('rangeF').textContent = `${from}-${to} de ${data.length}`;
+      document.getElementById('btnFirstF').disabled = pg <= 1 || data.length === 0;
+      document.getElementById('btnPrevF').disabled = pg <= 1 || data.length === 0;
+      document.getElementById('btnNextF').disabled = pg >= lastF || data.length === 0;
+      document.getElementById('btnLastF').disabled = pg >= lastF || data.length === 0;
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function setTf(t) {
+      tf = t;
+      pg = 1;
+      document.querySelectorAll('.tf').forEach((b) => {
+        const on = b.getAttribute('data-tf') === t;
+        b.classList.toggle('border-primary', on);
+        b.classList.toggle('text-primary', on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('text-ink-muted', !on);
+        const dot = b.querySelector('.tf-dot');
+        if (dot) dot.classList.toggle('opacity-0', !on);
+      });
+      renderF();
+    }
+
+    function openDetalleFondo(id) {
+      const f = fondos.find((x) => x.id === id);
+      if (!f) return;
+      document.getElementById('mdCodigo').textContent = f.codigo;
+      document.getElementById('mdNombre').textContent = f.nombre;
+      document.getElementById('mdEstadoBadge').innerHTML = badgeEstadoFondo(f.estado);
+
+      const activo = f.estado === 'ACTIVO';
+      const banner = document.getElementById('mdBannerVenc');
+      const d = diasHastaVencimiento(f);
+      if (activo && d !== null && d <= 7 && d >= 0) {
+        banner.classList.remove('hidden');
+        banner.textContent = `⚠️ Este fondo vence el ${f.vencimiento}. Tienes ${d} día${d === 1 ? '' : 's'} para rendir.`;
+      } else if (activo && d !== null && d < 0) {
+        banner.classList.remove('hidden');
+        banner.textContent = `⚠️ Este fondo está vencido (${f.vencimiento}). Regulariza con tu administrador.`;
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      document.getElementById('mdIni').textContent = money(f.inicial, f.mon);
+      const pctD = pctDisponible(f);
+      document.getElementById('mdDisp').textContent = money(f.disponible, f.mon);
+      document.getElementById('mdDisp').className = 'text-xl font-extrabold ' + (pctD > 50 ? 'text-success' : pctD >= 20 ? 'text-warning' : 'text-danger');
+      document.getElementById('mdGast').textContent = money(f.gastado, f.mon);
+      document.getElementById('mdRev').textContent = money(f.enRevision, f.mon);
+
+      const pctUso = f.inicial > 0 ? Math.round(((f.inicial - f.disponible) / f.inicial) * 100) : 0;
+      const barEl = document.getElementById('mdBarUso');
+      const wUso = Math.min(100, Math.max(0, pctUso));
+      barEl.style.width = `${wUso}%`;
+      barEl.className = 'fund-bar-fill' + (wUso > 0 ? ' ' + barFillClass(pctD) : '');
+      document.getElementById('mdUsoTxt').textContent = `${pctUso}% utilizado`;
+      document.getElementById('mdUsoSub').textContent = `${money(f.disponible, f.mon)} disponible de ${money(f.inicial, f.mon)} iniciales`;
+
+      document.getElementById('mdMovs').innerHTML = (f.movimientos || []).map((m) => {
+        const st = movBadgeStyle(m.tipo);
+        const lbl = movTipoLabel[m.tipo] || m.tipo;
+        const col = m.signo >= 0 ? 'text-success' : 'text-danger';
+        const pref = m.signo >= 0 ? '+' : '';
+        return `<tr class="border-b border-[#ECEEF4]">
+          <td class="py-2 px-2 whitespace-nowrap">${m.fecha}</td>
+          <td class="py-2 px-2">${m.concepto}</td>
+          <td class="py-2 px-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded-full" style="${st}">${lbl}</span></td>
+          <td class="py-2 px-2 text-right font-semibold ${col}">${pref}${money(m.monto, f.mon)}</td>
+          <td class="py-2 px-2 text-right font-medium">${money(m.saldo, f.mon)}</td>
+        </tr>`;
+      }).join('');
+
+      const infs = f.informes || [];
+      let totalInf = 0;
+      document.getElementById('mdInformes').innerHTML = infs.map((inf) => {
+        totalInf += inf.monto;
+        return `<tr class="border-b border-[#ECEEF4]">
+          <td class="py-2 px-1 font-semibold text-primary">${inf.nro}</td>
+          <td class="py-2 px-1">${badgeInformeEstado(inf)}</td>
+          <td class="py-2 px-1 text-right">${money(inf.monto, f.mon)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="3" class="py-3 text-ink-muted text-center">Sin informes vinculados</td></tr>';
+      document.getElementById('mdInformesPie').textContent = `${infs.length} informes • ${money(totalInf, f.mon)} total`;
+
+      document.getElementById('mdAsignado').textContent = f.asignadoPor;
+      document.getElementById('mdFechaAsig').textContent = f.fechaAsignacion;
+      if (f.sinVencimiento) {
+        document.getElementById('mdVenInfo').innerHTML = '<span class="text-ink-muted">Sin vencimiento</span>';
+      } else {
+        const dv = diasHastaVencimiento(f);
+        let extra = '';
+        if (f.estado === 'ACTIVO' && dv !== null && dv <= 7 && dv >= 0) {
+          extra = ' <span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold">VENCE PRONTO</span>';
+        } else if (dv !== null && dv < 0) {
+          extra = ' <span class="text-[10px] bg-danger-light text-danger px-2 py-0.5 rounded font-bold">VENCIDO</span>';
+        }
+        document.getElementById('mdVenInfo').innerHTML = `${f.vencimiento}${extra}`;
+      }
+
+      if (f.origen === 'solicitud' && f.solicitudCodigo) {
+        document.getElementById('mdOrigen').innerHTML = `<span class="text-ink font-medium">Nació de solicitud <span class="font-mono text-primary">${f.solicitudCodigo}</span></span>`;
+      } else {
+        document.getElementById('mdOrigen').innerHTML = '<span class="text-[10px] bg-gray-100 text-ink-muted px-2 py-1 rounded font-semibold">Creado directamente por el admin</span>';
+      }
+
+      const si = '<span class="status-pill status-active">SÍ</span>';
+      const no = '<span class="status-pill status-inactive">NO</span>';
+      document.getElementById('mdFlex').innerHTML = f.flexible ? si : no;
+      document.getElementById('mdBloqueo').innerHTML = f.bloqueoCero ? si : no;
+
+      openModal('modal-detalle-fondo-rendidor');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goF(p) {
+      if (p < 1) p = 1;
+      if (p > lastF) p = lastF;
+      pg = p;
+      renderF();
+    }
+
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+
+    document.querySelectorAll('.tf').forEach((b) => b.addEventListener('click', () => setTf(b.getAttribute('data-tf'))));
+    document.getElementById('qF').addEventListener('input', () => { pg = 1; renderF(); });
+    document.getElementById('monF').addEventListener('change', () => { pg = 1; renderF(); });
+    document.getElementById('rowsF').addEventListener('change', (e) => { psz = Number(e.target.value); pg = 1; renderF(); });
+
+    initLayout('MIS FONDOS', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      setTf('activos');
+    });
+  </script>
+</body>
+</html>

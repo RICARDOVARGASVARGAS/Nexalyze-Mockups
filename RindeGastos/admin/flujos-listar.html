@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Flujos de revisión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: {
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      colors: { primary:{DEFAULT:'#6B5BFF',light:'#EDE9FE',dark:'#5849D6'}, success:{DEFAULT:'#22C55E',light:'#D1FAE5'}, danger:{DEFAULT:'#EF4444',light:'#FEE2E2'}, warning:{DEFAULT:'#F59E0B',light:'#FEF3C7'}, info:{DEFAULT:'#3B82F6',light:'#DBEAFE'}, ink:{DEFAULT:'#1F2937',muted:'#6B7280',soft:'#9CA3AF'}, border:'#E5E7EB', bg:'#F5F7FA' }
+    } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#F5F7FA] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen px-3 py-3 space-y-3">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <article class="theme-surface kpi-card kpi-primary"><p class="kpi-value">5</p><p class="kpi-title">Total flujos</p><p class="kpi-subtitle">Registrados en el sistema</p></article>
+      <article class="theme-surface kpi-card kpi-success"><p class="kpi-value">4</p><p class="kpi-title">Activos</p><p class="kpi-subtitle">En uso por políticas</p></article>
+      <article class="theme-surface kpi-card" style="border-left:3px solid #F59E0B"><p class="kpi-value" style="color:#F59E0B">2</p><p class="kpi-title">En uso</p><p class="kpi-subtitle">Con informes activos ahora</p></article>
+    </div>
+
+    <div class="theme-surface rd-card p-4 space-y-3">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div><h1 class="table-panel-title">Tabla de flujos de revisión</h1><p class="table-panel-subtitle">Gestiona la cadena de aprobadores</p></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button class="btn btn-outline" onclick="refreshList()" title="Generar lista"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+          <button class="btn btn-outline" onclick="openModal('modal-exportar-flujos')"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> Exportar</button>
+          <button class="btn btn-outline" onclick="openModal('modal-importar-flujos')"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Importar</button>
+          <button class="btn btn-primary" onclick="openCreateModal()"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Registrar flujo</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <div class="md:col-span-2 flex gap-2">
+          <label class="relative flex-1"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="q" class="rd-input h-10 w-full pl-9 pr-3 text-sm uppercase" placeholder="BUSCAR POR NOMBRE O CÓDIGO"></label>
+          <button class="btn btn-primary h-10" onclick="renderTable()">Buscar</button>
+        </div>
+        <select id="estado" class="rd-select h-10 px-3 text-sm uppercase"><option value="todos">Todos los estados</option><option value="activo">Activos</option><option value="inactivo">Inactivos</option></select>
+        <span id="chip" class="inline-flex h-10 items-center px-3 rounded-md bg-primary-light text-primary text-xs font-semibold uppercase"></span>
+      </div>
+    </div>
+
+    <div class="theme-surface rd-card overflow-hidden">
+      <div class="px-4 py-3 border-b border-border"><h2 class="table-panel-title">Lista de flujos</h2></div>
+      <div class="px-2 pb-2 overflow-x-auto">
+        <table class="rd-table w-full min-w-[1100px]">
+          <thead><tr class="text-left border-b border-[#E5E7EF]"><th class="py-2.5 px-2">Código</th><th class="py-2.5 px-2">Nombre</th><th class="py-2.5 px-2">Pasos</th><th class="py-2.5 px-2">Políticas</th><th class="py-2.5 px-2">Revisores</th><th class="py-2.5 px-2">Estado</th><th class="py-2.5 px-2 text-right">Acciones</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+        <div class="inline-flex items-center gap-2 text-sm text-ink-muted"><span>Elementos por página:</span><select id="rowsPerPage" class="rd-select h-8 px-2 text-sm"><option>10</option><option selected>15</option><option>25</option><option>50</option></select></div>
+        <div id="range" class="text-sm text-ink-muted">1-5 de 5</div>
+        <div class="inline-flex items-center gap-2">
+          <button id="first" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+          <button id="prev" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(page-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+          <button id="next" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(page+1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+          <button id="last" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="modal-crear-flujo" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">NUEVO FLUJO DE REVISIÓN</h3><p class="rd-modal-subtitle">DEFINE LA CADENA DE APROBADORES</p></div><button class="rd-modal-close" onclick="closeModal('modal-crear-flujo')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="form-crear-flujo" class="p-5 space-y-4 overflow-y-auto">
+        <div id="crear-tabs" class="border-b border-border pb-2 flex items-center gap-4 text-xs font-semibold uppercase">
+          <button type="button" data-flow-tab="info" onclick="switchFlowTab('crear','info')" class="text-primary border-b-2 border-primary pb-1.5">Información</button>
+          <button type="button" data-flow-tab="revisores" onclick="switchFlowTab('crear','revisores')" class="text-ink-muted pb-1.5">Revisores</button>
+        </div>
+        <section data-flow-content="info" class="space-y-4">
+          <div><label class="rd-label block mb-1">Nombre *</label><input id="crear-nombre" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: FLUJO OPERACIONES 2 NIVELES" required></div>
+          <div><label class="rd-label block mb-1">Código</label><input id="crear-codigo" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: FLU-001"></div>
+          <div><label class="rd-label block mb-1">Descripción</label><textarea id="crear-descripcion" class="rd-textarea w-full px-3 py-2 text-sm" rows="3" placeholder="DESCRIPCIÓN (OPCIONAL)"></textarea></div>
+          <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p></div><span class="rd-switch"><input id="crear-estado" checked type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        </section>
+        <section data-flow-content="revisores" class="space-y-4 hidden">
+          <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+            <p class="rd-label mb-1 inline-flex items-center gap-2 text-primary"><i data-lucide="git-branch" class="w-3.5 h-3.5"></i> CADENA DE APROBADORES</p>
+            <p class="text-xs text-ink-muted mb-3">Define quién aprueba y en qué orden. El último paso cerrará el informe automáticamente.</p>
+            <div class="rounded-lg border border-info/30 bg-info-light/40 px-3 py-2 text-sm text-[#1D4ED8] mb-3">ℹ️ El informe no avanza al siguiente paso hasta que el aprobador actual tome una decisión.</div>
+            <div id="workflow-steps-container-crear" class="space-y-0"></div>
+            <button type="button" onclick="addWorkflowStep('crear')" class="btn btn-outline w-full mt-3 text-primary border-primary hover:bg-primary-light"><i data-lucide="plus" class="w-3.5 h-3.5"></i> AGREGAR PASO</button>
+          </div>
+          <div class="rd-modal-footer"><button type="button" class="btn btn-muted" onclick="closeModal('modal-crear-flujo')">CANCELAR</button><button type="submit" class="btn btn-primary">REGISTRAR</button></div>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-editar-flujo" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div><h3 class="rd-modal-title">EDITAR FLUJO DE REVISIÓN</h3><p class="rd-modal-subtitle">MODIFICA LA CADENA DE APROBADORES</p></div><button class="rd-modal-close" onclick="closeModal('modal-editar-flujo')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <form id="form-editar-flujo" class="p-5 overflow-y-auto space-y-4">
+        <input id="editar-workflow-id" type="hidden">
+        <div id="edit-lock-banner" class="hidden rounded-lg border border-danger/40 bg-danger-light/50 text-danger p-3 text-sm">🔒 HAY 3 INFORMES ACTIVOS USANDO ESTE FLUJO. Solo puedes editar nombre, código y descripción. Los pasos están bloqueados hasta que terminen.</div>
+        <div id="editar-tabs" class="border-b border-border pb-2 flex items-center gap-4 text-xs font-semibold uppercase">
+          <button type="button" data-flow-tab="info" onclick="switchFlowTab('editar','info')" class="text-primary border-b-2 border-primary pb-1.5">Información</button>
+          <button type="button" data-flow-tab="revisores" onclick="switchFlowTab('editar','revisores')" class="text-ink-muted pb-1.5">Revisores</button>
+        </div>
+        <section data-flow-content="info" class="space-y-4">
+          <div><label class="rd-label block mb-1">Nombre *</label><input id="editar-nombre" class="rd-input w-full h-10 px-3 text-sm"></div>
+          <div><label class="rd-label block mb-1">Código</label><input id="editar-codigo" class="rd-input w-full h-10 px-3 text-sm"></div>
+          <div><label class="rd-label block mb-1">Descripción</label><textarea id="editar-descripcion" class="rd-textarea w-full px-3 py-2 text-sm" rows="3"></textarea></div>
+          <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p></div><span class="rd-switch"><input id="editar-estado" checked type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        </section>
+        <section data-flow-content="revisores" class="space-y-4 hidden">
+          <div id="edit-steps-wrapper" class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
+            <p class="rd-label mb-1 inline-flex items-center gap-2 text-primary"><i data-lucide="git-branch" class="w-3.5 h-3.5"></i> CADENA DE APROBADORES</p>
+            <p class="text-xs text-ink-muted mb-3">Define quién aprueba y en qué orden. El último paso cerrará el informe automáticamente.</p>
+            <div class="rounded-lg border border-info/30 bg-info-light/40 px-3 py-2 text-sm text-[#1D4ED8] mb-3">ℹ️ El informe no avanza al siguiente paso hasta que el aprobador actual tome una decisión.</div>
+            <div id="workflow-steps-container-editar" class="space-y-0"></div>
+            <button id="btn-add-step-editar" type="button" onclick="addWorkflowStep('editar')" class="btn btn-outline w-full mt-3 text-primary border-primary hover:bg-primary-light"><i data-lucide="plus" class="w-3.5 h-3.5"></i> AGREGAR PASO</button>
+          </div>
+          <div class="rd-modal-footer"><button type="button" class="btn btn-muted" onclick="closeModal('modal-editar-flujo')">CANCELAR</button><button type="submit" class="btn btn-primary">ACTUALIZAR</button></div>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-detalle-flujo" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4 font-sans">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header border-b border-primary/15 bg-gradient-to-r from-primary-light/40 via-info-light/30 to-success-light/30">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-xl bg-white/80 border border-primary/20 text-primary inline-flex items-center justify-center shadow-sm">
+            <i data-lucide="git-branch" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <span id="d-code" class="text-xs bg-primary text-white px-2 py-1 rounded font-semibold">FLU-001</span>
+            <h3 id="d-name" class="rd-modal-title mt-2">FLUJO STANDARD 2 NIVELES</h3>
+            <span id="d-status" class="status-pill status-active mt-1">ACTIVO</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2"><button class="rd-modal-close bg-white/80" onclick="closeModal('modal-detalle-flujo')"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl border border-primary/25 bg-gradient-to-br from-primary-light to-white px-4 py-3 shadow-sm"><p class="text-xs uppercase text-primary font-semibold tracking-wide">Código</p><p id="d-info-code" class="text-lg font-semibold text-primary-dark mt-1">FLU-001</p></div>
+          <div class="rounded-xl border border-info/25 bg-gradient-to-br from-info-light to-white px-4 py-3 shadow-sm"><p class="text-xs uppercase text-info font-semibold tracking-wide">Pasos</p><p id="d-info-steps" class="text-lg font-semibold text-info mt-1">2 aprobadores</p></div>
+          <div class="rounded-xl border border-success/25 bg-gradient-to-br from-success-light to-white px-4 py-3 shadow-sm"><p class="text-xs uppercase text-success font-semibold tracking-wide">Último aprobador</p><p id="d-info-last" class="text-lg font-semibold text-ink mt-1">María Rojas Salas</p></div>
+        </div>
+        <div class="rd-card p-4 border border-primary/20 bg-gradient-to-br from-primary-light/25 to-white shadow-sm">
+          <p class="rd-label mb-3 text-primary inline-flex items-center gap-2"><i data-lucide="route" class="w-4 h-4"></i> CADENA DE APROBADORES</p>
+          <div id="d-steps" class="space-y-2"></div>
+        </div>
+        <div class="rd-card p-4 border border-info/20 bg-gradient-to-br from-info-light/25 to-white shadow-sm">
+          <p class="rd-label mb-3 text-info inline-flex items-center gap-2"><i data-lucide="layers-3" class="w-4 h-4"></i> POLÍTICAS ASOCIADAS</p>
+          <div id="d-policies" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-eliminar-flujo" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4"><div class="w-full max-w-lg bg-white border border-danger/40 rounded-xl shadow-xl"><div class="rd-modal-header"><div><h3 class="rd-modal-title">ELIMINAR FLUJO</h3></div><button class="rd-modal-close" onclick="closeModal('modal-eliminar-flujo')"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="p-5 space-y-3"><p class="text-sm">¿Eliminar <strong id="delete-flow-name">"FLUJO STANDARD 2 NIVELES"</strong>?</p><div id="delete-active-banner" class="hidden rounded-lg border border-danger/40 bg-danger-light/50 p-3 text-sm text-danger">❌ HAY <span id="delete-active-count">3</span> INFORMES EN PROCESO USANDO ESTE FLUJO. No puedes eliminarlo hasta que los informes terminen.</div><div id="delete-policy-banner" class="rounded-lg border border-warning/30 bg-warning-light/40 p-3 text-sm text-[#92400E]">⚠️ Este flujo está asignado a <span id="delete-policy-count">2</span> políticas. Al eliminarlo, esas políticas quedarán sin flujo y los rendidores no podrán enviar informes.</div><label id="delete-confirm-wrap" class="text-sm flex items-center gap-2"><input id="confirmDelete" type="checkbox"> Entiendo que las políticas quedarán sin flujo</label><div class="rd-modal-footer"><button class="btn btn-muted" onclick="closeModal('modal-eliminar-flujo')">CANCELAR</button><button id="btnDeleteFlow" disabled class="btn btn-danger disabled:opacity-50 disabled:cursor-not-allowed" onclick="showToast('Flujo eliminado','danger'); closeModal('modal-eliminar-flujo');">ELIMINAR</button></div></div></div></div>
+  <div id="modal-importar-flujos" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4"><div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl"><div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="upload" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">IMPORTAR FLUJOS (EXCEL)</h3><p class="rd-modal-subtitle">CARGA MASIVA DESDE ARCHIVO EXCEL</p></div></div><button class="rd-modal-close" onclick="closeModal('modal-importar-flujos')"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="p-5 space-y-4"><div class="rounded-lg border border-primary-light border-l-4 border-l-primary bg-primary-light/40 p-4 text-sm">Instrucciones de importación iguales al patrón base.</div><label class="block border-dashed border-2 border-border rounded-xl bg-bg/60 p-6 text-center"><input id="fileImport" type="file" class="hidden"><i data-lucide="cloud-upload" class="w-10 h-10 mx-auto text-ink-soft"></i><p class="mt-2 font-semibold uppercase">ARRASTRA Y SUELTA TU ARCHIVO</p><p class="text-xs text-ink-muted">O HAZ CLIC PARA SELECCIONAR</p></label><div class="rd-modal-footer"><button class="btn btn-muted" onclick="closeModal('modal-importar-flujos')">CANCELAR</button><button class="btn btn-primary" onclick="showToast('Importación completada','success'); closeModal('modal-importar-flujos');">IMPORTAR</button></div></div></div></div>
+  <div id="modal-exportar-flujos" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4"><div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl"><div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EXPORTAR FLUJOS</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div></div><button class="rd-modal-close" onclick="closeModal('modal-exportar-flujos')"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="p-5 space-y-4"><div class="rounded-lg border border-border bg-bg p-3 text-sm">Se exportarán 5 flujos en formato Excel (.xlsx).</div><div class="rd-modal-footer"><button class="btn btn-muted" onclick="closeModal('modal-exportar-flujos')">CANCELAR</button><button class="btn btn-primary" onclick="showToast('Exportación completada','success'); closeModal('modal-exportar-flujos');">EXPORTAR</button></div></div></div></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const approvers = [
+      { id: '1', name: 'Pedro Morales Quispe', email: 'pedro.morales@empresa.com.pe' },
+      { id: '2', name: 'María Rojas Salas', email: 'maria.rojas@empresa.com.pe' },
+      { id: '3', name: 'Carlos Mendoza Torres', email: 'carlos.mendoza@empresa.com.pe' },
+      { id: '4', name: 'Roberto Quispe Vargas', email: 'roberto.quispe@empresa.com.pe' }
+    ];
+    const rows = [
+      { id: 1, code: 'FLU-001', name: 'Flujo Standard 2 Niveles', description: 'Flujo base para validación operativa.', status: true, usage: 0, policies: ['POL-001 Política General PEN', 'POL-003 Política USD Internacional'], steps: ['1', '2'] },
+      { id: 2, code: 'FLU-002', name: 'Flujo Gerencia 3 Niveles', description: 'Flujo para aprobaciones de gerencia.', status: true, usage: 3, policies: ['POL-002 Política Gerencia'], steps: ['3', '4', '2'] },
+      { id: 3, code: 'FLU-003', name: 'Flujo Internacional', description: 'Flujo para gastos internacionales.', status: true, usage: 0, policies: ['POL-003 Política USD Internacional'], steps: ['1', '4'] },
+      { id: 4, code: 'FLU-004', name: 'Flujo Dirección Solo', description: 'Aprobación única de dirección.', status: true, usage: 0, policies: [], steps: ['2'] },
+      { id: 5, code: 'FLU-005', name: 'Flujo Antiguo 2023', description: 'Flujo legado sin uso.', status: false, usage: 0, policies: [], steps: ['1', '2'] }
+    ];
+    let page = 1; let lastPage = 1; let pageSize = 15; let selectedFlowId = 1; let stepCounter = 10;
+
+    function getFlowById(id) { return rows.find((r) => r.id === id); }
+    function getApproverById(id) { return approvers.find((a) => a.id === String(id)); }
+    function initialsFromName(name) { return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(); }
+
+    function renderTable() {
+      const q = document.getElementById('q').value.trim().toLowerCase();
+      const st = document.getElementById('estado').value;
+      const filtered = rows.filter((r) => (!q || r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q)) && (st === 'todos' || (st === 'activo' ? r.status : !r.status)));
+      document.getElementById('chip').innerHTML = `<i data-lucide="chevrons-down" class="w-3.5 h-3.5 mr-1"></i> ${filtered.length} resultados`;
+      lastPage = Math.max(1, Math.ceil(filtered.length / pageSize)); if (page > lastPage) page = lastPage;
+      const start = (page - 1) * pageSize; const data = filtered.slice(start, start + pageSize);
+      document.getElementById('tbody').innerHTML = data.map((r) => {
+        const reviewers = new Set(r.steps).size;
+        return `<tr class="border-b border-[#ECEEF4] last:border-0"><td class="py-2.5 px-2">${r.code}</td><td class="py-2.5 px-2">${r.name}</td><td class="py-2.5 px-2"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-light text-primary text-xs font-semibold"><i data-lucide="route" class="w-3.5 h-3.5"></i>${r.steps.length}</span></td><td class="py-2.5 px-2"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-light text-primary text-xs font-semibold"><i data-lucide="scale" class="w-3.5 h-3.5"></i>${r.policies.length}</span></td><td class="py-2.5 px-2"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-light text-primary text-xs font-semibold"><i data-lucide="users" class="w-3.5 h-3.5"></i>${reviewers}</span></td><td class="py-2.5 px-2">${r.status ? '<span class="status-pill status-active">ACTIVO</span>' : '<span class="status-pill status-inactive">INACTIVO</span>'}</td><td class="py-2.5 px-2"><div class="flex justify-end gap-1"><button class="rd-action-btn" onclick="openDetailModal(${r.id})"><i data-lucide="eye" class="w-4 h-4"></i></button><button class="rd-action-btn" onclick="openEditModal(${r.id})"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="rd-action-btn" onclick="openDeleteModal(${r.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`;
+      }).join('');
+      const from = filtered.length === 0 ? 0 : start + 1; const to = Math.min(start + pageSize, filtered.length);
+      document.getElementById('range').textContent = `${from}-${to} de ${filtered.length}`;
+      ['first', 'prev'].forEach((id) => { document.getElementById(id).disabled = page === 1; });
+      ['next', 'last'].forEach((id) => { document.getElementById(id).disabled = page === lastPage; });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goToPage(p) { if (p < 1) p = 1; if (p > lastPage) p = lastPage; page = p; renderTable(); }
+    function refreshList() { renderTable(); showToast('Lista actualizada', 'info'); }
+
+    function renderDetailSteps(flow) {
+      const wrap = document.getElementById('d-steps');
+      const steps = flow.steps.map((id) => getApproverById(id)).filter(Boolean);
+      wrap.innerHTML = `
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-info-light text-info text-[11px] font-semibold uppercase font-sans">
+          <i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Inicio del flujo
+        </div>
+        ${steps.map((step, index) => `
+          <div class="flex justify-center py-1.5 text-primary/60"><i data-lucide="chevron-down" class="w-5 h-5"></i></div>
+          <div class="relative border border-primary/20 bg-white rounded-xl p-3.5 shadow-sm font-sans">
+            <div class="absolute top-3 right-3">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${index === steps.length - 1 ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}">
+                ${index === steps.length - 1 ? 'CIERRE AUTOMÁTICO' : 'REVISIÓN'}
+              </span>
+            </div>
+            <p class="font-semibold text-ink inline-flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-primary text-white text-[11px] inline-flex items-center justify-center">${index + 1}</span>
+              PASO ${index + 1}
+            </p>
+            <div class="mt-2.5 flex items-center gap-3">
+              <span class="w-10 h-10 rounded-full bg-primary-light ring-2 ring-primary/20 text-primary text-xs font-bold inline-flex items-center justify-center">${initialsFromName(step.name)}</span>
+              <div>
+                <p class="font-semibold">${step.name}</p>
+                <p class="text-xs text-ink-muted">${step.email}</p>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+        <div class="flex justify-center py-1.5 text-success"><i data-lucide="chevron-down" class="w-5 h-5"></i></div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-success-light text-success text-[11px] font-semibold uppercase font-sans">
+          <i data-lucide="flag" class="w-3.5 h-3.5"></i> Fin del flujo
+        </div>
+      `;
+    }
+
+    function openDetailModal(id) {
+      selectedFlowId = id;
+      const flow = getFlowById(id); if (!flow) return;
+      const lastApprover = getApproverById(flow.steps[flow.steps.length - 1]);
+      document.getElementById('d-code').textContent = flow.code;
+      document.getElementById('d-name').textContent = flow.name.toUpperCase();
+      document.getElementById('d-status').className = `status-pill mt-1 ${flow.status ? 'status-active' : 'status-inactive'}`;
+      document.getElementById('d-status').textContent = flow.status ? 'ACTIVO' : 'INACTIVO';
+      renderDetailSteps(flow);
+      document.getElementById('d-policies').innerHTML = flow.policies.length
+        ? flow.policies.map((p) => `<button class="text-xs font-sans bg-primary-light text-primary border border-primary/20 px-2.5 py-1 rounded-full font-semibold hover:bg-primary-light/80 transition">${p}</button>`).join('')
+        : '<div class="rounded-lg border border-dashed border-border px-3 py-2 text-sm text-ink-muted">Sin políticas asignadas</div>';
+      document.getElementById('d-info-code').textContent = flow.code;
+      document.getElementById('d-info-steps').textContent = `${flow.steps.length} aprobadores`;
+      document.getElementById('d-info-last').textContent = lastApprover ? lastApprover.name : '—';
+      openModal('modal-detalle-flujo');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function switchFlowTab(mode, tabId) {
+      const form = document.getElementById(`form-${mode}-flujo`);
+      if (!form) return;
+      form.querySelectorAll('[data-flow-tab]').forEach((tab) => {
+        const active = tab.dataset.flowTab === tabId;
+        tab.classList.toggle('text-primary', active);
+        tab.classList.toggle('border-b-2', active);
+        tab.classList.toggle('border-primary', active);
+        tab.classList.toggle('text-ink-muted', !active);
+      });
+      form.querySelectorAll('[data-flow-content]').forEach((content) => {
+        content.classList.toggle('hidden', content.dataset.flowContent !== tabId);
+      });
+    }
+
+    function buildStepCard(mode, stepId, number, approverId, locked) {
+      const approver = getApproverById(approverId);
+      const initials = approver ? initialsFromName(approver.name) : '?';
+      return `
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2">
+            <span data-step-badge class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-semibold">${number}</span>
+            <span data-closing-badge class="hidden items-center gap-1 px-2 py-1 rounded-full bg-primary-light text-primary text-xs font-semibold"><i data-lucide="check-circle" class="w-3 h-3"></i> CIERRA EL INFORME</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button data-move-up ${locked ? 'data-locked="true"' : ''} type="button" onclick="moveStep('${mode}','${stepId}','up')" class="w-7 h-7 flex items-center justify-center rounded border border-border hover:bg-bg text-ink-muted disabled:opacity-40 disabled:cursor-not-allowed" ${locked ? 'disabled' : ''}><i data-lucide="chevron-up" class="w-3 h-3"></i></button>
+            <button data-move-down ${locked ? 'data-locked="true"' : ''} type="button" onclick="moveStep('${mode}','${stepId}','down')" class="w-7 h-7 flex items-center justify-center rounded border border-border hover:bg-bg text-ink-muted disabled:opacity-40 disabled:cursor-not-allowed" ${locked ? 'disabled' : ''}><i data-lucide="chevron-down" class="w-3 h-3"></i></button>
+            <button type="button" ${locked ? 'data-locked="true"' : ''} onclick="removeStep('${mode}','${stepId}')" class="w-7 h-7 flex items-center justify-center rounded border border-danger hover:bg-danger-light text-danger" ${locked ? 'disabled' : ''}><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-primary-light ring-2 ring-primary/20 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0" data-avatar>${initials}</div>
+          <div class="flex-1">
+            <select data-approver-select onchange="updateStepApprover('${mode}','${stepId}', this)" class="w-full border border-primary/30 rounded-lg px-3 py-2 text-sm font-sans focus:outline-none focus:border-primary bg-white text-ink" ${locked ? 'disabled' : ''}>
+              <option value="">SELECCIONAR APROBADOR</option>
+              ${approvers.map((a) => `<option value="${a.id}" ${String(approverId) === a.id ? 'selected' : ''}>${a.name} — ${a.email}</option>`).join('')}
+            </select>
+            <p class="text-xs text-ink-muted mt-1" data-approver-email>${approver ? approver.email : 'Sin aprobador asignado'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function getStepsContainer(mode) { return document.getElementById(`workflow-steps-container-${mode}`); }
+    function createStepNode(mode, approverId, locked = false) {
+      const container = getStepsContainer(mode);
+      const stepId = ++stepCounter;
+      const number = container.querySelectorAll('[data-step-id]').length + 1;
+      const card = document.createElement('div');
+      card.id = `step-${mode}-${stepId}`;
+      card.dataset.stepId = String(stepId);
+      card.className = 'bg-white border border-primary/25 rounded-xl p-4 relative shadow-sm';
+      card.innerHTML = buildStepCard(mode, stepId, number, approverId, locked);
+      return card;
+    }
+
+    function renderSteps(mode, stepApproverIds, locked = false) {
+      const container = getStepsContainer(mode);
+      container.innerHTML = '';
+      stepApproverIds.forEach((approverId, index) => {
+        container.appendChild(createStepNode(mode, approverId, locked));
+        if (index < stepApproverIds.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'flex justify-center py-1 text-ink-muted';
+          connector.dataset.connector = 'true';
+          connector.innerHTML = '<i data-lucide="chevron-down" class="w-5 h-5"></i>';
+          container.appendChild(connector);
+        }
+      });
+      updateStepBadges(mode);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ═══ FLUJOS DE REVISIÓN ═══
+    function addWorkflowStep(mode) {
+      const container = getStepsContainer(mode);
+      const cards = container.querySelectorAll('[data-step-id]');
+      if (cards.length > 0) {
+        const connector = document.createElement('div');
+        connector.className = 'flex justify-center py-1 text-ink-muted';
+        connector.dataset.connector = 'true';
+        connector.innerHTML = '<i data-lucide="chevron-down" class="w-5 h-5"></i>';
+        container.appendChild(connector);
+      }
+      container.appendChild(createStepNode(mode, null, false));
+      updateStepBadges(mode);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateStepApprover(mode, stepId, select) {
+      const card = document.getElementById(`step-${mode}-${stepId}`);
+      const avatar = card.querySelector('[data-avatar]');
+      const email = card.querySelector('[data-approver-email]');
+      const approver = getApproverById(select.value);
+      if (approver) {
+        avatar.textContent = initialsFromName(approver.name);
+        email.textContent = approver.email;
+        card.classList.remove('border-danger', 'border-2');
+      } else {
+        avatar.textContent = '?';
+        email.textContent = 'Sin aprobador asignado';
+      }
+    }
+
+    function moveStep(mode, stepId, direction) {
+      const container = getStepsContainer(mode);
+      const cards = Array.from(container.querySelectorAll('[data-step-id]'));
+      const current = cards.find((node) => node.dataset.stepId === String(stepId));
+      const currentIndex = cards.indexOf(current);
+      if (currentIndex < 0) return;
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= cards.length) return;
+      const order = cards.map((card) => card.dataset.stepId);
+      [order[currentIndex], order[targetIndex]] = [order[targetIndex], order[currentIndex]];
+      const reordered = order.map((id) => cards.find((node) => node.dataset.stepId === id));
+      container.innerHTML = '';
+      reordered.forEach((card, index) => {
+        container.appendChild(card);
+        if (index < reordered.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'flex justify-center py-1 text-ink-muted';
+          connector.dataset.connector = 'true';
+          connector.innerHTML = '<i data-lucide="chevron-down" class="w-5 h-5"></i>';
+          container.appendChild(connector);
+        }
+      });
+      updateStepBadges(mode);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removeStep(mode, stepId) {
+      const container = getStepsContainer(mode);
+      const cards = Array.from(container.querySelectorAll('[data-step-id]'));
+      if (cards.length <= 1) { showToast('El flujo debe tener al menos un aprobador', 'danger'); return; }
+      const card = cards.find((node) => node.dataset.stepId === String(stepId));
+      if (card) card.remove();
+      const remaining = Array.from(container.querySelectorAll('[data-step-id]'));
+      container.querySelectorAll('[data-connector]').forEach((c) => c.remove());
+      remaining.forEach((node, index) => {
+        if (index < remaining.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'flex justify-center py-1 text-ink-muted';
+          connector.dataset.connector = 'true';
+          connector.innerHTML = '<i data-lucide="chevron-down" class="w-5 h-5"></i>';
+          node.insertAdjacentElement('afterend', connector);
+        }
+      });
+      updateStepBadges(mode);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateStepBadges(mode) {
+      const container = getStepsContainer(mode);
+      const steps = container.querySelectorAll('[data-step-id]');
+      steps.forEach((step, index) => {
+        const isFirst = index === 0;
+        const isLast = index === steps.length - 1;
+        const badge = step.querySelector('[data-step-badge]');
+        if (badge) badge.textContent = index + 1;
+        const closingBadge = step.querySelector('[data-closing-badge]');
+        if (closingBadge) {
+          closingBadge.classList.toggle('hidden', !isLast);
+          closingBadge.classList.toggle('inline-flex', isLast);
+        }
+        const upBtn = step.querySelector('[data-move-up]');
+        const downBtn = step.querySelector('[data-move-down]');
+        if (upBtn) upBtn.disabled = upBtn.hasAttribute('data-locked') || isFirst;
+        if (downBtn) downBtn.disabled = downBtn.hasAttribute('data-locked') || isLast;
+      });
+    }
+
+    function validateWorkflowSteps(mode) {
+      const container = getStepsContainer(mode);
+      const steps = container.querySelectorAll('[data-step-id]');
+      if (steps.length === 0) {
+        showToast('Debes agregar al menos un aprobador al flujo', 'danger');
+        return false;
+      }
+      let hasEmpty = false;
+      steps.forEach((step) => {
+        const select = step.querySelector('[data-approver-select]');
+        if (!select || !select.value) {
+          step.classList.add('border-danger', 'border-2');
+          hasEmpty = true;
+        } else {
+          step.classList.remove('border-danger', 'border-2');
+        }
+      });
+      if (hasEmpty) {
+        showToast('Todos los pasos deben tener un aprobador asignado', 'danger');
+        return false;
+      }
+      return true;
+    }
+
+    function collectStepApprovers(mode) {
+      return Array.from(getStepsContainer(mode).querySelectorAll('[data-step-id]')).map((step) => {
+        const select = step.querySelector('[data-approver-select]');
+        return select ? select.value : '';
+      });
+    }
+
+    function openCreateModal() {
+      document.getElementById('form-crear-flujo').reset();
+      renderSteps('crear', ['1', '2'], false);
+      switchFlowTab('crear', 'info');
+      openModal('modal-crear-flujo');
+    }
+
+    function openEditModal(id) {
+      selectedFlowId = id;
+      const flow = getFlowById(id); if (!flow) return;
+      document.getElementById('editar-workflow-id').value = String(flow.id);
+      document.getElementById('editar-nombre').value = flow.name;
+      document.getElementById('editar-codigo').value = flow.code;
+      document.getElementById('editar-descripcion').value = flow.description || '';
+      document.getElementById('editar-estado').checked = !!flow.status;
+      const isLocked = flow.usage > 0;
+      document.getElementById('edit-lock-banner').classList.toggle('hidden', !isLocked);
+      document.getElementById('btn-add-step-editar').disabled = isLocked;
+      document.getElementById('btn-add-step-editar').classList.toggle('opacity-50', isLocked);
+      document.getElementById('edit-steps-wrapper').classList.toggle('opacity-75', isLocked);
+      renderSteps('editar', flow.steps, isLocked);
+      switchFlowTab('editar', 'info');
+      openModal('modal-editar-flujo');
+    }
+
+    function openDeleteModal(id) {
+      selectedFlowId = id;
+      const flow = getFlowById(id); if (!flow) return;
+      document.getElementById('delete-flow-name').textContent = `"${flow.name}"`;
+      document.getElementById('delete-policy-count').textContent = String(flow.policies.length);
+      document.getElementById('delete-active-count').textContent = String(flow.usage);
+      const hasActive = flow.usage > 0;
+      const hasPolicies = flow.policies.length > 0;
+      document.getElementById('delete-active-banner').classList.toggle('hidden', !hasActive);
+      document.getElementById('delete-policy-banner').classList.toggle('hidden', !hasPolicies);
+      document.getElementById('delete-confirm-wrap').classList.toggle('hidden', !hasPolicies || hasActive);
+      const confirm = document.getElementById('confirmDelete');
+      confirm.checked = false;
+      document.getElementById('btnDeleteFlow').disabled = hasActive || hasPolicies;
+      if (!hasActive && !hasPolicies) document.getElementById('btnDeleteFlow').disabled = false;
+      openModal('modal-eliminar-flujo');
+    }
+
+    document.getElementById('form-crear-flujo').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validateWorkflowSteps('crear')) return;
+      showToast('Flujo creado', 'success');
+      closeModal('modal-crear-flujo');
+    });
+
+    document.getElementById('form-editar-flujo').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById('editar-workflow-id').value);
+      const flow = getFlowById(id);
+      if (!flow) return;
+      const isLocked = flow.usage > 0;
+      if (!isLocked && !validateWorkflowSteps('editar')) return;
+      flow.name = document.getElementById('editar-nombre').value.trim() || flow.name;
+      flow.code = document.getElementById('editar-codigo').value.trim() || flow.code;
+      flow.description = document.getElementById('editar-descripcion').value.trim();
+      flow.status = document.getElementById('editar-estado').checked;
+      if (!isLocked) flow.steps = collectStepApprovers('editar');
+      showToast('Flujo actualizado', 'success');
+      closeModal('modal-editar-flujo');
+      renderTable();
+    });
+
+    document.getElementById('estado').addEventListener('change', () => { page = 1; renderTable(); });
+    document.getElementById('q').addEventListener('input', () => { page = 1; renderTable(); });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); page = 1; renderTable(); });
+    document.getElementById('confirmDelete').addEventListener('change', (e) => {
+      const flow = getFlowById(selectedFlowId);
+      if (!flow) return;
+      if (flow.usage > 0) return;
+      if (flow.policies.length > 0) document.getElementById('btnDeleteFlow').disabled = !e.target.checked;
+      else document.getElementById('btnDeleteFlow').disabled = false;
+    });
+    initLayout('RINDE GASTOS / FLUJOS DE REVISIÓN', '../components').then(() => {
+      renderTable();
+      renderSteps('crear', ['1', '2'], false);
+      renderSteps('editar', ['1', '2'], false);
+    });
+  </script>
+</body>
+</html>

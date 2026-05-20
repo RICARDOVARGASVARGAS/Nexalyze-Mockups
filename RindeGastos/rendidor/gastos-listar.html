@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Mis gastos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291200">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-24">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <article class="theme-surface kpi-card" style="border-left: 3px solid #6B5BFF;">
+          <p class="kpi-value text-primary">12</p>
+          <p class="kpi-title">En borrador</p>
+          <p class="kpi-subtitle">Listos para agrupar</p>
+        </article>
+        <article class="theme-surface kpi-card" style="border-left: 3px solid #F59E0B;">
+          <p class="kpi-value" style="color: #F59E0B;">8</p>
+          <p class="kpi-title">En revisión</p>
+          <p class="kpi-subtitle">Dentro de informes</p>
+        </article>
+        <article class="theme-surface kpi-card kpi-success">
+          <p class="kpi-value">45</p>
+          <p class="kpi-title">Aprobados</p>
+          <p class="kpi-subtitle">Total histórico</p>
+        </article>
+        <article class="theme-surface kpi-card kpi-danger">
+          <p class="kpi-value">3</p>
+          <p class="kpi-title">Rechazados</p>
+          <p class="kpi-subtitle">Requieren atención</p>
+        </article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Mis gastos</h1>
+            <p class="table-panel-subtitle">Ana Guevara Muñoz — Todos tus gastos en un solo lugar</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" class="btn btn-outline inline-flex items-center gap-2" onclick="syncGastos()">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              Sincronizar
+            </button>
+            <button type="button" class="btn btn-primary inline-flex items-center gap-2" onclick="openModal('modal-tipo-gasto')">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              Nuevo gasto
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <div class="min-w-[980px] grid grid-cols-12 gap-2">
+            <label class="relative col-span-3">
+              <i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input id="filtroSearch" type="text" placeholder="BUSCAR POR PROVEEDOR O DOCUMENTO" class="rd-input h-9 w-full pl-9 pr-3 text-[11px] uppercase">
+            </label>
+            <select id="filtroPolitica" class="rd-select h-9 px-3 text-[11px] uppercase col-span-4">
+              <option value="">TODAS LAS POLÍTICAS</option>
+              <option>ADMINITRACION</option>
+              <option>POLÍTICA GENERAL PEN</option>
+              <option>POLÍTICA OPERACIONES</option>
+            </select>
+            <select id="filtroCategoria" class="rd-select h-9 px-3 text-[11px] uppercase col-span-3">
+              <option value="">TODAS LAS CATEGORÍAS</option>
+              <option>COMBUSTIBLE</option>
+              <option>ALIMENTACIÓN</option>
+              <option>HOSPEDAJE</option>
+              <option>MOVILIDAD</option>
+              <option>ÚTILES DE OFICINA</option>
+            </select>
+            <button type="button" class="btn btn-primary h-9 col-span-2 w-full" onclick="currentPage=1;renderTable()">Buscar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de gastos</h2>
+          <span id="resultadosLabel" class="text-[12px] text-primary font-semibold uppercase">Resultados</span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[940px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Nombre / Fecha</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2">Política</th>
+                <th class="py-2.5 px-2">Categoría</th>
+                <th class="py-2.5 px-2 text-right">Total</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="gastosTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="25">25</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">0-0 de 0</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goToPage(currentPage - 1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goToPage(currentPage + 1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal tipo gasto -->
+  <div id="modal-tipo-gasto" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 class="rd-modal-title">Nuevo gasto</h3>
+          <p class="rd-modal-subtitle">¿Cómo quieres registrar tu gasto?</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-tipo-gasto')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-3 overflow-y-auto">
+        <button type="button" onclick="location.href='gastos-crear-simple.html'" class="text-left rd-card p-4 hover:border-primary transition-colors group">
+          <span class="w-12 h-12 rounded-xl bg-primary-light text-primary inline-flex items-center justify-center mb-3"><i data-lucide="file-plus" class="w-6 h-6"></i></span>
+          <p class="font-extrabold uppercase text-sm">Gasto simple</p>
+          <p class="text-xs text-ink-muted mt-1">Registra un gasto llenando el formulario manualmente</p>
+        </button>
+        <button type="button" onclick="location.href='gastos-crear-multiple.html'" class="text-left rd-card p-4 hover:border-primary transition-colors">
+          <span class="w-12 h-12 rounded-xl bg-primary-light text-primary inline-flex items-center justify-center mb-3"><i data-lucide="files" class="w-6 h-6"></i></span>
+          <p class="font-extrabold uppercase text-sm">Gasto múltiple</p>
+          <p class="text-xs text-ink-muted mt-1">Registra varios gastos a la vez en una tabla rápida</p>
+        </button>
+        <button type="button" onclick="location.href='gastos-crear-scanit.html'" class="text-left rd-card p-4 hover:border-primary transition-colors relative">
+          <span class="absolute top-2 right-2 text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded">IA</span>
+          <span class="w-12 h-12 rounded-xl bg-primary-light text-primary inline-flex items-center justify-center mb-3"><i data-lucide="scan" class="w-6 h-6"></i></span>
+          <p class="font-extrabold uppercase text-sm inline-flex items-center gap-1">SCAN <span class="text-[10px] bg-orange-500 text-white px-1 rounded">IA</span></p>
+          <p class="text-xs text-ink-muted mt-1">Sube la foto del comprobante y la IA extrae los datos automáticamente</p>
+        </button>
+      </div>
+      <div class="rd-modal-footer px-5 pb-5 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-tipo-gasto')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal detalle -->
+  <div id="modal-detalle-gasto" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header flex-wrap gap-2 bg-gradient-to-r from-primary-light/50 via-info-light/30 to-success-light/30 border-b border-primary/20">
+        <div class="flex-1 min-w-[200px]">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="detCodigo" class="text-xs bg-primary-light text-primary px-2 py-1 rounded font-semibold">GAS-2026-00125</span>
+            <span id="detEstadoBadge" class="status-pill status-inactive">BORRADOR</span>
+          </div>
+          <h3 id="detProveedor" class="rd-modal-title mt-2">PETROPERÚ</h3>
+          <p id="detFecha" class="text-sm text-ink-muted">25/04/2026</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap" id="detHeaderActions">
+          <button type="button" class="rd-modal-close" onclick="closeModal('modal-detalle-gasto')"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="p-5 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-4 text-sm bg-[#FCFCFE]">
+        <div class="lg:col-span-7 space-y-4">
+          <div class="rd-card p-3 border border-primary/15">
+            <p class="rd-label mb-2">Información del gasto</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div><span class="text-ink-muted text-xs uppercase">Proveedor</span><p id="detProv2" class="font-semibold">Petroperú</p></div>
+              <div><span class="text-ink-muted text-xs uppercase">Fecha del gasto</span><p id="detFecha2">25/04/2026</p></div>
+              <div><span class="text-ink-muted text-xs uppercase">Categoría</span><p id="detCat"><span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-semibold">Combustible</span></p></div>
+              <div><span class="text-ink-muted text-xs uppercase">Moneda</span><p>S/ PEN</p></div>
+            </div>
+            <div class="mt-3 rounded-lg bg-primary-light/50 border border-primary/20 p-3">
+              <p class="text-[10px] uppercase text-ink-muted font-semibold">Monto total</p>
+              <p id="detMonto" class="text-2xl font-extrabold text-primary">S/ 80.00</p>
+            </div>
+          </div>
+          <div class="rd-card p-3 border border-info/20">
+            <p class="rd-label mb-2">Datos del comprobante</p>
+            <p><strong>Tipo:</strong> <span id="detTipoDoc">Factura</span></p>
+            <p><strong>Número:</strong> <span id="detNumDoc">F001-12345</span></p>
+            <p><strong>RUC proveedor:</strong> <span id="detRucProv">20100070970</span></p>
+            <p><strong>RUC receptor:</strong> <span id="detRucRec">20512948069</span></p>
+          </div>
+          <div class="rd-card p-3 border border-warning/20">
+            <p class="rd-label mb-2">Vinculaciones</p>
+            <p><strong>Proyecto:</strong> <span id="detProyecto">Proyecto Sur</span></p>
+            <p><strong>Centro de costo:</strong> <span id="detCC">Operaciones Lima</span></p>
+            <p><strong>Solicitud previa:</strong> <a id="detSol" href="#" class="text-primary font-semibold">SOL-0088</a></p>
+            <p><strong>Galería:</strong> <span id="detGaleria">0 archivo(s)</span></p>
+          </div>
+          <p class="text-xs text-ink-muted"><strong>Política aplicada:</strong> Política General PEN</p>
+          <div id="wrapInformeAsoc" class="hidden rd-card p-3 bg-bg border border-primary/20">
+            <p class="rd-label mb-1">Informe asociado</p>
+            <a id="detInformeLink" href="informes-detalle.html" class="inline-flex items-center gap-1 text-primary font-bold">📑 Informe IR-00045</a>
+          </div>
+          <div class="rd-card p-3 border border-border">
+            <p class="rd-label mb-1">Nota del rendidor</p>
+            <p id="detNota" class="text-ink-muted">Sin nota</p>
+          </div>
+        </div>
+        <div class="lg:col-span-5 space-y-4">
+          <div class="rd-card p-3 border border-success/20">
+            <p class="rd-label mb-2">Comprobante adjunto</p>
+            <div class="h-36 rounded-lg bg-bg border border-dashed border-border flex items-center justify-center text-ink-muted"><i data-lucide="file-text" class="w-10 h-10"></i></div>
+            <p class="text-xs mt-2 truncate" id="detNomArchivo">comprobante_petroperu.pdf</p>
+            <button type="button" class="btn btn-outline w-full mt-2 text-sm" onclick="showToast('Descarga simulada','success')">📥 Descargar comprobante</button>
+          </div>
+          <div class="rd-card p-3 border border-border">
+            <p class="rd-label mb-3">Historial del gasto</p>
+            <ul id="detTimeline" class="space-y-3 text-xs border-l-2 border-primary-light pl-4 ml-1"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal editar -->
+  <div id="modal-editar-gasto" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 class="rd-modal-title">Editar gasto</h3>
+          <p class="rd-modal-subtitle">Actualiza los datos del gasto en borrador</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-editar-gasto')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Proveedor</label><input id="editProveedor" class="rd-input h-10 w-full px-3 text-sm uppercase"></div>
+          <div><label class="rd-label block mb-1">Fecha del gasto</label><input id="editFecha" type="date" class="rd-input h-10 w-full px-3 text-sm"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Política</label><select id="editPolitica" class="rd-select h-10 w-full px-3 text-sm uppercase"><option>ADMINITRACION</option><option>POLÍTICA GENERAL PEN</option><option>POLÍTICA OPERACIONES</option></select></div>
+          <div><label class="rd-label block mb-1">Categoría</label><select id="editCategoria" class="rd-select h-10 w-full px-3 text-sm uppercase"><option>COMBUSTIBLE</option><option>ALIMENTACIÓN</option><option>HOSPEDAJE</option><option>MOVILIDAD</option><option>ÚTILES DE OFICINA</option><option>OTROS</option></select></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Tipo de factura</label><select id="editTipoDoc" class="rd-select h-10 w-full px-3 text-sm uppercase"><option>FACTURA DE COMPRA</option><option>FACTURA ELECTRONICA</option><option>FACTURA EXENTA</option><option>BOLETA</option><option>BOLETA ELECTRÓNICA</option><option>VALE POR OLITEL</option></select></div>
+          <div><label class="rd-label block mb-1">Número de documento</label><input id="editDoc" class="rd-input h-10 w-full px-3 text-sm uppercase"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Moneda</label><select id="editMoneda" class="rd-select h-10 w-full px-3 text-sm uppercase"><option>S/ PEN</option><option>US$ USD</option><option>CLP$</option></select></div>
+          <div><label class="rd-label block mb-1">Monto</label><input id="editMonto" type="number" step="0.01" class="rd-input h-10 w-full px-3 text-sm"></div>
+        </div>
+        <div><label class="rd-label block mb-1">RUC proveedor</label><input id="editRuc" class="rd-input h-10 w-full px-3 text-sm"></div>
+        <div><label class="rd-label block mb-1">Nota</label><textarea id="editNota" rows="3" class="rd-textarea w-full px-3 py-2 text-sm"></textarea></div>
+      </div>
+      <div class="rd-modal-footer">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-editar-gasto')">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="saveEditGasto()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal eliminar -->
+  <div id="modal-eliminar-gasto" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-danger/30 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex gap-3">
+          <span class="w-10 h-10 rounded-lg bg-danger-light text-danger inline-flex items-center justify-center"><i data-lucide="alert-triangle" class="w-5 h-5"></i></span>
+          <div>
+            <h3 class="rd-modal-title">Eliminar gasto</h3>
+            <p class="rd-modal-subtitle">Esta acción no se puede deshacer</p>
+          </div>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-eliminar-gasto')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p id="elimPregunta" class="text-sm">¿Eliminar el gasto de «Petroperú» por S/ 80.00?</p>
+        <div class="rd-card p-3 bg-bg text-sm space-y-1">
+          <p><strong>Proveedor:</strong> <span id="elimProv">Petroperú</span></p>
+          <p><strong>Fecha:</strong> <span id="elimFecha">25/04/2026</span></p>
+          <p><strong>Monto:</strong> <span id="elimMonto">S/ 80.00</span></p>
+          <p><strong>Categoría:</strong> <span id="elimCat">Combustible</span></p>
+        </div>
+        <div id="elimBannerInforme" class="hidden rounded-lg border border-warning/40 bg-warning-light/50 text-[#92400E] p-3 text-sm">⚠️ Este gasto está en el informe #IR-00045. Al eliminarlo se recalculará el total del informe.</div>
+        <div class="rd-modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-muted" onclick="closeModal('modal-eliminar-gasto')">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="showToast('Gasto eliminado (mockup)','success'); closeModal('modal-eliminar-gasto');">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const gastos = [];
+    const baseBorrador = [
+      { id: 'g1', fecha: '2026-04-25', supplier: 'Petroperú', cat: 'Combustible', catPill: true, proyecto: 'Proyecto Sur', cc: 'Operaciones Lima', monto: 80, status: 'borrador', doc: 'F001-12345', rucP: '20100070970', rucR: '20512948069', tipoDoc: 'Factura', code: 'GAS-2026-00125', nota: 'Sin nota', sol: 'SOL-0088' },
+      { id: 'g2', fecha: '2026-04-24', supplier: 'Restaurante La Mar', cat: 'Alimentación', catPill: false, proyecto: '—', cc: 'Administración', monto: 145.5, status: 'borrador', doc: 'B002-8891', rucP: '20565478912', rucR: '20512948069', tipoDoc: 'Boleta', code: 'GAS-2026-00124', nota: 'Almuerzo con cliente', sol: null },
+      { id: 'g3', fecha: '2026-04-23', supplier: 'Hotel Casa Andina', cat: 'Hospedaje', catPill: false, proyecto: 'Proyecto Norte', cc: 'Operaciones Lima', monto: 380, status: 'borrador', doc: 'F003-1122', rucP: '20123456789', rucR: '20512948069', tipoDoc: 'Factura', code: 'GAS-2026-00123', nota: '', sol: null },
+      { id: 'g4', fecha: '2026-04-22', supplier: 'Taxi Beat', cat: 'Movilidad', catPill: false, proyecto: 'Proyecto Sur', cc: 'Operaciones Lima', monto: 25, status: 'borrador', doc: 'REC-4455', rucP: '', rucR: '20512948069', tipoDoc: 'Recibo', code: 'GAS-2026-00122', nota: 'Sin nota', sol: null },
+      { id: 'g5', fecha: '2026-04-21', supplier: 'Tay Loy', cat: 'Útiles de oficina', catPill: false, proyecto: '—', cc: 'Administración', monto: 67.3, status: 'borrador', doc: 'B004-2211', rucP: '20100113610', rucR: '20512948069', tipoDoc: 'Boleta', code: 'GAS-2026-00121', nota: 'Útiles abril', sol: null },
+      { id: 'g6', fecha: '2026-04-20', supplier: 'InDriver', cat: 'Movilidad', catPill: false, proyecto: 'Proyecto Centro', cc: 'Comercial Norte', monto: 18, status: 'borrador', doc: 'APP-7788', rucP: '', rucR: '', tipoDoc: 'Recibo', code: 'GAS-2026-00120', nota: 'Traslado Miraflores', sol: null },
+      { id: 'g7', fecha: '2026-04-19', supplier: 'KFC San Isidro', cat: 'Alimentación', catPill: false, proyecto: '—', cc: 'TI / Sistemas', monto: 32, status: 'borrador', doc: 'B005-9900', rucP: '20312345678', rucR: '20512948069', tipoDoc: 'Boleta', code: 'GAS-2026-00119', nota: '', sol: null },
+      { id: 'g8', fecha: '2026-04-18', supplier: 'Sodexo Perú', cat: 'Alimentación', catPill: false, proyecto: 'Proyecto Selva', cc: 'Operaciones Lima', monto: 210.9, status: 'borrador', doc: 'F006-3344', rucP: '20100041941', rucR: '20512948069', tipoDoc: 'Factura', code: 'GAS-2026-00118', nota: 'Viáticos Iquitos', sol: 'SOL-0077' },
+      { id: 'g9', fecha: '2026-04-17', supplier: 'Clínica Internacional', cat: 'Otros', catPill: false, proyecto: '—', cc: 'Administración', monto: 95, status: 'borrador', doc: 'B007-1123', rucP: '20100053455', rucR: '20512948069', tipoDoc: 'Boleta', code: 'GAS-2026-00117', nota: 'Chequeo ocupacional', sol: null },
+      { id: 'g10', fecha: '2026-04-16', supplier: 'Oechsle', cat: 'Útiles de oficina', catPill: false, proyecto: 'Proyecto Sur', cc: 'Operaciones Lima', monto: 142.8, status: 'borrador', doc: 'F008-5566', rucP: '20100047218', rucR: '20512948069', tipoDoc: 'Factura', code: 'GAS-2026-00116', nota: 'Cable adaptador', sol: null },
+      { id: 'g11', fecha: '2026-04-15', supplier: 'Plaza Vea', cat: 'Alimentación', catPill: false, proyecto: '—', cc: 'Administración', monto: 54.9, status: 'borrador', doc: 'B011-7788', rucP: '20100070970', rucR: '20512948069', tipoDoc: 'Boleta', code: 'GAS-2026-00115', nota: '', sol: null },
+      { id: 'g12', fecha: '2026-04-14', supplier: 'Entel Perú', cat: 'Otros', catPill: false, proyecto: 'Proyecto Norte', cc: 'TI / Sistemas', monto: 29.9, status: 'borrador', doc: 'F012-9900', rucP: '20380778371', rucR: '20512948069', tipoDoc: 'Factura', code: 'GAS-2026-00114', nota: 'Chip datos', sol: null }
+    ];
+    baseBorrador.forEach((r, i) => gastos.push({ ...r, source: i % 4 === 0 ? 'scanit' : 'manual' }));
+    for (let i = 0; i < 8; i++) {
+      gastos.push({ id: 'gi' + i, fecha: '2026-04-' + (10 - i), supplier: 'Proveedor Informe ' + (i + 1), cat: 'Combustible', catPill: true, proyecto: 'Proyecto Norte', cc: 'Operaciones Lima', monto: 50 + i * 10, status: 'en_informe', reportCode: 'IR-00045', reportState: i % 3 === 0 ? 'BLOQUEADO' : (i % 2 === 0 ? 'CERRADO' : 'ABIERTO'), code: 'GAS-2026-00' + (100 + i), doc: 'F00-' + i, tipoDoc: 'Factura', rucP: '20100070970', rucR: '20512948069', nota: 'En informe', source: i % 2 === 0 ? 'scanit' : 'manual' });
+    }
+    for (let i = 0; i < 45; i++) {
+      gastos.push({ id: 'ga' + i, fecha: '2025-11-' + ((i % 28) + 1), supplier: 'Histórico ' + (i + 1), cat: 'Alimentación', catPill: false, proyecto: '—', cc: 'Administración', monto: 20 + i, status: 'aprobado', code: 'GAS-2025-H' + i, doc: 'X-' + i, tipoDoc: 'Boleta', rucP: '', rucR: '20512948069', nota: '', source: i % 6 === 0 ? 'scanit' : 'manual' });
+    }
+    const rechazos = [
+      { id: 'gr1', fecha: '2026-03-28', supplier: 'Mercado Modelo', cat: 'Alimentación', catPill: false, proyecto: '—', cc: 'Administración', monto: 48, status: 'rechazado', rejectReason: 'Comprobante ilegible', code: 'GAS-2026-00090', doc: 'B009-1', tipoDoc: 'Boleta', rucP: '', rucR: '', nota: '' },
+      { id: 'gr2', fecha: '2026-03-15', supplier: 'Taller Mecánico Sur', cat: 'Movilidad', catPill: false, proyecto: 'Proyecto Sur', cc: 'Operaciones Lima', monto: 320, status: 'rechazado', rejectReason: 'Fuera de política de movilidad', code: 'GAS-2026-00077', doc: 'F009-2', tipoDoc: 'Factura', rucP: '20601234567', rucR: '20512948069', nota: '' },
+      { id: 'gr3', fecha: '2026-02-10', supplier: 'Farmacia Universal', cat: 'Otros', catPill: false, proyecto: '—', cc: 'Administración', monto: 35.5, status: 'rechazado', rejectReason: 'Categoría incorrecta', code: 'GAS-2026-00055', doc: 'B010-3', tipoDoc: 'Boleta', rucP: '20456789123', rucR: '20512948069', nota: '' }
+    ];
+    rechazos.forEach((r) => gastos.push(r));
+    gastos.forEach((g, idx) => {
+      if (!g.politica) g.politica = idx % 2 === 0 ? 'ADMINITRACION' : 'POLÍTICA GENERAL PEN';
+      if (!g.reportState) g.reportState = g.status === 'en_informe' ? 'ABIERTO' : null;
+    });
+    gastos.forEach((g, idx) => { if (typeof g.galeria !== 'number') g.galeria = g.status === 'borrador' ? ((idx % 3) + 1) : (g.status === 'en_informe' ? 2 : 1); });
+
+    let currentPage = 1;
+    let lastPage = 1;
+    let pageSize = 10;
+    let currentDetailId = null;
+
+    function fmtFecha(iso) {
+      const [y, m, d] = iso.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function badgeCat(g) {
+      return `<span class="inline-flex items-center px-2.5 py-1 rounded bg-primary-light text-primary text-xs font-semibold">${(g.cat || '').toUpperCase()}</span>`;
+    }
+
+    function pillEstado(st) {
+      if (st === 'borrador') return '<span class="status-pill status-inactive">BORRADOR</span>';
+      if (st === 'en_informe') return '<span class="status-pill" style="background:#FEF3C7;color:#92400E">EN INFORME</span>';
+      if (st === 'aprobado') return '<span class="status-pill" style="background:#D1FAE5;color:#15803D">APROBADO</span>';
+      return '<span class="status-pill" style="background:#FEE2E2;color:#B91C1C">RECHAZADO</span>';
+    }
+
+    function filtrarLista() {
+      const search = document.getElementById('filtroSearch').value.trim().toLowerCase();
+      const pol = document.getElementById('filtroPolitica').value;
+      const cat = document.getElementById('filtroCategoria').value;
+      return gastos.filter((g) => {
+        if (search && !g.supplier.toLowerCase().includes(search) && !(g.doc || '').toLowerCase().includes(search)) return false;
+        if (pol && g.politica !== pol) return false;
+        if (cat && g.cat !== cat) return false;
+        return true;
+      }).sort((a, b) => {
+        const byDate = b.fecha.localeCompare(a.fecha);
+        if (byDate !== 0) return byDate;
+        return a.supplier.localeCompare(b.supplier);
+      });
+    }
+
+    function renderTable() {
+      const filtered = filtrarLista();
+      lastPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+      if (currentPage > lastPage) currentPage = lastPage;
+      const start = (currentPage - 1) * pageSize;
+      const slice = filtered.slice(start, start + pageSize);
+      const tbody = document.getElementById('gastosTbody');
+      tbody.innerHTML = slice.map((g) => {
+        let rowClass = 'border-b border-[#ECEEF4] last:border-0';
+
+        const canEditDelete = g.status === 'borrador';
+        let acciones = '';
+        if (canEditDelete) {
+          acciones = `<div class="flex justify-end gap-1">
+            <button type="button" class="rd-action-btn" title="Ver" onclick="openDetalle('${g.id}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
+            <button type="button" class="rd-action-btn" title="Editar" onclick="openEditModal('${g.id}')"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+            <button type="button" class="rd-action-btn" title="Eliminar" onclick="openEliminar('${g.id}')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>`;
+        } else {
+          acciones = `<div class="flex justify-end gap-1">
+            <button type="button" class="rd-action-btn" title="Ver" onclick="openDetalle('${g.id}')"><i data-lucide="eye" class="w-4 h-4"></i></button>
+          </div>`;
+        }
+
+        let estadoCell = pillEstado(g.status);
+        if (g.status === 'rechazado' && g.rejectReason) {
+          estadoCell += ` <span class="text-[10px] text-danger cursor-help" title="${g.rejectReason}">ⓘ</span>`;
+        }
+        const previewIcon = g.tipoDoc && g.tipoDoc.toLowerCase().includes('fact') ? 'file-text' : 'receipt-text';
+        const scanitMark = g.source === 'scanit'
+          ? `<span class="inline-flex items-center gap-1 text-[10px] bg-warning-light text-warning px-1.5 py-0.5 rounded font-bold uppercase"><i data-lucide="scan" class="w-3 h-3"></i>SCAN</span>`
+          : '';
+
+        return `<tr class="${rowClass}">
+          <td class="py-2.5 px-2">
+            <div class="flex items-center gap-2">
+              <span class="w-11 h-11 rounded-xl bg-bg border border-border inline-flex items-center justify-center text-ink-soft"><i data-lucide="${previewIcon}" class="w-5 h-5"></i></span>
+              <div>
+                <p class="font-semibold inline-flex items-center gap-1">${g.supplier.toUpperCase()} ${scanitMark}</p>
+                <p class="text-ink-muted">${fmtFecha(g.fecha)}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-2.5 px-2">${estadoCell}</td>
+          <td class="py-2.5 px-2 font-medium text-[#374B7A]">${g.politica}</td>
+          <td class="py-2.5 px-2">${badgeCat(g)}</td>
+          <td class="py-2.5 px-2 text-right font-extrabold text-info">S/ ${g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+          <td class="py-2.5 px-2">${acciones}</td>
+        </tr>`;
+      }).join('');
+
+      const from = filtered.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, filtered.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${filtered.length}`;
+      document.getElementById('resultadosLabel').textContent = `${filtered.length} RESULTADOS`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === lastPage;
+      document.getElementById('btnLastPage').disabled = currentPage === lastPage;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function syncGastos() {
+      showToast('Gastos sincronizados correctamente', 'success');
+      renderTable();
+    }
+
+    function goToPage(p) {
+      if (p < 1) p = 1;
+      if (p > lastPage) p = lastPage;
+      currentPage = p;
+      renderTable();
+    }
+
+    function openDetalle(id) {
+      const g = gastos.find((x) => x.id === id);
+      if (!g) return;
+      currentDetailId = id;
+      document.getElementById('detCodigo').textContent = g.code;
+      document.getElementById('detProveedor').textContent = g.supplier.toUpperCase();
+      document.getElementById('detFecha').textContent = fmtFecha(g.fecha);
+      document.getElementById('detProv2').textContent = g.supplier;
+      document.getElementById('detFecha2').textContent = fmtFecha(g.fecha);
+      document.getElementById('detCat').innerHTML = badgeCat(g);
+      document.getElementById('detMonto').textContent = 'S/ ' + g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('detTipoDoc').textContent = g.tipoDoc || '—';
+      document.getElementById('detNumDoc').textContent = g.doc || '—';
+      document.getElementById('detRucProv').textContent = g.rucP || '—';
+      document.getElementById('detRucRec').textContent = g.rucR || '—';
+      document.getElementById('detProyecto').textContent = g.proyecto || '—';
+      document.getElementById('detCC').textContent = g.cc || '—';
+      const solEl = document.getElementById('detSol');
+      if (g.sol) { solEl.textContent = g.sol; solEl.classList.remove('pointer-events-none', 'text-ink-muted'); }
+      else { solEl.textContent = '—'; solEl.classList.add('pointer-events-none', 'text-ink-muted'); }
+      document.getElementById('detNota').textContent = g.nota || 'Sin nota';
+      document.getElementById('detGaleria').textContent = `${g.galeria ?? 0} archivo(s)`;
+
+      const badge = document.getElementById('detEstadoBadge');
+      badge.textContent = g.status === 'en_informe' ? 'EN INFORME' : g.status.replace('_', ' ').toUpperCase();
+      badge.className = 'status-pill ' + (g.status === 'aprobado' ? 'status-active' : g.status === 'rechazado' ? '' : 'status-inactive');
+      if (g.status === 'rechazado') badge.style.cssText = 'background:#FEE2E2;color:#B91C1C';
+
+      const wrap = document.getElementById('wrapInformeAsoc');
+      if (g.reportCode) { wrap.classList.remove('hidden'); document.getElementById('detInformeLink').textContent = '📑 Informe ' + g.reportCode; }
+      else wrap.classList.add('hidden');
+
+      const tl = document.getElementById('detTimeline');
+      let html = `<li class="relative"><span class="absolute -left-[21px] w-2.5 h-2.5 rounded-full bg-primary top-1"></span><strong>Gasto creado</strong><br>Ana Guevara — ${fmtFecha(g.fecha)} 14:30</li>`;
+      if (g.reportCode) html += `<li class="relative text-ink-muted"><span class="absolute -left-[21px] w-2.5 h-2.5 rounded-full bg-gray-300 top-1"></span>Agregado al informe ${g.reportCode}<br>26/04/2026</li>`;
+      if (g.status === 'aprobado') html += `<li class="relative"><span class="absolute -left-[21px] w-2.5 h-2.5 rounded-full bg-success top-1"></span>Aprobado por Pedro Morales<br>28/04/2026</li>`;
+      if (g.status === 'rechazado') html += `<li class="relative"><span class="absolute -left-[21px] w-2.5 h-2.5 rounded-full bg-danger top-1"></span>Rechazado<br><span class="text-danger">${g.rejectReason || ''}</span></li>`;
+      tl.innerHTML = html;
+
+      openModal('modal-detalle-gasto');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openEliminar(id) {
+      const g = gastos.find((x) => x.id === id);
+      if (!g) return;
+      document.getElementById('elimProv').textContent = g.supplier;
+      document.getElementById('elimFecha').textContent = fmtFecha(g.fecha);
+      document.getElementById('elimMonto').textContent = 'S/ ' + g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('elimCat').textContent = g.cat;
+      document.getElementById('elimPregunta').textContent = `¿Eliminar el gasto de «${g.supplier}» por S/ ${g.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}?`;
+      const ban = document.getElementById('elimBannerInforme');
+      if (g.reportCode) { ban.classList.remove('hidden'); ban.textContent = `⚠️ Este gasto está en el informe ${g.reportCode}. Al eliminarlo se recalculará el total del informe.`; }
+      else ban.classList.add('hidden');
+      openModal('modal-eliminar-gasto');
+    }
+
+    function openEliminarDesdeDetalle() {
+      if (currentDetailId) openEliminar(currentDetailId);
+    }
+
+    function openEditModal(id) {
+      const g = gastos.find((x) => x.id === id);
+      if (!g) return;
+      localStorage.setItem('rgEditGasto', JSON.stringify(g));
+      window.location.href = 'gastos-crear-simple.html?modo=editar';
+    }
+
+    document.getElementById('filtroSearch').addEventListener('input', () => { currentPage = 1; renderTable(); });
+    document.getElementById('filtroPolitica').addEventListener('change', () => { currentPage = 1; renderTable(); });
+    document.getElementById('filtroCategoria').addEventListener('change', () => { currentPage = 1; renderTable(); });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderTable(); });
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+
+    initLayout('MIS GASTOS / LISTADO', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      renderTable();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

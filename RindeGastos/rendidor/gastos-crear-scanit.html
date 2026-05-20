@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Nuevo gasto SCAN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291200">
+  <style>.badge-ia{font-size:10px;font-weight:800;background:#f97316;color:#fff;padding:2px 6px;border-radius:4px;vertical-align:middle}</style>
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-28">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 max-w-[1400px] mx-auto space-y-3">
+      <nav class="text-xs text-ink-muted uppercase font-semibold"><a href="gastos-listar.html" class="text-primary hover:underline">Mis gastos</a> / Nuevo gasto con SCAN</nav>
+
+      <!--
+      ═══ ESTADO 1 — Sin archivo (zona upload) ═══
+      <article class="theme-surface rd-card p-8 max-w-3xl mx-auto text-center border-2 border-dashed border-primary relative">
+        <span class="badge-ia absolute top-3 right-3">IA</span>
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-light text-primary mb-4"><i data-lucide="scan" class="w-8 h-8"></i></div>
+        <h1 class="text-lg font-extrabold uppercase">Arrastra tu comprobante aquí</h1>
+        <p class="text-sm text-ink-muted mt-2">O haz clic para seleccionar</p>
+        <p class="text-xs text-ink-soft mt-2 uppercase">JPG, PNG, PDF (máx 10MB)</p>
+      </article>
+      <article class="theme-surface rd-card p-4 max-w-3xl mx-auto">
+        <h2 class="font-extrabold uppercase text-sm mb-2">💡 Consejos para mejores resultados</h2>
+        <ul class="text-sm space-y-2 text-ink-muted">
+          <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-success shrink-0"></i> Foto con buena iluminación, sin sombras</li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-success shrink-0"></i> Todo el documento visible, sin cortes</li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-success shrink-0"></i> Texto legible y sin borrones</li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-4 h-4 text-success shrink-0"></i> Foto recta, no en ángulo</li>
+        </ul>
+      </article>
+      -->
+
+      <!--
+      ═══ ESTADO 2 — Procesando ═══
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
+        <article class="theme-surface rd-card p-4 flex items-center justify-center min-h-[280px] bg-bg">
+          <img src="https://placehold.co/400x520/e8e8ff/6B5BFF?text=COMPROBANTE" alt="Vista previa" class="max-h-80 rounded-lg border border-border shadow">
+        </article>
+        <article class="theme-surface rd-card p-5 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
+            <div>
+              <p class="font-extrabold uppercase text-sm">Analizando tu comprobante...</p>
+              <p class="text-xs text-ink-muted">Esto toma 3-5 segundos</p>
+            </div>
+          </div>
+          <ul class="text-sm space-y-2">
+            <li class="text-success font-semibold">✅ Archivo recibido</li>
+            <li class="text-success font-semibold">✅ Detectando tipo de documento</li>
+            <li class="text-warning font-semibold">⏳ Extrayendo datos del texto...</li>
+            <li class="text-ink-muted">○ Validando información</li>
+          </ul>
+        </article>
+      </div>
+      -->
+
+      <!-- ═══ ESTADO 3 — Datos extraídos (vista principal) ═══ -->
+      <div class="rounded-lg border border-success/40 bg-success-light/50 text-success px-4 py-3 text-sm font-semibold">
+        ✅ Datos extraídos correctamente. Revisa y confirma la información.
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
+        <div class="lg:col-span-8 space-y-3">
+          <article class="theme-surface rd-card p-4 space-y-4">
+            <h2 class="table-panel-title">Datos del gasto <span class="badge-ia">✨ IA SCAN</span></h2>
+            <div>
+              <label class="rd-label block mb-1">Proveedor * <span class="badge-ia ml-1">✨ IA</span></label>
+              <input type="text" class="rd-input w-full h-10 px-3 text-sm uppercase" value="PETROPERÚ S.A.A.">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="rd-label block mb-1">Fecha del gasto * <span class="badge-ia">✨ IA</span></label>
+                <input type="date" class="rd-input w-full h-10 px-3 text-sm" value="2026-04-25">
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Monto * <span class="badge-ia">✨ IA</span></label>
+                <div class="flex items-center gap-2"><span class="font-bold">S/</span><input type="number" step="0.01" class="rd-input w-full h-10 px-3 text-sm" value="80.00"></div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="rd-label block mb-1">Política *</label>
+                <select class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option>POL-001 · POLÍTICA GENERAL PEN</option>
+                  <option>POL-003 · POLÍTICA USD INTERNACIONAL</option>
+                  <option>POL-007 · POLÍTICA OPERACIONES</option>
+                </select>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Moneda</label>
+                <select id="currScan" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option value="S/">S/ PEN</option>
+                  <option value="US$">US$ USD</option>
+                  <option value="CLP$">CLP$</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="rd-label block mb-1">Tipo comprobante <span class="badge-ia">✨ IA</span></label>
+                <select class="rd-select w-full h-10 px-3 text-sm uppercase"><option selected>Factura</option></select>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Número <span class="badge-ia">✨ IA</span></label>
+                <input type="text" class="rd-input w-full h-10 px-3 text-sm" value="F001-12345">
+              </div>
+            </div>
+            <div>
+              <label class="rd-label block mb-1">RUC proveedor <span class="badge-ia">✨ IA</span></label>
+              <input type="text" class="rd-input w-full h-10 px-3 text-sm border-2 border-warning rd-input" value="20100070970">
+              <p class="text-xs text-warning mt-1 font-medium">Por favor verifica este dato</p>
+            </div>
+            <div>
+              <label class="rd-label block mb-1">Categoría</label>
+              <select class="rd-select w-full h-10 px-3 text-sm uppercase"><option selected>Combustible</option></select>
+            </div>
+            <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/30">
+              <div>
+                <p class="text-sm font-semibold uppercase">Incluye impuesto</p>
+                <p class="text-xs text-ink-muted">Activa para registrar IGV u otro impuesto</p>
+              </div>
+              <span class="rd-switch"><input id="toggleImpScan" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span>
+            </label>
+            <div id="bloqueImpScan" class="hidden space-y-2 border-l-4 border-warning/50 pl-3">
+              <div>
+                <label class="rd-label block mb-1">Monto del impuesto</label>
+                <div class="flex items-center gap-2"><span id="prefImpScan" class="text-sm font-bold w-10">S/</span><input id="montoImpScan" type="number" step="0.01" class="rd-input w-full h-10 px-3 text-sm" value="14.40"></div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="rd-label block mb-1">Proyecto</label>
+                <select class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option>PROYECTO SUR</option>
+                  <option>PROYECTO NORTE</option>
+                  <option>PROYECTO SELVA</option>
+                </select>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Centro de costo</label>
+                <select class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option>OPERACIONES LIMA</option>
+                  <option>ADMINISTRACIÓN CENTRAL</option>
+                  <option>COMERCIAL NORTE</option>
+                </select>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Solicitud de compra</label>
+                <select class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option value="">SIN SOLICITUD</option>
+                  <option>SOL-0088 — ÚTILES Q2</option>
+                  <option>SOL-0077 — VIÁTICOS SELVA</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="rd-label block mb-1">Nota</label>
+              <textarea class="rd-textarea w-full px-3 py-2 text-sm" rows="2" placeholder="NOTA OPCIONAL"></textarea>
+            </div>
+          </article>
+        </div>
+        <div class="lg:col-span-4 space-y-3">
+          <article class="theme-surface rd-card p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="table-panel-title">Comprobante</h2>
+              <span class="badge-ia">IA</span>
+            </div>
+            <div class="rounded-lg overflow-hidden border border-border bg-bg">
+              <img src="https://placehold.co/400x280/e8e8ff/6B5BFF?text=FACTURA+PETROPER%C3%9A" alt="Comprobante" class="w-full h-auto object-cover">
+            </div>
+            <p class="text-xs text-ink-muted mt-2 truncate">factura_petroperu_20260425.jpg</p>
+            <button type="button" class="btn btn-outline w-full mt-3 text-sm" onclick="showToast('Vuelve a subir un archivo (mockup)','info')">🔄 Analizar otro comprobante</button>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="fixed bottom-0 left-0 right-0 md:left-[220px] z-30 bg-white border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,.06)] px-3 py-3">
+    <div class="max-w-[1400px] mx-auto flex flex-wrap justify-end gap-2">
+      <a href="gastos-listar.html" class="btn btn-muted">Cancelar</a>
+      <button type="button" class="btn btn-outline border-primary text-primary" onclick="showToast('Reprocesando con IA… (mockup)','info')">🔄 Reprocesar con IA</button>
+      <button type="button" class="btn btn-outline border-primary text-primary" onclick="showToast('Guardado en borrador','success')">Guardar en borrador</button>
+      <button type="button" class="btn btn-primary" onclick="showToast('Gasto guardado','success'); setTimeout(()=>location.href='gastos-listar.html',400)">Guardar gasto</button>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+    document.getElementById('currScan').addEventListener('change', (e) => {
+      document.getElementById('prefImpScan').textContent = e.target.value;
+    });
+    document.getElementById('toggleImpScan').addEventListener('change', (e) => {
+      document.getElementById('bloqueImpScan').classList.toggle('hidden', !e.target.checked);
+    });
+
+    initLayout('MIS GASTOS / NUEVO GASTO SCAN', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

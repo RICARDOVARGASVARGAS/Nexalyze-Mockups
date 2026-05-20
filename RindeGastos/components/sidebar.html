@@ -1,0 +1,153 @@
+<aside class="w-[220px] h-screen bg-[#F3F3F6] border-r border-[#E1E4EB] fixed left-0 top-0 flex flex-col z-40">
+  <div class="px-3.5 py-4 border-b border-[#E2E5EC]">
+    <div class="flex items-center gap-2.5">
+      <div class="w-10 h-10 bg-gradient-to-br from-[#5F63F2] to-[#7B7AF8] rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-sm">R</div>
+      <div class="font-extrabold text-[#3B3D4E] text-xl leading-none tracking-tight">RENDICION DIGITAL</div>
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-2.5">
+    <a href="../index.html" class="menu-link">
+      <i data-lucide="house" class="w-4 h-4"></i>
+      <span>INICIO</span>
+    </a>
+
+    <div class="menu-caption">MODULO</div>
+
+    <div data-group="rendidor">
+      <button onclick="toggleSidebarGroup('rendidor')" class="menu-group">
+        <span class="inline-flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i>RENDIDOR</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 group-icon transition-transform"></i>
+      </button>
+      <div class="group-items hidden pl-2">
+        <a href="../rendidor/gastos-listar.html" class="sidebar-item">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span>GASTOS</span>
+        </a>
+        <a href="../rendidor/informes-listar.html" class="sidebar-item">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>INFORMES</span>
+        </a>
+        <a href="../rendidor/fondos-listar.html" class="sidebar-item">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>FONDOS</span>
+        </a>
+        <a href="../rendidor/galeria-listar.html" class="sidebar-item">
+          <i data-lucide="images" class="w-4 h-4"></i>
+          <span>GALERÍA</span>
+        </a>
+      </div>
+    </div>
+
+    <div data-group="aprobador">
+      <button onclick="toggleSidebarGroup('aprobador')" class="menu-group">
+        <span class="inline-flex items-center gap-2"><i data-lucide="user-check" class="w-4 h-4"></i>APROBADOR</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 group-icon transition-transform"></i>
+      </button>
+      <div class="group-items hidden pl-2">
+        <a href="../aprobador/informes-bandeja.html" class="sidebar-item">
+          <i data-lucide="file-search" class="w-4 h-4"></i>
+          <span>REVISIÓN DE INFORMES</span>
+        </a>
+        <a href="../aprobador/solicitudes-bandeja.html" class="sidebar-item">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>SOLICITUDES DE FONDOS</span>
+        </a>
+      </div>
+    </div>
+
+    <div data-group="administrador">
+      <button onclick="toggleSidebarGroup('administrador')" class="menu-group">
+        <span class="inline-flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4"></i>ADMINISTRADOR</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 group-icon transition-transform"></i>
+      </button>
+      <div class="group-items hidden pl-2">
+        <a href="../admin/categorias-listar.html" class="sidebar-item">
+          <i data-lucide="folder-tree" class="w-4 h-4"></i>
+          <span>CATEGORÍAS</span>
+        </a>
+        <a href="../admin/flujos-listar.html" class="sidebar-item">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>FLUJOS DE REVISIÓN</span>
+        </a>
+        <a href="../admin/politicas-listar.html" class="sidebar-item">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          <span>POLÍTICAS</span>
+        </a>
+        <a href="../admin/fondos-listar.html" class="sidebar-item">
+          <i data-lucide="wallet-cards" class="w-4 h-4"></i>
+          <span>FONDOS</span>
+        </a>
+        <a href="../admin/reporteria.html" class="sidebar-item">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>REPORTES</span>
+        </a>
+        <a href="../admin/usuarios-listar.html" class="sidebar-item">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>USUARIOS</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<style>
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin: 0 8px;
+    border-radius: 8px;
+    color: #3F4252;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .menu-link:hover { background: #fff; }
+  .menu-caption {
+    padding: 14px 12px 6px;
+    color: #A1A7B5;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .menu-group {
+    width: calc(100% - 16px);
+    margin: 2px 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #4A4F60;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .menu-group:hover { background: #fff; }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    margin: 2px 8px;
+    border-radius: 8px;
+    color: #525768;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .sidebar-item i { color: #848B9B; }
+  .sidebar-item:hover { background: #fff; }
+  .sidebar-item.active {
+    background: linear-gradient(90deg, #7669EF 0%, #6A5CE4 100%);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(117, 102, 235, 0.35);
+  }
+  .sidebar-item.active i { color: #fff; }
+</style>

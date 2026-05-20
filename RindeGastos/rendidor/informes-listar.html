@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Mis informes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA', info: { DEFAULT: '#3B82F6', light: '#DBEAFE' } } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604301600">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <article class="theme-surface kpi-card" style="border-left:3px solid #9CA3AF"><p class="kpi-value">3</p><p class="kpi-title">Borradores</p><p class="kpi-subtitle">Sin enviar aún</p></article>
+        <article class="theme-surface kpi-card" style="border-left:3px solid #F59E0B"><p class="kpi-value" style="color:#F59E0B">2</p><p class="kpi-title">En revisión</p><p class="kpi-subtitle">Esperando aprobación</p></article>
+        <article class="theme-surface kpi-card ring-2 ring-orange-500 shadow-lg" style="border-left:3px solid #EA580C"><p class="kpi-value" style="color:#EA580C">1</p><p class="kpi-title inline-flex items-center gap-1">Con observaciones <i data-lucide="alert-circle" class="w-5 h-5"></i></p><p class="kpi-subtitle">Debes corregir</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p class="kpi-value">24</p><p class="kpi-title">Cerrados</p><p class="kpi-subtitle">Aprobados y pagados</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Mis informes</h1>
+            <p class="table-panel-subtitle">Agrupa y envía tus gastos a revisión</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" class="btn btn-outline inline-flex items-center gap-2" onclick="syncInformes()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sincronizar</button>
+            <button type="button" class="btn btn-primary inline-flex items-center gap-2" onclick="abrirModalNuevoInforme()"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nuevo informe</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <label class="relative md:col-span-2">
+            <i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="qInf" type="text" placeholder="BUSCAR POR TÍTULO O NÚMERO" class="rd-input w-full h-10 pl-9 pr-3 text-[12px] uppercase">
+          </label>
+          <select id="filtroTipoInf" class="rd-select h-10 px-3 text-[12px] uppercase">
+            <option value="">TODOS LOS TIPOS</option>
+            <option>REEMBOLSO</option>
+            <option>FONDO POR RENDIR</option>
+          </select>
+          <button type="button" class="btn btn-primary h-10" onclick="page=1;render()">Buscar</button>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-border"><h2 class="table-panel-title">Lista de informes</h2></div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1000px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF] text-xs uppercase text-ink-muted">
+                <th class="py-2.5 px-2">Nro</th>
+                <th class="py-2.5 px-2">Título</th>
+                <th class="py-2.5 px-2">Tipo</th>
+                <th class="py-2.5 px-2">Gastos</th>
+                <th class="py-2.5 px-2">Monto total</th>
+                <th class="py-2.5 px-2">Aprobador actual</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInf"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted"><span>Elementos por página:</span><select id="rowsPerPage" class="rd-select h-8 px-2 text-sm"><option selected>10</option><option>15</option><option>25</option></select></div>
+          <div id="pageRange" class="text-sm text-ink-muted">1-10 de 10</div>
+          <div class="inline-flex items-center gap-2">
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goPage(page-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goPage(page+1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40" onclick="goPage(lastP)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-informe-datos" data-modal class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl max-h-[92vh] flex flex-col">
+      <div class="rd-modal-header shrink-0">
+        <div>
+          <h3 class="rd-modal-title">Datos del informe</h3>
+          <p class="rd-modal-subtitle">Completa la información básica</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-informe-datos')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div>
+          <label class="rd-label block mb-1">Política *</label>
+          <select id="crearPoliticaInf" class="rd-select w-full h-10 px-3 text-sm uppercase">
+            <option value="">SELECCIONA POLÍTICA</option>
+            <option>POL-001 · POLÍTICA GENERAL PEN</option>
+            <option>POL-003 · POLÍTICA USD INTERNACIONAL</option>
+            <option>POL-007 · POLÍTICA OPERACIONES</option>
+          </select>
+        </div>
+        <div>
+          <p class="rd-label mb-2">Tipo gestión *</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label id="lblTipoReembolso" class="tipo-inf-lbl border-2 border-primary rounded-xl p-3 cursor-pointer bg-primary-light/30">
+              <input type="radio" name="crearTipoInf" value="reembolso" checked class="mr-2">
+              <span class="font-extrabold uppercase text-sm">Reembolso</span>
+            </label>
+            <label id="lblTipoFondo" class="tipo-inf-lbl border border-border rounded-xl p-3 cursor-pointer hover:border-primary/50">
+              <input type="radio" name="crearTipoInf" value="fondo" class="mr-2">
+              <span class="font-extrabold uppercase text-sm">Fondos por rendir</span>
+            </label>
+          </div>
+        </div>
+        <div id="wrapFondosRendir" class="hidden space-y-3 rounded-lg border border-primary/20 bg-primary-light/15 p-3">
+          <p class="rd-label">Origen del fondo *</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label id="lblSubtipoGpc" class="subtipo-fondo-lbl border-2 border-primary rounded-xl p-2.5 cursor-pointer bg-white">
+              <input type="radio" name="crearSubtipoFondo" value="gpc" checked class="mr-2">
+              <span class="font-extrabold uppercase text-xs">Fondos x rendir GPC</span>
+            </label>
+            <label id="lblSubtipoRd" class="subtipo-fondo-lbl border border-border rounded-xl p-2.5 cursor-pointer bg-white hover:border-primary/50">
+              <input type="radio" name="crearSubtipoFondo" value="rd" class="mr-2">
+              <span class="font-extrabold uppercase text-xs">Fondos x rendir RD</span>
+            </label>
+          </div>
+          <div id="wrapSelectGpc">
+            <label class="rd-label block mb-1">Fondo GPC *</label>
+            <select id="crearFondoGpc" class="rd-select w-full h-10 px-3 text-sm uppercase">
+              <option value="">SELECCIONA FONDO GPC</option>
+              <option value="gpc-fx1">FX-001 · FXR - MAYO - ANA — S/ 1,200.00 disp.</option>
+              <option value="gpc-fx2">FX-002 · FONDO USD PROYECTO — US$ 500.00 disp.</option>
+            </select>
+          </div>
+          <div id="wrapSelectRd" class="hidden">
+            <label class="rd-label block mb-1">Fondo RD *</label>
+            <select id="crearFondoRd" class="rd-select w-full h-10 px-3 text-sm uppercase">
+              <option value="">SELECCIONA FONDO RD</option>
+              <option value="rd-fxr1">FXR-RD-001 · VIÁTICOS Q2 — S/ 850.00 disp.</option>
+              <option value="rd-fxr2">FXR-RD-002 · COMPRAS LOCALES — S/ 420.00 disp.</option>
+              <option value="rd-fxr3">FXR-RD-003 · EVENTOS CORPORATIVOS — S/ 1,100.00 disp.</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="rd-label block mb-1">Título del informe *</label>
+          <input id="crearTituloInf" type="text" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="EJ: REEMBOLSO MAYO - LIMA">
+        </div>
+        <div>
+          <label class="rd-label block mb-1">Nota</label>
+          <textarea id="crearNotaInf" class="rd-textarea w-full px-3 py-2 text-sm" rows="2" placeholder="NOTA DEL INFORME"></textarea>
+        </div>
+      </div>
+      <div class="rd-modal-footer shrink-0 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-informe-datos')">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarDatosBasicosInforme()">Guardar y continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-informe-gastos" data-modal class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white border border-border rounded-xl shadow-xl max-h-[92vh] flex flex-col">
+      <div class="rd-modal-header shrink-0">
+        <div>
+          <h3 class="rd-modal-title">Agregar gastos al informe</h3>
+          <p class="rd-modal-subtitle">Selecciona los gastos que deseas vincular</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-informe-gastos')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="detalleInformeHeader" class="shrink-0 mx-5 mt-3 rounded-lg border border-primary/25 bg-primary-light/25 px-4 py-3 text-sm">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-primary mb-2">Informe a actualizar</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1.5">
+          <p><span class="text-ink-muted text-xs uppercase">Código</span><br><span id="hdrCodigo" class="font-extrabold">—</span></p>
+          <p class="col-span-2 md:col-span-1"><span class="text-ink-muted text-xs uppercase">Título</span><br><span id="hdrTitulo" class="font-semibold">—</span></p>
+          <p><span class="text-ink-muted text-xs uppercase">Política</span><br><span id="hdrPolitica" class="font-semibold text-xs">—</span></p>
+          <p><span class="text-ink-muted text-xs uppercase">Tipo gestión</span><br><span id="hdrTipo" class="font-semibold">—</span></p>
+          <p id="hdrFondoWrap" class="hidden col-span-2"><span class="text-ink-muted text-xs uppercase">Fondo</span><br><span id="hdrFondo" class="font-semibold text-xs">—</span></p>
+          <p id="hdrNotaWrap" class="hidden col-span-2 md:col-span-4"><span class="text-ink-muted text-xs uppercase">Nota</span><br><span id="hdrNota" class="text-ink-muted">—</span></p>
+        </div>
+      </div>
+      <div class="p-5 overflow-y-auto flex-1 min-h-0 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="rd-label mb-0">Gastos disponibles</p>
+          <span id="resumenSelGastos" class="hidden rounded-lg bg-primary-light/50 border border-primary/20 px-3 py-1 text-xs font-semibold"></span>
+        </div>
+        <div class="overflow-x-auto border border-border rounded-lg">
+          <table class="rd-table w-full min-w-[640px] text-sm">
+            <thead>
+              <tr class="text-left border-b bg-bg text-xs uppercase text-ink-muted">
+                <th class="py-2 px-2 w-10"></th>
+                <th class="py-2 px-2">Comprobante</th>
+                <th class="py-2 px-2">Fecha</th>
+                <th class="py-2 px-2">Proveedor</th>
+                <th class="py-2 px-2">Categoría</th>
+                <th class="py-2 px-2">Monto</th>
+                <th class="py-2 px-2 text-right">Ver</th>
+              </tr>
+            </thead>
+            <tbody id="tbGastosInforme"></tbody>
+          </table>
+        </div>
+        <p class="text-xs text-ink-muted">Solo gastos en borrador compatibles con la política del informe.</p>
+      </div>
+      <div class="rd-modal-footer shrink-0 border-t border-border">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-informe-gastos')">Cerrar</button>
+        <button id="btnEnviarInfCrear" type="button" class="btn btn-outline border-primary text-primary hidden" onclick="enviarInformeDesdeCrear()">Enviar informe</button>
+        <button type="button" class="btn btn-primary" onclick="guardarInformeConGastos()">Guardar informe</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-detalle-gasto-informe" data-modal class="hidden fixed inset-0 z-[60] bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div>
+          <h3 id="mgProv" class="rd-modal-title">DETALLE DEL GASTO</h3>
+          <p id="mgCode" class="rd-modal-subtitle">GAS-2026-00001</p>
+        </div>
+        <button type="button" class="rd-modal-close" onclick="closeModal('modal-detalle-gasto-informe')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm overflow-y-auto">
+        <div class="rd-card p-3 space-y-2">
+          <p class="rd-label">Información</p>
+          <p><strong>Fecha:</strong> <span id="mgFecha"></span></p>
+          <p><strong>Categoría:</strong> <span id="mgCat"></span></p>
+          <p><strong>Monto:</strong> <span id="mgMonto" class="font-extrabold text-primary"></span></p>
+        </div>
+        <div class="rd-card p-3 space-y-2">
+          <p class="rd-label">Comprobante</p>
+          <img id="mgImg" src="" alt="Comprobante" class="w-full h-48 object-cover rounded-lg border border-border">
+        </div>
+      </div>
+      <div class="rd-modal-footer">
+        <button type="button" class="btn btn-muted" onclick="closeModal('modal-detalle-gasto-informe')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalDetalleInforme" data-modal class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-5xl bg-white border border-border rounded-2xl shadow-2xl max-h-[92vh] overflow-hidden flex flex-col">
+      <div class="inf-view-topnav bg-[#f8fafc] border-b border-border shrink-0">
+        <span class="inf-view-topnav-item">Informes</span>
+        <span class="inf-view-topnav-item inf-view-topnav-item-active">Detalle del informe</span>
+      </div>
+      <div class="flex items-start justify-between gap-3 px-4 py-3 border-b border-border shrink-0 bg-white">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-ink-muted">Vista informe</p>
+          <h3 class="text-base font-extrabold text-[#1e3a5f] mt-0.5">Detalle del informe</h3>
+          <p id="mdInfNro" class="text-xs font-mono font-bold text-[#2563eb] mt-1">IR-00000</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div id="mdInfEstado"><span class="status-pill status-inactive">BORRADOR</span></div>
+          <button type="button" class="rd-modal-close" onclick="closeModal('modalDetalleInforme')"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="inf-detail-tabs shrink-0">
+        <button type="button" class="inf-detail-tab inf-detail-tab-active" data-inf-tab="detalle" onclick="switchInfModalTab('detalle')">Detalle informe</button>
+        <button type="button" class="inf-detail-tab inline-flex items-center gap-1.5" data-inf-tab="historial" onclick="switchInfModalTab('historial')">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Historial
+        </button>
+        <button type="button" class="inf-detail-tab" data-inf-tab="flujo" onclick="switchInfModalTab('flujo')">Flujo de revisión</button>
+      </div>
+      <div class="flex-1 overflow-y-auto min-h-0 bg-white px-4 py-4">
+        <div data-inf-panel="detalle" id="infPanelDetalle">
+          <div class="inf-meta-bar">
+            <p id="mdMetaPolitica" class="text-[#0f172a] font-semibold"><span class="text-ink-muted font-normal">Política:</span> — <span class="text-ink-muted font-normal mx-1">/</span> <span class="text-ink-muted font-normal">Rendidor:</span> —</p>
+            <button type="button" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#2563eb] hover:underline uppercase tracking-wide" onclick="showToast('Enlace copiado (mockup)','success')">
+              <i data-lucide="link" class="w-3.5 h-3.5"></i> Generar enlace para compartir
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-ink-soft"></i>
+            </button>
+          </div>
+          <div class="flex flex-wrap justify-between items-center gap-2 mt-3">
+            <p id="mdLineFechas" class="text-sm text-ink">Enviado: — · Cierre: —</p>
+            <div id="mdEstadoLine"></div>
+          </div>
+          <div class="flex flex-wrap justify-between items-start gap-4 mt-4">
+            <h2 id="mdTituloGrande" class="text-xl md:text-2xl font-extrabold text-[#1e3a5f] leading-tight">—</h2>
+            <p id="mdMontoGrande" class="text-xl md:text-2xl font-extrabold text-[#2563eb] whitespace-nowrap">S/ 0.00</p>
+          </div>
+          <p id="mdEstadoDesc" class="text-sm text-ink-muted mt-2"></p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 text-sm border-t border-border pt-4">
+            <div>
+              <p class="text-[11px] font-bold uppercase text-ink-muted tracking-wide">Nota</p>
+              <p id="mdNota" class="mt-1 text-ink">—</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold uppercase text-ink-muted tracking-wide">Creador</p>
+              <p id="mdCreador" class="mt-1 text-ink font-medium">—</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold uppercase text-ink-muted tracking-wide">Tipo rendición</p>
+              <p id="mdTipoRend" class="mt-1 text-ink font-medium">—</p>
+            </div>
+          </div>
+          <div class="mt-6">
+            <h4 id="mdGastosTitle" class="font-extrabold text-[#1e3a5f] text-sm mb-2">Gastos del informe (0)</h4>
+            <div class="border border-border rounded-lg overflow-x-auto">
+              <table class="rd-table w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr class="text-left border-b bg-bg text-xs uppercase text-ink-muted">
+                    <th class="py-2.5 px-3">Proveedor / Fecha envío gasto</th>
+                    <th class="py-2.5 px-3">Estado</th>
+                    <th class="py-2.5 px-3">Categoría</th>
+                    <th class="py-2.5 px-3 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="mdGastosTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div data-inf-panel="historial" id="infPanelHistorial" class="hidden">
+          <h2 class="text-xl font-extrabold text-[#1e3a5f]">Historial</h2>
+          <p class="text-sm text-ink-muted mt-1 max-w-2xl">En esta sección puedes ver todos los eventos asociados a este informe y enviar comentarios.</p>
+          <div id="mdHistorialCards" class="space-y-3 mt-5"></div>
+          <div class="mt-6 flex gap-3 items-start border border-border rounded-xl p-4 bg-[#f8fafc]">
+            <div class="w-10 h-10 rounded-full bg-[#dbeafe] flex items-center justify-center shrink-0 text-[#2563eb]">
+              <i data-lucide="user" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <input id="mdComentarioInput" type="text" maxlength="250" class="rd-input w-full h-10 px-3 text-sm" placeholder="Escribe una nota o comentario" autocomplete="off">
+              <div class="flex flex-wrap justify-between items-center gap-2 mt-3">
+                <span id="mdComentarioCount" class="text-xs text-ink-muted">0 de 250</span>
+                <button type="button" class="btn btn-primary rounded-full px-6 h-9" onclick="mockComentarInforme()">Comentar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-inf-panel="flujo" id="infPanelFlujo" class="hidden">
+          <div class="flex flex-wrap justify-between items-start gap-3">
+            <div>
+              <h2 class="text-xl font-extrabold text-[#1e3a5f]">Flujo de revisión</h2>
+              <p id="mdFlujoCodigo" class="text-sm font-semibold text-[#2563eb] mt-1">—</p>
+              <p class="text-sm text-ink-muted mt-2">Revisa el flujo de revisión del informe.</p>
+            </div>
+            <div id="mdInfEstadoFlujo"></div>
+          </div>
+          <div id="mdFlujoStepper" class="mt-8"></div>
+          <div id="mdFlujoRevisor" class="mt-8 max-w-xl"></div>
+        </div>
+      </div>
+      <div class="rd-modal-footer shrink-0 border-t border-border">
+        <button id="mdBtnEditar" type="button" class="btn btn-outline hidden inline-flex items-center gap-2">
+          <i data-lucide="pencil" class="w-4 h-4"></i> Editar
+        </button>
+        <button id="mdBtnEnviar" type="button" class="btn btn-primary hidden inline-flex items-center gap-2" onclick="sendInformeFromModal()">
+          <i data-lucide="send" class="w-4 h-4"></i> Enviar informe
+        </button>
+        <button type="button" class="btn btn-muted" onclick="closeModal('modalDetalleInforme')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    const informes = [
+      { nro: 'IR-00050', titulo: 'Reembolso Mayo - Lima', tipo: 'reembolso', ng: 5, monto: 702.8, apr: '—', st: 'borrador', det: 'informes-detalle.html' },
+      { nro: 'IR-00049', titulo: 'Gastos Proyecto Norte', tipo: 'reembolso', ng: 3, monto: 455, apr: '—', st: 'borrador', det: 'informes-detalle.html' },
+      { nro: 'IR-00048', titulo: 'Rendición Fondo Viaje Cusco', tipo: 'fondo', ng: 8, monto: 1700, apr: '—', st: 'borrador', det: 'informes-detalle.html' },
+      { nro: 'IR-00045', titulo: 'Reembolso Abril', tipo: 'reembolso', ng: 6, monto: 455.5, apr: 'Pedro Morales (Paso 1/2)', st: 'revision', det: 'informes-detalle.html' },
+      { nro: 'IR-00044', titulo: 'Gastos Emergencia Q1', tipo: 'reembolso', ng: 2, monto: 180, apr: 'María Rojas (Paso 2/2)', st: 'revision', det: 'informes-detalle.html' },
+      {
+        nro: 'IR-00043',
+        titulo: 'Reembolso Marzo',
+        tipo: 'reembolso',
+        ng: 4,
+        monto: 320,
+        apr: 'Devuelto por Pedro Morales',
+        st: 'obs',
+        det: 'informes-detalle.html',
+        nota: 'Sin datos',
+        enviado: '01/03/2026',
+        cierre: '—',
+        gastos: [
+          { prov: 'Hotel Libertador', fecha: '15/03/2026', cat: 'Hospedaje', monto: 150, est: 'aprobado' },
+          { prov: 'Taxi Beat', fecha: '14/03/2026', cat: 'Movilidad', monto: 25, est: 'aprobado' },
+          { prov: 'Restaurante Sin Nombre', fecha: '13/03/2026', cat: 'Alimentación', monto: 85, est: 'rechazado' },
+          { prov: 'Mercado', fecha: '12/03/2026', cat: 'Sin categoría', monto: 60, est: 'rechazado' }
+        ]
+      }
+    ];
+    for (let i = 0; i < 24; i++) {
+      informes.push({ nro: 'IR-00' + (900 + i), titulo: 'Informe cerrado ' + (i + 1), tipo: 'reembolso', ng: 2 + (i % 4), monto: 100 + i * 15, apr: '—', st: 'cerrado', det: 'informes-detalle.html' });
+    }
+
+    let page = 1;
+    let pageSize = 10;
+    let lastP = 1;
+
+    function tipoBadge(t) {
+      if (t === 'fondo') return '<span class="text-[10px] bg-primary-light text-primary px-2 py-0.5 rounded font-bold">FONDO X RENDIR</span>';
+      return '<span class="text-[10px] bg-info-light text-info px-2 py-0.5 rounded font-bold">REEMBOLSO</span>';
+    }
+
+    function pill(st) {
+      const map = {
+        borrador: '<span class="status-pill status-inactive">BORRADOR</span>',
+        revision: '<span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded font-bold">EN REVISIÓN</span>',
+        obs: '<span class="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-bold">CON OBSERVACIONES</span>',
+        cerrado: '<span class="status-pill status-active">CERRADO</span>',
+        enviado: '<span class="text-[10px] bg-info-light text-info px-2 py-0.5 rounded font-bold">ENVIADO</span>',
+        aprobado: '<span class="text-[10px] bg-success-light text-success px-2 py-0.5 rounded font-bold">APROBADO</span>',
+        rechazado: '<span class="text-[10px] bg-danger-light text-danger px-2 py-0.5 rounded font-bold">RECHAZADO</span>',
+        pagado: '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">PAGADO</span>',
+        bloqueado: '<span class="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-bold">BLOQUEADO</span>'
+      };
+      return map[st] || map.borrador;
+    }
+
+    function filtrar() {
+      const q = document.getElementById('qInf').value.trim().toLowerCase();
+      const tipo = document.getElementById('filtroTipoInf').value;
+      return informes.filter((r) => {
+        if (q && !r.titulo.toLowerCase().includes(q) && !r.nro.toLowerCase().includes(q)) return false;
+        if (tipo === 'REEMBOLSO' && r.tipo !== 'reembolso') return false;
+        if (tipo === 'FONDO POR RENDIR' && r.tipo !== 'fondo') return false;
+        return true;
+      });
+    }
+
+    function render() {
+      const data = filtrar();
+      lastP = Math.max(1, Math.ceil(data.length / pageSize));
+      if (page > lastP) page = lastP;
+      const s = (page - 1) * pageSize;
+      const slice = data.slice(s, s + pageSize);
+      document.getElementById('tbodyInf').innerHTML = slice.map((r) => {
+        let row = '';
+        const base = `<td class="py-2.5 px-2 font-mono text-xs">${r.nro}</td><td class="py-2.5 px-2 font-medium">${r.titulo}</td><td class="py-2.5 px-2">${tipoBadge(r.tipo)}</td><td class="py-2.5 px-2"><span class="inline-flex items-center gap-1 text-[10px] bg-bg px-2 py-0.5 rounded font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>${r.ng} gastos</span></td><td class="py-2.5 px-2 font-semibold">S/ ${r.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td><td class="py-2.5 px-2 text-sm text-ink-muted">${r.apr}</td><td class="py-2.5 px-2">${pill(r.st)}</td>`;
+        let acc = '<td class="py-2.5 px-2"><div class="flex justify-end gap-1 flex-wrap">';
+        acc += `<button type="button" class="rd-action-btn" title="Detalle" onclick="openInformeDetail('${r.nro}')"><i data-lucide="eye" class="w-4 h-4"></i></button>`;
+        if (r.st === 'borrador' || r.st === 'obs') acc += `<button type="button" class="rd-action-btn" title="Editar" onclick="abrirModalEditarInforme('${r.nro}')"><i data-lucide="pencil" class="w-4 h-4"></i></button>`;
+        acc += '</div></td>';
+        const trClass = r.st === 'obs' ? 'bg-orange-50/80' : '';
+        row = `<tr class="border-b border-[#ECEEF4] ${trClass}">${base}${acc}</tr>`;
+        return row;
+      }).join('');
+
+      const from = data.length === 0 ? 0 : s + 1;
+      const to = Math.min(s + pageSize, data.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${data.length}`;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function syncInformes() {
+      showToast('Informes sincronizados correctamente', 'success');
+      render();
+    }
+
+    let currentInformeDetail = null;
+    let informeEnCreacion = null;
+    const gastosDisponibles = [
+      { id: '1', code: 'GAS-2026-00125', f: '25/04/2026', p: 'Petroperú', c: 'Combustible', m: 80, img: 'https://picsum.photos/seed/inf-g-1/120/80' },
+      { id: '2', code: 'GAS-2026-00124', f: '24/04/2026', p: 'Restaurante La Mar', c: 'Alimentación', m: 145.5, img: 'https://picsum.photos/seed/inf-g-2/120/80' },
+      { id: '3', code: 'GAS-2026-00123', f: '23/04/2026', p: 'Hotel Casa Andina', c: 'Hospedaje', m: 380, img: 'https://picsum.photos/seed/inf-g-3/120/80' },
+      { id: '4', code: 'GAS-2026-00122', f: '22/04/2026', p: 'Taxi Beat', c: 'Movilidad', m: 25, img: 'https://picsum.photos/seed/inf-g-4/120/80' },
+      { id: '5', code: 'GAS-2026-00121', f: '21/04/2026', p: 'Tay Loy', c: 'Útiles', m: 67.3, img: 'https://picsum.photos/seed/inf-g-5/120/80' },
+      { id: '6', code: 'GAS-2026-00120', f: '20/04/2026', p: 'InDriver', c: 'Movilidad', m: 18, img: 'https://picsum.photos/seed/inf-g-6/120/80' },
+      { id: '7', code: 'GAS-2026-00119', f: '19/04/2026', p: 'KFC San Isidro', c: 'Alimentación', m: 32, img: 'https://picsum.photos/seed/inf-g-7/120/80' },
+      { id: '8', code: 'GAS-2026-00118', f: '18/04/2026', p: 'Petroperú', c: 'Combustible', m: 90, img: 'https://picsum.photos/seed/inf-g-8/120/80' }
+    ];
+    const gastosSelInforme = new Set();
+
+    function getCrearTipoInf() {
+      const r = document.querySelector('input[name="crearTipoInf"]:checked');
+      return r ? r.value : 'reembolso';
+    }
+
+    function getCrearSubtipoFondo() {
+      const r = document.querySelector('input[name="crearSubtipoFondo"]:checked');
+      return r ? r.value : 'gpc';
+    }
+
+    function styleCrearRadioLabels(items) {
+      items.forEach(({ el, active }) => {
+        el.classList.toggle('border-2', active);
+        el.classList.toggle('border-primary', active);
+        el.classList.toggle('bg-primary-light/30', active);
+        el.classList.toggle('border', !active);
+        el.classList.toggle('border-border', !active);
+        el.classList.toggle('hover:border-primary/50', !active);
+      });
+    }
+
+    function onCrearTipoInfChange() {
+      const esFondo = getCrearTipoInf() === 'fondo';
+      document.getElementById('wrapFondosRendir').classList.toggle('hidden', !esFondo);
+      styleCrearRadioLabels([
+        { el: document.getElementById('lblTipoReembolso'), active: !esFondo },
+        { el: document.getElementById('lblTipoFondo'), active: esFondo }
+      ]);
+      if (esFondo) onCrearSubtipoFondoChange();
+    }
+
+    function onCrearSubtipoFondoChange() {
+      const esGpc = getCrearSubtipoFondo() === 'gpc';
+      document.getElementById('wrapSelectGpc').classList.toggle('hidden', !esGpc);
+      document.getElementById('wrapSelectRd').classList.toggle('hidden', esGpc);
+      styleCrearRadioLabels([
+        { el: document.getElementById('lblSubtipoGpc'), active: esGpc },
+        { el: document.getElementById('lblSubtipoRd'), active: !esGpc }
+      ]);
+    }
+
+    function getCrearFondoTexto() {
+      const sub = getCrearSubtipoFondo();
+      const selEl = sub === 'gpc' ? document.getElementById('crearFondoGpc') : document.getElementById('crearFondoRd');
+      if (!selEl.value) return '';
+      return selEl.options[selEl.selectedIndex].text;
+    }
+
+    function resetFormularioCrearInforme() {
+      document.getElementById('crearPoliticaInf').value = '';
+      document.querySelector('input[name="crearTipoInf"][value="reembolso"]').checked = true;
+      document.querySelector('input[name="crearSubtipoFondo"][value="gpc"]').checked = true;
+      document.getElementById('crearTituloInf').value = '';
+      document.getElementById('crearNotaInf').value = '';
+      document.getElementById('crearFondoGpc').value = '';
+      document.getElementById('crearFondoRd').value = '';
+      onCrearTipoInfChange();
+    }
+
+    function validarDatosBasicosInforme() {
+      const politica = document.getElementById('crearPoliticaInf').value.trim();
+      const titulo = document.getElementById('crearTituloInf').value.trim();
+      if (!politica) { showToast('Selecciona la política del informe', 'warning'); return false; }
+      if (!titulo) { showToast('Indica el título del informe', 'warning'); return false; }
+      if (getCrearTipoInf() === 'fondo') {
+        const sub = getCrearSubtipoFondo();
+        const fondoVal = sub === 'gpc' ? document.getElementById('crearFondoGpc').value : document.getElementById('crearFondoRd').value;
+        if (!fondoVal) {
+          showToast(sub === 'gpc' ? 'Selecciona un fondo GPC' : 'Selecciona un fondo RD', 'warning');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function buildInformeFromCrearForm(codigo) {
+      const nota = document.getElementById('crearNotaInf').value.trim();
+      const esFondo = getCrearTipoInf() === 'fondo';
+      return {
+        codigo,
+        titulo: document.getElementById('crearTituloInf').value.trim(),
+        politica: document.getElementById('crearPoliticaInf').value,
+        tipo: esFondo ? 'Fondos por rendir' : 'Reembolso',
+        tipoRaw: esFondo ? 'fondo' : 'reembolso',
+        fondo: esFondo ? `${getCrearSubtipoFondo() === 'gpc' ? 'GPC' : 'RD'}: ${getCrearFondoTexto()}` : null,
+        nota: nota || null
+      };
+    }
+
+    function pintarDetalleInformeHeader(inf) {
+      document.getElementById('hdrCodigo').textContent = inf.codigo;
+      document.getElementById('hdrTitulo').textContent = inf.titulo;
+      document.getElementById('hdrPolitica').textContent = inf.politica;
+      document.getElementById('hdrTipo').textContent = inf.tipo;
+      const fw = document.getElementById('hdrFondoWrap');
+      if (inf.fondo) {
+        fw.classList.remove('hidden');
+        document.getElementById('hdrFondo').textContent = inf.fondo;
+      } else fw.classList.add('hidden');
+      const nw = document.getElementById('hdrNotaWrap');
+      if (inf.nota) {
+        nw.classList.remove('hidden');
+        document.getElementById('hdrNota').textContent = inf.nota;
+      } else nw.classList.add('hidden');
+    }
+
+    function abrirModalNuevoInforme() {
+      informeEnCreacion = null;
+      gastosSelInforme.clear();
+      resetFormularioCrearInforme();
+      document.getElementById('btnEnviarInfCrear').classList.add('hidden');
+      openModal('modal-informe-datos');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function abrirModalEditarInforme(nro) {
+      const raw = informes.find((x) => x.nro === nro);
+      if (!raw) return;
+      informeEnCreacion = {
+        codigo: raw.nro,
+        titulo: raw.titulo,
+        politica: 'POL-001 · POLÍTICA GENERAL PEN',
+        tipo: raw.tipo === 'fondo' ? 'Fondos por rendir' : 'Reembolso',
+        tipoRaw: raw.tipo,
+        fondo: raw.tipo === 'fondo' ? 'GPC: FX-001 · FXR - MAYO - ANA' : null,
+        nota: raw.nota || null
+      };
+      gastosSelInforme.clear();
+      document.getElementById('btnEnviarInfCrear').classList.toggle('hidden', raw.st !== 'borrador');
+      pintarDetalleInformeHeader(informeEnCreacion);
+      renderGastosInformeModal();
+      openModal('modal-informe-gastos');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function guardarDatosBasicosInforme() {
+      if (!validarDatosBasicosInforme()) return;
+      const codigo = informeEnCreacion?.codigo || ('IR-' + String(Math.floor(100050 + Math.random() * 50)).padStart(5, '0'));
+      informeEnCreacion = buildInformeFromCrearForm(codigo);
+      const nuevo = !informes.some((x) => x.nro === codigo);
+      if (nuevo) {
+        informes.unshift({
+          nro: codigo,
+          titulo: informeEnCreacion.titulo,
+          tipo: informeEnCreacion.tipoRaw,
+          ng: 0,
+          monto: 0,
+          apr: '—',
+          st: 'borrador',
+          det: 'informes-detalle.html',
+          nota: informeEnCreacion.nota
+        });
+        render();
+      }
+      closeModal('modal-informe-datos');
+      showToast(`Informe ${codigo} registrado. Agrega los gastos.`, 'success');
+      gastosSelInforme.clear();
+      setTimeout(() => {
+        pintarDetalleInformeHeader(informeEnCreacion);
+        renderGastosInformeModal();
+        openModal('modal-informe-gastos');
+        if (window.lucide) lucide.createIcons();
+      }, 280);
+    }
+
+    function renderGastosInformeModal() {
+      document.getElementById('tbGastosInforme').innerHTML = gastosDisponibles.map((r) => {
+        const on = gastosSelInforme.has(r.id);
+        return `<tr class="border-b ${on ? 'bg-primary-light/40' : ''}">
+          <td class="py-2 px-2"><input type="checkbox" class="gchk-inf h-4 w-4" data-id="${r.id}" ${on ? 'checked' : ''}></td>
+          <td class="py-2 px-2"><img src="${r.img}" alt="" class="w-14 h-10 rounded object-cover border border-border"></td>
+          <td class="py-2 px-2">${r.f}</td><td class="py-2 px-2">${r.p}</td><td class="py-2 px-2">${r.c}</td>
+          <td class="py-2 px-2 font-semibold">S/ ${r.m.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
+          <td class="py-2 px-2 text-right"><button type="button" class="rd-action-btn" onclick="openGastoInformeModal('${r.id}')"><i data-lucide="eye" class="w-4 h-4"></i></button></td>
+        </tr>`;
+      }).join('');
+      document.querySelectorAll('.gchk-inf').forEach((cb) => {
+        cb.addEventListener('change', () => {
+          if (cb.checked) gastosSelInforme.add(cb.dataset.id); else gastosSelInforme.delete(cb.dataset.id);
+          updateResumenGastosInforme();
+          renderGastosInformeModal();
+        });
+      });
+      updateResumenGastosInforme();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateResumenGastosInforme() {
+      let total = 0;
+      gastosDisponibles.forEach((r) => { if (gastosSelInforme.has(r.id)) total += r.m; });
+      const rs = document.getElementById('resumenSelGastos');
+      if (gastosSelInforme.size > 0) {
+        rs.classList.remove('hidden');
+        rs.textContent = `${gastosSelInforme.size} gastos · S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+      } else rs.classList.add('hidden');
+    }
+
+    function openGastoInformeModal(id) {
+      const g = gastosDisponibles.find((x) => x.id === id);
+      if (!g) return;
+      document.getElementById('mgProv').textContent = g.p.toUpperCase();
+      document.getElementById('mgCode').textContent = g.code;
+      document.getElementById('mgFecha').textContent = g.f;
+      document.getElementById('mgCat').textContent = g.c;
+      document.getElementById('mgMonto').textContent = 'S/ ' + g.m.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('mgImg').src = g.img;
+      openModal('modal-detalle-gasto-informe');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function guardarInformeConGastos() {
+      if (!informeEnCreacion) return;
+      if (gastosSelInforme.size === 0) { showToast('Selecciona al menos un gasto', 'warning'); return; }
+      let total = 0;
+      gastosDisponibles.forEach((r) => { if (gastosSelInforme.has(r.id)) total += r.m; });
+      const row = informes.find((x) => x.nro === informeEnCreacion.codigo);
+      if (row) {
+        row.ng = gastosSelInforme.size;
+        row.monto = total;
+        row.titulo = informeEnCreacion.titulo;
+      }
+      closeModal('modal-informe-gastos');
+      showToast('Informe guardado en borrador', 'success');
+      render();
+    }
+
+    function enviarInformeDesdeCrear() {
+      if (gastosSelInforme.size === 0) { showToast('Selecciona al menos un gasto', 'warning'); return; }
+      const row = informes.find((x) => x.nro === informeEnCreacion?.codigo);
+      if (row) row.st = 'revision';
+      closeModal('modal-informe-gastos');
+      showToast('Informe enviado a revisión', 'success');
+      render();
+    }
+
+    function initCrearInformeFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('nuevo') === '1') {
+        history.replaceState({}, '', 'informes-listar.html');
+        setTimeout(abrirModalNuevoInforme, 300);
+      } else if (params.get('modo') === 'editar') {
+        const nro = params.get('nro') || 'IR-00050';
+        history.replaceState({}, '', 'informes-listar.html');
+        setTimeout(() => abrirModalEditarInforme(nro), 300);
+      }
+    }
+
+    function enrichInforme(r) {
+      const out = {
+        politica: 'POL-001 · ADMINISTRACIÓN',
+        rendidor: 'Ana Guevara Muñoz',
+        creador: 'Ana Guevara Muñoz',
+        nota: 'Sin datos',
+        moneda: 'S/',
+        flujoCodigo: 'FLU-001 · FLUJO STANDARD 2 NIVELES',
+        ...r
+      };
+      if (!out.gastos) out.gastos = generateDefaultGastos(out);
+      if (out.enviado === undefined) out.enviado = out.st === 'borrador' ? null : '01/04/2026';
+      if (out.cierre === undefined) out.cierre = out.st === 'cerrado' ? '01/04/2026' : '—';
+      return out;
+    }
+
+    function generateDefaultGastos(r) {
+      const n = Math.min(Math.max(r.ng, 1), 6);
+      const provs = ['FALABELLA.COM SPA', 'Petroperú SAC', 'Hotel Casa Andina', 'Taxi Beat', 'Restaurante Demo', 'Tay Loy'];
+      const cats = ['Materiales Varios', 'Combustible', 'Hospedaje', 'Movilidad', 'Alimentación', 'Útiles'];
+      const rows = [];
+      const base = r.monto / n;
+      for (let i = 0; i < n; i++) {
+        let est = 'aprobado';
+        if (r.st === 'borrador') est = 'borrador';
+        else if (r.st === 'obs' && i >= 2) est = 'rechazado';
+        rows.push({
+          prov: provs[i % provs.length],
+          fecha: `${String(20 + (i % 9)).padStart(2, '0')}/03/2026`,
+          cat: cats[i % cats.length],
+          monto: +base.toFixed(2),
+          est
+        });
+      }
+      return rows;
+    }
+
+    function formatInfMoney(moneda, num) {
+      const sym = moneda === 'CLP$' ? '' : moneda;
+      const s = num.toLocaleString('es-PE', { minimumFractionDigits: moneda === 'CLP$' ? 0 : 2 });
+      return moneda === 'CLP$' ? `${s} CLP` : `${sym} ${s}`;
+    }
+
+    function pillGasto(est) {
+      if (est === 'aprobado') return '<span class="status-pill status-active">APROBADO</span>';
+      if (est === 'rechazado') return '<span class="text-[10px] bg-danger-light text-danger px-2 py-0.5 rounded font-bold">RECHAZADO</span>';
+      return '<span class="text-[10px] bg-bg text-ink-muted px-2 py-0.5 rounded font-bold">BORRADOR</span>';
+    }
+
+    function renderGastosRows(gastos, moneda) {
+      return gastos.map((g) => {
+        const ok = g.est !== 'rechazado';
+        const badge = ok
+          ? '<span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full flex items-center justify-center border-2 border-white"><i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i></span>'
+          : '<span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full flex items-center justify-center border-2 border-white"><i data-lucide="x" class="w-2.5 h-2.5 text-white stroke-[3]"></i></span>';
+        return `<tr class="border-b border-[#ECEEF4] ${g.est === 'rechazado' ? 'bg-danger-light/25' : ''}">
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-3">
+              <div class="relative shrink-0">
+                <i data-lucide="file-text" class="w-9 h-9 text-slate-400"></i>
+                ${badge}
+              </div>
+              <div>
+                <p class="font-semibold text-ink">${g.prov}</p>
+                <p class="text-xs text-ink-muted">Envío gasto: ${g.fecha}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-3 px-3">${pillGasto(g.est)}</td>
+          <td class="py-3 px-3">${g.cat}</td>
+          <td class="py-3 px-3 text-right font-extrabold text-[#2563eb]">${formatInfMoney(moneda, g.monto)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function switchInfModalTab(tab) {
+      document.querySelectorAll('#modalDetalleInforme [data-inf-tab]').forEach((btn) => {
+        const on = btn.dataset.infTab === tab;
+        btn.classList.toggle('inf-detail-tab-active', on);
+      });
+      document.querySelectorAll('#modalDetalleInforme [data-inf-panel]').forEach((p) => {
+        p.classList.toggle('hidden', p.dataset.infPanel !== tab);
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function mockComentarInforme() {
+      const el = document.getElementById('mdComentarioInput');
+      const t = (el && el.value) ? el.value.trim() : '';
+      if (!t) {
+        showToast('Escribe un comentario', 'warning');
+        return;
+      }
+      showToast('Comentario registrado (mockup)', 'success');
+      if (el) el.value = '';
+      const c = document.getElementById('mdComentarioCount');
+      if (c) c.textContent = '0 de 250';
+    }
+
+    function buildHistorialCards(r) {
+      const ev = [];
+      if (r.st === 'borrador') {
+        ev.push({ title: 'Informe en borrador', meta: `${new Date().toLocaleDateString('es-PE')} / Rendidor : ${r.creador}`, latest: true });
+      } else if (r.st === 'cerrado') {
+        ev.push({ title: 'Informe cerrado', meta: '01-04-2026 07:50 / Aprobador : Ana Guevara Muñoz', latest: true });
+        ev.push({ title: 'Aprobado — Gasto: FALABELLA.COM SPA', meta: '01-04-2026 07:45 / Aprobador : Ana Guevara Muñoz', latest: false });
+        ev.push({ title: 'Informe enviado', meta: '01-04-2026 07:40 / Rendidor : Ana Guevara Muñoz', latest: false });
+      } else if (r.st === 'obs') {
+        ev.push({ title: 'Informe devuelto con observaciones', meta: '20/03/2026 / Aprobador : Pedro Morales Quispe', latest: true });
+        ev.push({ title: 'Gasto rechazado — Restaurante Sin Nombre', meta: '20/03/2026 / Sin comprobante válido', latest: false });
+        ev.push({ title: 'Informe enviado', meta: '01/03/2026 / Rendidor : Ana Guevara Muñoz', latest: false });
+      } else {
+        ev.push({ title: 'En revisión — pendiente de aprobación', meta: `${r.apr || 'Paso actual'} · ${new Date().toLocaleDateString('es-PE')}`, latest: true });
+        ev.push({ title: 'Informe enviado', meta: '01/04/2026 / Rendidor : Ana Guevara Muñoz', latest: false });
+      }
+      return ev.map((e, idx) => `
+        <article class="inf-historial-card ${e.latest ? 'inf-historial-card--latest' : ''}">
+          <div class="flex gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#dbeafe] flex items-center justify-center shrink-0 text-[#2563eb] font-bold text-sm">${String(idx + 1)}</div>
+            <div class="min-w-0 flex-1">
+              <p class="font-extrabold text-[#2563eb] text-sm leading-snug">${e.title}</p>
+              <p class="text-xs text-ink-muted mt-1">${e.meta}</p>
+              <button type="button" class="mt-2 text-xs font-bold text-[#2563eb] hover:underline" onclick="showToast('Comentarios (mockup)','info')">Comentar</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function buildFlujoStepperHTML(st) {
+      let completed = 0;
+      let active = 0;
+      if (st === 'borrador') { completed = 0; active = 0; }
+      else if (st === 'revision') { completed = 1; active = 1; }
+      else if (st === 'obs') { completed = 1; active = 1; }
+      else if (st === 'cerrado') { completed = 3; active = -1; }
+      const labels = ['Enviado', 'En proceso', 'Cerrado'];
+      return `<div class="inf-flujo-stepper">` + labels.map((lab, i) => {
+        const done = i < completed;
+        const current = active >= 0 && !done && i === active;
+        const inner = done
+          ? '<i data-lucide="check" class="w-5 h-5"></i>'
+          : `<span class="text-sm font-extrabold">${i + 1}</span>`;
+        const dotClass = done
+          ? 'inf-flujo-dot'
+          : current
+            ? 'inf-flujo-dot ring-4 ring-blue-200'
+            : 'inf-flujo-dot inf-flujo-dot--pending';
+        return `<div class="inf-flujo-step"><div class="${dotClass}">${inner}</div><p class="text-[11px] font-bold text-[#1e3a5f] mt-1">${lab}</p></div>`;
+      }).join('') + `</div>`;
+    }
+
+    function buildFlujoRevisorHTML(r) {
+      if (r.st === 'cerrado') {
+        return `<div class="inf-flujo-revisor">
+          <div class="w-12 h-12 rounded-full bg-white border border-[#bae6fd] flex items-center justify-center shrink-0 relative">
+            <i data-lucide="user" class="w-6 h-6 text-[#2563eb]"></i>
+            <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-[#2563eb] rounded-full flex items-center justify-center border-2 border-white"><i data-lucide="check" class="w-3 h-3 text-white"></i></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-ink">Informe revisado por: <strong class="text-[#2563eb]">Ana Guevara Muñoz</strong>, Aprobador</p>
+            <p class="text-xs text-ink-muted text-right mt-2">aguevara@empresa.com.pe</p>
+          </div>
+        </div>`;
+      }
+      if (r.st === 'revision') {
+        return `<div class="inf-flujo-revisor">
+          <div class="w-12 h-12 rounded-full bg-white border border-[#bae6fd] flex items-center justify-center shrink-0"><i data-lucide="user" class="w-6 h-6 text-[#2563eb]"></i></div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-ink">Pendiente de revisión: <strong class="text-[#2563eb]">Pedro Morales Quispe</strong></p>
+            <p class="text-xs text-ink-muted mt-1">El informe avanzará cuando el aprobador registre su decisión.</p>
+          </div>
+        </div>`;
+      }
+      if (r.st === 'obs') {
+        return `<div class="inf-flujo-revisor border-orange-200 bg-orange-50/90">
+          <div class="w-12 h-12 rounded-full bg-white border border-orange-200 flex items-center justify-center shrink-0"><i data-lucide="alert-circle" class="w-6 h-6 text-orange-600"></i></div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-ink">Última acción: <strong class="text-orange-700">devolución por Pedro Morales Quispe</strong></p>
+            <p class="text-xs text-ink-muted mt-1">Corrige los gastos observados y vuelve a enviar desde edición.</p>
+          </div>
+        </div>`;
+      }
+      return `<div class="inf-flujo-revisor bg-[#f8fafc] border-slate-200">
+        <div class="w-12 h-12 rounded-full bg-white border border-border flex items-center justify-center shrink-0"><i data-lucide="send" class="w-6 h-6 text-slate-500"></i></div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-ink font-semibold">El informe aún no fue enviado a revisión</p>
+          <p class="text-xs text-ink-muted mt-1">Completa los datos y usa <strong>Enviar informe</strong> cuando esté listo.</p>
+        </div>
+      </div>`;
+    }
+
+    function getEstadoDescription(st) {
+      if (st === 'borrador') return 'Este informe está en borrador y aún no inicia el flujo de revisión.';
+      if (st === 'revision') return 'El informe está siendo evaluado por el aprobador actual.';
+      if (st === 'obs') return 'El informe fue observado. Revisa el historial, corrige y vuelve a enviarlo desde edición.';
+      if (st === 'cerrado') return 'El informe completó todos los pasos del flujo y fue cerrado.';
+      return 'Estado operativo del informe.';
+    }
+
+    function openInformeDetail(nro) {
+      const raw = informes.find((x) => x.nro === nro);
+      if (!raw) return;
+      const r = enrichInforme(raw);
+      currentInformeDetail = raw;
+
+      document.getElementById('mdInfNro').textContent = r.nro;
+      const codNum = String(parseInt(r.nro.replace(/\D/g, ''), 10) || r.nro);
+      document.getElementById('mdTituloGrande').textContent = `${codNum} : ${r.titulo.toLowerCase()}`;
+      document.getElementById('mdMontoGrande').textContent = formatInfMoney(r.moneda, r.monto);
+      document.getElementById('mdMetaPolitica').innerHTML = `<span class="text-ink-muted font-normal">Política:</span> ${r.politica} <span class="text-ink-muted font-normal mx-1">/</span> <span class="text-ink-muted font-normal">Rendidor:</span> ${r.rendidor}`;
+
+      const envTxt = r.enviado ? r.enviado : 'Sin enviar';
+      document.getElementById('mdLineFechas').textContent = `Enviado: ${envTxt} · Cierre: ${r.cierre || '—'}`;
+
+      const estadoHtml = pill(raw.st);
+      document.getElementById('mdInfEstado').innerHTML = estadoHtml;
+      document.getElementById('mdEstadoLine').innerHTML = estadoHtml;
+      document.getElementById('mdInfEstadoFlujo').innerHTML = estadoHtml;
+
+      document.getElementById('mdEstadoDesc').textContent = getEstadoDescription(raw.st);
+      document.getElementById('mdNota').textContent = r.nota || 'Sin datos';
+      document.getElementById('mdCreador').textContent = r.creador;
+      document.getElementById('mdTipoRend').textContent = r.tipo === 'fondo' ? 'Fondos por rendir' : 'Reembolso';
+
+      document.getElementById('mdGastosTitle').textContent = `Gastos del informe (${r.gastos.length})`;
+      document.getElementById('mdGastosTbody').innerHTML = renderGastosRows(r.gastos, r.moneda);
+
+      document.getElementById('mdHistorialCards').innerHTML = buildHistorialCards(r);
+      document.getElementById('mdFlujoCodigo').textContent = r.flujoCodigo;
+      document.getElementById('mdFlujoStepper').innerHTML = buildFlujoStepperHTML(raw.st);
+      document.getElementById('mdFlujoRevisor').innerHTML = buildFlujoRevisorHTML(r);
+
+      const btnEditar = document.getElementById('mdBtnEditar');
+      const btnEnviar = document.getElementById('mdBtnEnviar');
+      btnEditar.classList.toggle('hidden', raw.st !== 'borrador');
+      btnEnviar.classList.toggle('hidden', raw.st !== 'borrador');
+      btnEditar.onclick = () => { closeModal('modalDetalleInforme'); abrirModalEditarInforme(raw.nro); };
+      btnEditar.removeAttribute('href');
+
+      const ci = document.getElementById('mdComentarioInput');
+      if (ci) ci.value = '';
+      const cc = document.getElementById('mdComentarioCount');
+      if (cc) cc.textContent = '0 de 250';
+
+      switchInfModalTab('detalle');
+      openModal('modalDetalleInforme');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function sendInformeFromModal() {
+      if (!currentInformeDetail) return;
+      currentInformeDetail.st = 'revision';
+      closeModal('modalDetalleInforme');
+      showToast('Informe enviado a revisión', 'success');
+      render();
+    }
+
+    document.getElementById('qInf').addEventListener('input', () => { page = 1; render(); });
+    document.getElementById('filtroTipoInf').addEventListener('change', () => { page = 1; render(); });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); page = 1; render(); });
+
+    function goPage(p) {
+      if (p < 1) p = 1;
+      if (p > lastP) p = lastP;
+      page = p;
+      render();
+    }
+
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+
+    document.querySelectorAll('input[name="crearTipoInf"]').forEach((r) => r.addEventListener('change', onCrearTipoInfChange));
+    document.querySelectorAll('input[name="crearSubtipoFondo"]').forEach((r) => r.addEventListener('change', onCrearSubtipoFondoChange));
+
+    initLayout('MIS INFORMES / LISTADO', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      const ci = document.getElementById('mdComentarioInput');
+      if (ci) {
+        ci.addEventListener('input', (e) => {
+          const cc = document.getElementById('mdComentarioCount');
+          if (cc) cc.textContent = `${e.target.value.length} de 250`;
+        });
+      }
+      onCrearTipoInfChange();
+      render();
+      initCrearInformeFromUrl();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Nuevo gasto simple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' }, success: { DEFAULT: '#22C55E', light: '#D1FAE5' }, danger: { DEFAULT: '#EF4444', light: '#FEE2E2' }, warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' }, ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' }, border: '#E5E7EB', bg: '#F5F7FA' } } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css?v=202604291200">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen pb-28">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 max-w-[1400px] mx-auto space-y-3">
+      <nav id="breadcrumbMode" class="text-xs text-ink-muted uppercase font-semibold"><a href="gastos-listar.html" class="text-primary hover:underline">Mis gastos</a> / Nuevo gasto simple</nav>
+      <div>
+        <h1 id="formTitle" class="text-xl font-extrabold uppercase">Nuevo gasto simple</h1>
+        <p id="formSubtitle" class="text-sm text-ink-muted mt-1">Completa la información del gasto</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
+        <div class="lg:col-span-12">
+          <article class="theme-surface rd-card p-4 space-y-4">
+            <div class="flex flex-wrap gap-2 border-b border-border pb-2">
+              <button type="button" data-gasto-tab="factura" class="gasto-tab px-3 py-2 text-sm font-semibold uppercase border-b-2 border-primary text-primary" onclick="switchCreateTab('factura')">1. Datos de la factura</button>
+              <button type="button" data-gasto-tab="vinculaciones" class="gasto-tab px-3 py-2 text-sm font-semibold uppercase border-b-2 border-transparent text-ink-muted" onclick="switchCreateTab('vinculaciones')">2. Vinculaciones</button>
+              <button type="button" data-gasto-tab="archivos" class="gasto-tab px-3 py-2 text-sm font-semibold uppercase border-b-2 border-transparent text-ink-muted" onclick="switchCreateTab('archivos')">3. Archivos</button>
+            </div>
+
+            <section data-gasto-content="factura" class="space-y-4">
+              <h2 class="table-panel-title">Datos de la factura</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="rd-label block mb-1">Proveedor *</label>
+                  <input id="proveedor" type="text" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="EJ: PETROPERÚ" required>
+                </div>
+                <div>
+                  <label class="rd-label block mb-1">Fecha del gasto *</label>
+                  <input id="fechaGasto" type="date" class="rd-input w-full h-10 px-3 text-sm" required>
+                  <p id="fechaErr" class="text-xs text-danger mt-1 hidden">No puede ser una fecha futura</p>
+                </div>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Política *</label>
+                <select id="politica" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option value="">SELECCIONA POLÍTICA</option>
+                  <option value="POL-001">POL-001 · Política General PEN</option>
+                  <option value="POL-003">POL-003 · Política USD Internacional</option>
+                  <option value="POL-007">POL-007 · Política Operaciones</option>
+                </select>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Categoría</label>
+                <select id="categoria" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                  <option value="">SELECCIONA UNA CATEGORÍA</option>
+                  <option>— VIAJES</option>
+                  <option>&nbsp;&nbsp;Hospedaje</option>
+                  <option>&nbsp;&nbsp;Movilidad</option>
+                  <option>&nbsp;&nbsp;&nbsp;&nbsp;Taxis</option>
+                  <option>Combustible</option>
+                  <option>Alimentación</option>
+                  <option>Útiles de oficina</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="rd-label block mb-1">Moneda (según política)</label>
+                  <div id="monedaPoliticaDisplay" class="flex items-center min-h-10 px-3 rounded-lg border border-border bg-bg text-sm font-semibold uppercase text-ink-muted">— Selecciona una política</div>
+                  <p class="text-xs text-ink-muted mt-1">La moneda la define la política; no se elige aparte.</p>
+                </div>
+                <div>
+                  <label class="rd-label block mb-1">Monto *</label>
+                  <div class="flex items-center gap-2">
+                    <span id="prefMonto" class="text-sm font-bold w-10 shrink-0">S/</span>
+                    <input id="monto" type="number" step="0.01" min="0" class="rd-input w-full h-10 px-3 text-sm" placeholder="0.00" required>
+                  </div>
+                </div>
+              </div>
+              <div id="wrapImpuestoPolitica" class="space-y-2 rounded-lg border border-border px-3 py-3 bg-primary-light/20 opacity-60">
+                <label class="rd-label block mb-1">Tipo de impuesto / descuento</label>
+                <select id="impuestoPolitica" class="rd-select w-full h-10 px-3 text-sm" disabled>
+                  <option value="">Primero selecciona una política</option>
+                </select>
+                <p class="text-xs text-ink-muted">Por defecto queda en <strong>null</strong> si no eliges nada. Al desplegar verás impuestos y <strong>descuentos</strong> definidos por la política. Si cambias de política, se reinicia la selección.</p>
+                <div id="bloqueImpResumen" class="hidden space-y-1 border-l-4 border-primary/40 pl-3 pt-2">
+                  <p class="text-xs font-semibold uppercase text-ink-muted">Impuesto o descuento estimado</p>
+                  <p class="text-sm font-bold tabular-nums" id="montoImpuestoCalculado">S/ 0.00</p>
+                  <p class="text-lg font-extrabold text-primary tabular-nums" id="totalConImp">Total: S/ 0.00</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="rd-label block mb-1">Tipo de factura *</label>
+                  <select id="tipoComprobante" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                    <option value="">SELECCIONAR TIPO</option>
+                    <option>Factura De Compra</option>
+                    <option>Factura Electronica</option>
+                    <option>Factura Exenta</option>
+                    <option>Boleta</option>
+                    <option>Boleta Electrónica</option>
+                    <option>Vale Por Olitel</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="rd-label block mb-1">Número de documento *</label>
+                  <input id="numeroDocumento" type="text" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="EJ: F001-12345">
+                </div>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">RUC proveedor</label>
+                <input id="rucProv" type="text" maxlength="11" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: 20100070970">
+                <p id="rucErr" class="text-xs text-danger mt-1 hidden">El RUC debe tener 11 dígitos</p>
+              </div>
+              <div>
+                <label class="rd-label block mb-1">Nota</label>
+                <textarea id="nota" maxlength="500" rows="3" class="rd-textarea w-full px-3 py-2 text-sm" placeholder="NOTA OPCIONAL"></textarea>
+                <p class="text-xs text-ink-muted mt-1"><span id="notaCount">0</span>/500</p>
+              </div>
+            </section>
+
+            <section data-gasto-content="vinculaciones" class="space-y-4 hidden">
+              <h2 class="table-panel-title">Vinculaciones</h2>
+              <article class="theme-surface rd-card p-4 space-y-4 bg-bg/80 border border-border">
+                <h3 class="table-panel-title">Vinculaciones</h3>
+                <p class="text-xs text-ink-muted">Campos opcionales. Vincula el gasto a un proyecto, centro de costo o solicitud de compra previa.</p>
+                <div>
+                  <label class="rd-label block mb-1">Proyecto</label>
+                  <select id="proyecto" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                    <option value="">BUSCAR PROYECTO...</option>
+                    <option value="sur">Proyecto Sur — Lima</option>
+                    <option value="norte">Proyecto Norte — Trujillo</option>
+                    <option value="selva">Proyecto Selva — Iquitos</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="rd-label block mb-1">Centro de costo</label>
+                  <select id="cc" class="rd-select w-full h-10 px-3 text-sm uppercase">
+                    <option value="">BUSCAR CENTRO DE COSTO...</option>
+                    <option>Operaciones Lima</option>
+                    <option>Administración Central</option>
+                    <option>Comercial Norte</option>
+                    <option>TI / Sistemas</option>
+                  </select>
+                  <p class="text-xs text-ink-muted mt-1">Se autocompleta si seleccionas un proyecto</p>
+                </div>
+                <div>
+                  <label class="rd-label block mb-1">Solicitud de compra previa</label>
+                  <select class="rd-select w-full h-10 px-3 text-sm uppercase">
+                    <option value="">VINCULAR A SOLICITUD APROBADA (OPCIONAL)</option>
+                    <option>SOL-0088 — Útiles Q2 (aprobada)</option>
+                    <option>SOL-0077 — Viáticos Selva (aprobada)</option>
+                  </select>
+                </div>
+              </article>
+
+            </section>
+
+            <section data-gasto-content="archivos" class="space-y-4 hidden">
+              <h2 class="table-panel-title">Archivos</h2>
+              <p class="text-xs text-ink-muted">Carga comprobantes o trae archivos desde tu galería. Se mostrará vista previa para imágenes.</p>
+              <div id="zonaDrop" class="border-2 border-dashed border-primary rounded-xl p-8 text-center cursor-pointer bg-primary-light/20 hover:bg-primary-light/40 transition-colors">
+                <i data-lucide="upload-cloud" class="w-12 h-12 text-primary mx-auto mb-2"></i>
+                <p class="font-extrabold uppercase text-sm">Arrastra tu comprobante aquí</p>
+                <p class="text-xs text-ink-muted mt-1">O haz clic para seleccionar</p>
+                <p class="text-[11px] text-ink-soft mt-2 uppercase">PDF, JPG, PNG (máx 10MB)</p>
+                <input id="fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden">
+              </div>
+              <div id="zonaFile" class="hidden border border-border rounded-xl p-3 space-y-2 bg-white">
+                <div id="previewArchivo" class="h-44 bg-bg rounded-lg flex items-center justify-center overflow-hidden">
+                  <i data-lucide="file-text" class="w-12 h-12 text-ink-soft"></i>
+                </div>
+                <p class="text-xs font-semibold truncate" id="nombreArchivo">archivo.pdf</p>
+                <p class="text-xs text-ink-muted" id="tamArchivo">245 KB</p>
+                <div class="flex gap-2">
+                  <button type="button" class="btn btn-outline flex-1 text-xs" onclick="addOtroArchivo()">+ Agregar otro archivo</button>
+                  <button type="button" class="btn text-danger border border-danger/40 text-xs px-3" onclick="quitarArchivo()">✕ Quitar</button>
+                </div>
+              </div>
+              <div class="rd-card p-3 border border-info/20 bg-info-light/20 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="rd-label">Traer desde mi galería</p>
+                  <a href="galeria-listar.html" class="text-xs font-semibold text-primary uppercase">Abrir galería completa</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                  <label class="rounded border border-border bg-white p-2 flex items-center gap-2"><input type="radio" name="galeriaPick" class="gal-check" value="factura_hotel_0426.pdf|pdf"><span class="w-10 h-10 rounded bg-danger-light text-danger inline-flex items-center justify-center"><i data-lucide="file-text" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block truncate font-semibold">factura_hotel_0426.pdf</span><span class="text-[11px] text-ink-muted">PDF</span></span></label>
+                  <label class="rounded border border-border bg-white p-2 flex items-center gap-2"><input type="radio" name="galeriaPick" class="gal-check" value="ticket_taxi_2104.jpg|img"><img src="https://picsum.photos/seed/taxi-2104/64/64" class="w-10 h-10 rounded object-cover" alt="ticket"><span class="min-w-0"><span class="block truncate font-semibold">ticket_taxi_2104.jpg</span><span class="text-[11px] text-ink-muted">Imagen</span></span></label>
+                  <label class="rounded border border-border bg-white p-2 flex items-center gap-2"><input type="radio" name="galeriaPick" class="gal-check" value="boleta_combo_1988.jpg|img"><img src="https://picsum.photos/seed/boleta-1988/64/64" class="w-10 h-10 rounded object-cover" alt="boleta"><span class="min-w-0"><span class="block truncate font-semibold">boleta_combo_1988.jpg</span><span class="text-[11px] text-ink-muted">Imagen</span></span></label>
+                  <label class="rounded border border-border bg-white p-2 flex items-center gap-2"><input type="radio" name="galeriaPick" class="gal-check" value="factura_combustible_f001-889.pdf|pdf"><span class="w-10 h-10 rounded bg-danger-light text-danger inline-flex items-center justify-center"><i data-lucide="file-text" class="w-4 h-4"></i></span><span class="min-w-0"><span class="block truncate font-semibold">factura_combustible_f001-889.pdf</span><span class="text-[11px] text-ink-muted">PDF</span></span></label>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="btn btn-outline border-primary text-primary" onclick="traerDesdeGaleria()">Traer archivo</button>
+                  <span id="galeriaSeleccion" class="text-xs text-ink-muted">Sin archivos traídos desde galería</span>
+                </div>
+              </div>
+              <p class="text-xs text-ink-muted">El comprobante es opcional pero recomendado. Los gastos sin comprobante pueden ser rechazados.</p>
+              <div class="flex justify-end pt-2 border-t border-border">
+                <button id="btnGuardarFinal" type="button" class="btn btn-primary" onclick="guardar('final')">Guardar gasto</button>
+              </div>
+            </section>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="fixed bottom-0 left-0 right-0 md:left-[220px] z-30 bg-white border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,.06)] px-3 py-3">
+    <div class="max-w-[1400px] mx-auto flex flex-wrap items-center justify-end gap-2">
+      <a href="gastos-listar.html" class="btn btn-muted">Cancelar</a>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script>
+    function switchCreateTab(tabId) {
+      document.querySelectorAll('.gasto-tab').forEach((t) => {
+        const on = t.dataset.gastoTab === tabId;
+        t.classList.toggle('text-primary', on);
+        t.classList.toggle('border-primary', on);
+        t.classList.toggle('text-ink-muted', !on);
+        t.classList.toggle('border-transparent', !on);
+      });
+      document.querySelectorAll('[data-gasto-content]').forEach((c) => {
+        c.classList.toggle('hidden', c.dataset.gastoContent !== tabId);
+      });
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('fechaGasto').value = today;
+    document.getElementById('fechaGasto').max = today;
+
+    const proyectoCc = { sur: 'Operaciones Lima', norte: 'Comercial Norte', selva: 'Operaciones Lima' };
+    document.getElementById('proyecto').addEventListener('change', (e) => {
+      const cc = proyectoCc[e.target.value];
+      if (cc) document.getElementById('cc').value = cc;
+    });
+
+    const POLITICAS_CONFIG = {
+      'POL-001': {
+        currency: 'PEN',
+        taxes: [
+          { id: 'igv', label: 'IGV 18%', pct: 18 },
+          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
+          { id: 'ret_3', label: 'Retención / detracción referencial (3%)', pct: 3 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_com', label: 'Descuento comercial (−3%)', pct: -3 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
+        ]
+      },
+      'POL-003': {
+        currency: 'USD',
+        taxes: [
+          { id: 'loc', label: 'Cargo / impuesto referencial (10%)', pct: 10 },
+          { id: 'sin_cargo', label: 'Sin cargo adicional (0%)', pct: 0 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−4%)', pct: -4 },
+          { id: 'dto_linea', label: 'Descuento en línea (−1,5%)', pct: -1.5 }
+        ]
+      },
+      'POL-007': {
+        currency: 'PEN',
+        taxes: [
+          { id: 'igv', label: 'IGV 18%', pct: 18 },
+          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
+          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
+          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
+        ]
+      }
+    };
+
+    function symForCurrency(c) {
+      if (c === 'USD') return 'US$';
+      if (c === 'CLP') return 'CLP$';
+      return 'S/';
+    }
+
+    function labelMonedaPolitica(c) {
+      if (c === 'USD') return 'US$ USD — Dólares';
+      if (c === 'CLP') return 'CLP$ — Pesos chilenos';
+      return 'S/ PEN — Soles';
+    }
+
+    function onPoliticaChange() {
+      const key = document.getElementById('politica').value;
+      const impSel = document.getElementById('impuestoPolitica');
+      const wrap = document.getElementById('wrapImpuestoPolitica');
+      const monedaEl = document.getElementById('monedaPoliticaDisplay');
+
+      if (!key || !POLITICAS_CONFIG[key]) {
+        monedaEl.textContent = '— Selecciona una política';
+        monedaEl.classList.add('text-ink-muted');
+        document.getElementById('prefMonto').textContent = 'S/';
+        impSel.innerHTML = '<option value="">Primero selecciona una política</option>';
+        impSel.disabled = true;
+        impSel.value = '';
+        wrap.classList.add('opacity-60');
+        document.getElementById('bloqueImpResumen').classList.add('hidden');
+        return;
+      }
+
+      const cfg = POLITICAS_CONFIG[key];
+      monedaEl.textContent = `${labelMonedaPolitica(cfg.currency)} · ${cfg.currency}`;
+      monedaEl.classList.remove('text-ink-muted');
+      document.getElementById('prefMonto').textContent = symForCurrency(cfg.currency);
+
+      impSel.disabled = false;
+      wrap.classList.remove('opacity-60');
+      impSel.innerHTML = '<option value="">Sin seleccionar (null)</option>' +
+        cfg.taxes.map((t) => `<option value="${t.id}">${t.label}</option>`).join('');
+      impSel.value = '';
+
+      document.getElementById('bloqueImpResumen').classList.add('hidden');
+      actualizarImpuestoDesdePolitica();
+    }
+
+    function getTaxPctSeleccionado() {
+      const key = document.getElementById('politica').value;
+      const taxId = document.getElementById('impuestoPolitica').value;
+      if (!key || !taxId || !POLITICAS_CONFIG[key]) return null;
+      const t = POLITICAS_CONFIG[key].taxes.find((x) => x.id === taxId);
+      return t ? t.pct : null;
+    }
+
+    function actualizarImpuestoDesdePolitica() {
+      const taxId = document.getElementById('impuestoPolitica').value;
+      const bloque = document.getElementById('bloqueImpResumen');
+      const sym = document.getElementById('prefMonto').textContent;
+      const base = parseFloat(document.getElementById('monto').value) || 0;
+
+      if (!taxId) {
+        bloque.classList.add('hidden');
+        return;
+      }
+      const pct = getTaxPctSeleccionado();
+      if (pct === null) {
+        bloque.classList.add('hidden');
+        return;
+      }
+      const imp = base * (pct / 100);
+      bloque.classList.remove('hidden');
+      document.getElementById('montoImpuestoCalculado').textContent =
+        `${sym} ${imp.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+      document.getElementById('totalConImp').textContent =
+        `Total: ${sym} ${(base + imp).toLocaleString('es-PE', { minimumFractionDigits: 2 })}`;
+    }
+
+    function inferPolicyKeyFromText(raw) {
+      const u = (raw || '').toUpperCase();
+      if (u.includes('POL-001')) return 'POL-001';
+      if (u.includes('POL-003')) return 'POL-003';
+      if (u.includes('POL-007')) return 'POL-007';
+      if (u.includes('INTERNACIONAL') || (u.includes('USD') && u.includes('INTER'))) return 'POL-003';
+      if (u.includes('OPERACIONES')) return 'POL-007';
+      if (u.includes('GENERAL') || u.includes('ADMIN')) return 'POL-001';
+      return '';
+    }
+
+    document.getElementById('politica').addEventListener('change', onPoliticaChange);
+    document.getElementById('impuestoPolitica').addEventListener('change', actualizarImpuestoDesdePolitica);
+    document.getElementById('monto').addEventListener('input', actualizarImpuestoDesdePolitica);
+
+    document.getElementById('nota').addEventListener('input', (e) => {
+      document.getElementById('notaCount').textContent = e.target.value.length;
+    });
+
+    document.getElementById('fechaGasto').addEventListener('change', (e) => {
+      const err = document.getElementById('fechaErr');
+      err.classList.toggle('hidden', e.target.value <= today);
+    });
+
+    document.getElementById('rucProv').addEventListener('blur', (e) => {
+      const v = e.target.value.replace(/\D/g, '');
+      const err = document.getElementById('rucErr');
+      if (!v) { err.classList.add('hidden'); return; }
+      err.classList.toggle('hidden', v.length === 11);
+    });
+
+    const zonaDrop = document.getElementById('zonaDrop');
+    const fileInput = document.getElementById('fileInput');
+
+    function renderPreviewByType(name, kind, src = '') {
+      const preview = document.getElementById('previewArchivo');
+      if (!preview) return;
+      if (kind === 'img') {
+        preview.innerHTML = `<img src="${src}" alt="${name}" class="w-full h-full object-cover">`;
+        return;
+      }
+      preview.innerHTML = `<div class="text-center"><i data-lucide="file-text" class="w-12 h-12 text-danger mx-auto"></i><p class="text-xs font-semibold mt-2">${name}</p><p class="text-[11px] text-ink-muted">Documento PDF</p></div>`;
+    }
+
+    zonaDrop.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f) return;
+      document.getElementById('zonaDrop').classList.add('hidden');
+      document.getElementById('zonaFile').classList.remove('hidden');
+      document.getElementById('nombreArchivo').textContent = f.name;
+      document.getElementById('tamArchivo').textContent = (f.size / 1024).toFixed(0) + ' KB';
+      const isImage = f.type.startsWith('image/');
+      renderPreviewByType(f.name, isImage ? 'img' : 'pdf', isImage ? URL.createObjectURL(f) : '');
+      if (window.lucide) lucide.createIcons();
+    });
+    function quitarArchivo() {
+      fileInput.value = '';
+      document.getElementById('zonaFile').classList.add('hidden');
+      document.getElementById('zonaDrop').classList.remove('hidden');
+      const preview = document.getElementById('previewArchivo');
+      if (preview) preview.innerHTML = '<i data-lucide="file-text" class="w-12 h-12 text-ink-soft"></i>';
+      if (window.lucide) lucide.createIcons();
+    }
+    function addOtroArchivo() { fileInput.click(); }
+
+    function validar() {
+      const fe = document.getElementById('fechaGasto');
+      if (fe.value > today) { showToast('Corrige la fecha del gasto', 'danger'); return false; }
+      if (!document.getElementById('proveedor').value.trim()) { showToast('Indica el proveedor', 'warning'); return false; }
+      if (!document.getElementById('monto').value) { showToast('Indica el monto', 'warning'); return false; }
+      if (!document.getElementById('politica').value) { showToast('Selecciona la política del gasto', 'warning'); switchCreateTab('factura'); return false; }
+      if (!document.getElementById('tipoComprobante').value) { showToast('Selecciona el tipo de factura', 'warning'); switchCreateTab('factura'); return false; }
+      if (!document.getElementById('numeroDocumento').value.trim()) { showToast('Indica el número de documento', 'warning'); switchCreateTab('factura'); return false; }
+      const ruc = document.getElementById('rucProv').value.replace(/\D/g, '');
+      if (ruc && ruc.length !== 11) { showToast('RUC inválido', 'warning'); return false; }
+      return true;
+    }
+
+    function traerDesdeGaleria() {
+      const selected = document.querySelector('.gal-check:checked');
+      if (!selected) { showToast('Selecciona un archivo de galería', 'info'); return; }
+      const [fileName, fileType] = selected.value.split('|');
+      document.getElementById('zonaDrop').classList.add('hidden');
+      document.getElementById('zonaFile').classList.remove('hidden');
+      document.getElementById('nombreArchivo').textContent = fileName;
+      document.getElementById('tamArchivo').textContent = 'Archivo importado desde galería';
+      document.getElementById('galeriaSeleccion').textContent = `Archivo traído: ${fileName}`;
+      if (fileType === 'img') {
+        const seed = encodeURIComponent(fileName);
+        renderPreviewByType(fileName, 'img', `https://picsum.photos/seed/${seed}/960/640`);
+      } else {
+        renderPreviewByType(fileName, 'pdf');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function guardar(modo) {
+      if (!validar()) return;
+      const isEditMode = new URLSearchParams(window.location.search).get('modo') === 'editar';
+      showToast(isEditMode ? 'Gasto actualizado correctamente' : 'Gasto guardado correctamente', 'success');
+      if (isEditMode) localStorage.removeItem('rgEditGasto');
+      if (modo === 'final') setTimeout(() => { location.href = 'gastos-listar.html'; }, 600);
+    }
+
+    function initEditMode() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('modo') !== 'editar') return;
+      const raw = localStorage.getItem('rgEditGasto');
+      if (!raw) return;
+      let g = null;
+      try { g = JSON.parse(raw); } catch (_) { return; }
+      if (!g) return;
+
+      document.getElementById('breadcrumbMode').innerHTML = '<a href="gastos-listar.html" class="text-primary hover:underline">Mis gastos</a> / Editar gasto';
+      document.getElementById('formTitle').textContent = 'Editar gasto';
+      document.getElementById('formSubtitle').textContent = `Código ${g.code || ''} · Actualiza la información del gasto`;
+      document.getElementById('btnGuardarFinal').textContent = 'Actualizar gasto';
+
+      document.getElementById('proveedor').value = g.supplier || '';
+      document.getElementById('fechaGasto').value = g.fecha || today;
+      document.getElementById('categoria').value = g.cat || '';
+      document.getElementById('monto').value = g.monto || '';
+      const polKey = (g.politicaKey && POLITICAS_CONFIG[g.politicaKey]) ? g.politicaKey : inferPolicyKeyFromText(g.politica || '');
+      document.getElementById('politica').value = polKey;
+      onPoliticaChange();
+      if (g.impuestoId) {
+        const impSel = document.getElementById('impuestoPolitica');
+        if ([...impSel.options].some((o) => o.value === g.impuestoId)) impSel.value = g.impuestoId;
+      }
+      actualizarImpuestoDesdePolitica();
+      const tipoEl = document.getElementById('tipoComprobante');
+      const tipoRaw = (g.tipoDoc || '').toLowerCase();
+      const tipoMatch = Array.from(tipoEl.options).find((o) => o.text.toLowerCase().includes(tipoRaw));
+      tipoEl.value = tipoMatch ? tipoMatch.value : '';
+      document.getElementById('numeroDocumento').value = g.doc || '';
+      document.getElementById('rucProv').value = g.rucP || '';
+      document.getElementById('nota').value = g.nota || '';
+      document.getElementById('notaCount').textContent = (g.nota || '').length;
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function collapseOtherSidebarGroups() {
+      ['aprobador', 'administrador'].forEach((g) => {
+        const items = document.querySelector(`[data-group="${g}"] .group-items`);
+        const icon = document.querySelector(`[data-group="${g}"] .group-icon`);
+        if (items) items.classList.add('hidden');
+        if (icon) icon.classList.remove('rotate-90');
+      });
+      const rItems = document.querySelector('[data-group="rendidor"] .group-items');
+      const rIcon = document.querySelector('[data-group="rendidor"] .group-icon');
+      if (rItems) rItems.classList.remove('hidden');
+      if (rIcon) rIcon.classList.add('rotate-90');
+    }
+
+    initLayout('MIS GASTOS / NUEVO GASTO SIMPLE', '../components').then(() => {
+      collapseOtherSidebarGroups();
+      switchCreateTab('factura');
+      initEditMode();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
