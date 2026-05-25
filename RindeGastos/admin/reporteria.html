@@ -1,25 +1,897 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rinde Gastos | Reportería</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>tailwind=window.tailwind||{};tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']},colors:{primary:{DEFAULT:'#6B5BFF',light:'#EDE9FE',dark:'#5849D6'},success:{DEFAULT:'#22C55E',light:'#D1FAE5'},danger:{DEFAULT:'#EF4444',light:'#FEE2E2'},warning:{DEFAULT:'#F59E0B',light:'#FEF3C7'},info:{DEFAULT:'#3B82F6',light:'#DBEAFE'},ink:{DEFAULT:'#1F2937',muted:'#6B7280',soft:'#9CA3AF'},border:'#E5E7EB',bg:'#F5F7FA'}}}};</script>
-  <script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="../assets/css/custom.css">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+  <style>
+    .rep-row:hover { background: #F8F7FF; }
+    .rep-sort-btn { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+    .rep-sort-btn:hover { color: #6B5BFF; }
+    .rep-sort-icon { width: 12px; height: 12px; opacity: .55; }
+    .rep-sort-btn.active .rep-sort-icon { opacity: 1; color: #6B5BFF; }
+    .rep-pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+    .rep-pill--cerrado { background: #DDF8EC; color: #16A34A; }
+    .rep-pill--pagado { background: #DBEAFE; color: #1D4ED8; }
+    .rep-pill--proceso { background: #FEF3C7; color: #B45309; }
+    .rep-pill--observado { background: #FFE4D6; color: #C2410C; }
+    .rep-pill--cancelado { background: #F3F4F6; color: #6B7280; }
+    .rep-fondo-pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 8px; background: #EDE9FE; color: #5849D6; font-weight: 700; font-size: 11px; cursor: pointer; }
+    .rep-fondo-pill:hover { background: #DDD6FE; }
+    .rep-rendidor-link { color: #1F2937; font-weight: 600; }
+    .rep-rendidor-link:hover { color: #6B5BFF; text-decoration: underline; }
+    .rep-kpi-trend { font-size: 11px; font-weight: 600; }
+    .rep-export-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; box-shadow: 0 12px 28px rgba(15,23,42,.12); min-width: 200px; z-index: 30; padding: 6px; }
+    .rep-export-menu.open { display: block; }
+    .rep-export-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475066; cursor: pointer; }
+    .rep-export-item:hover { background: #F4F5F9; color: #1F2937; }
+    .rep-date-range { display: none; gap: 8px; }
+    .rep-date-range.show { display: flex; }
+    .rep-progress { height: 6px; background: #E5E7EB; border-radius: 999px; overflow: hidden; margin-top: 6px; }
+    .rep-progress-fill { height: 100%; background: linear-gradient(90deg,#6B5BFF,#8B7BFF); border-radius: 999px; }
+    .rep-empty { text-align: center; padding: 48px 16px; color: #8B93A8; }
+    .rep-gasto-row td { padding: 8px 10px; font-size: 12px; border-bottom: 1px solid #F1F2F7; }
+    .rep-mini-card { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; }
+    .rep-mini-card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6B7280; letter-spacing: .04em; }
+    .rep-mini-card .val { font-size: 16px; font-weight: 700; color: #1F2937; margin-top: 2px; }
+    .rep-action-link { font-weight: 600; color: #6B5BFF; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background .15s ease; display: inline-flex; align-items: center; gap: 4px; }
+    .rep-action-link:hover { background: #EDE9FE; color: #5849D6; }
+    .rep-flujo-step { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: #F8FAFC; border: 1px solid #E2E8F0; }
+    .rep-flujo-step.done { background: #ECFDF5; border-color: #A7F3D0; }
+    .rep-flujo-step.active { background: #EDE9FE; border-color: #C4B5FD; }
+    .rep-flujo-dot { width: 22px; height: 22px; border-radius: 999px; background: #E5E7EB; color: #6B7280; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .rep-flujo-step.done .rep-flujo-dot { background: #16A34A; color: #fff; }
+    .rep-flujo-step.active .rep-flujo-dot { background: #6B5BFF; color: #fff; }
+  </style>
 </head>
 <body class="bg-[#F5F7FA] text-ink font-sans min-h-screen">
-<div id="sidebar-mount"></div><div id="header-mount"></div>
+<div id="sidebar-mount"></div>
+<div id="header-mount"></div>
+
 <main class="ml-0 md:ml-[220px] pt-16 min-h-screen px-3 py-3 space-y-3">
-  <div class="theme-surface rd-card p-4"><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-7 gap-2"><select class="rd-select h-10 px-3 text-sm uppercase"><option>ESTE MES</option><option>ESTE AÑO</option><option>ÚLTIMOS 3 MESES</option><option>RANGO</option></select><select class="rd-select h-10 px-3 text-sm uppercase"><option>TODOS LOS RENDIDORES</option></select><select class="rd-select h-10 px-3 text-sm uppercase"><option>TODAS LAS POLÍTICAS</option></select><select class="rd-select h-10 px-3 text-sm uppercase"><option>TODOS LOS FONDOS</option><option>FX-001 · FXR Mayo Ana</option><option>FX-002 · Viaje Cusco</option><option>FX-003 · USD Gerencia</option><option>SIN FONDO (REEMBOLSO)</option></select><select class="rd-select h-10 px-3 text-sm uppercase"><option>TODOS LOS ESTADOS</option></select><button class="btn btn-primary h-10"><i data-lucide="search" class="w-3.5 h-3.5"></i> APLICAR FILTROS</button><button class="btn btn-outline h-10"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> EXPORTAR REPORTE</button></div><p class="text-xs text-ink-muted mt-2">Los informes tipo <strong>Fondo x rendir</strong> muestran el código de fondo asignado; los de <strong>Reembolso</strong> no llevan fondo.</p></div>
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-    <article class="theme-surface kpi-card kpi-primary"><p class="kpi-value text-3xl">S/ 48,250</p><p class="kpi-title">Total aprobado</p><p class="kpi-subtitle">Este mes</p></article>
-    <article class="theme-surface kpi-card kpi-success"><p class="kpi-value">89</p><p class="kpi-title">Informes cerrados</p><p class="kpi-subtitle">Este mes</p></article>
-    <article class="theme-surface kpi-card" style="border-left:3px solid #F59E0B"><p class="kpi-value text-3xl" style="color:#F59E0B">S/ 3,200</p><p class="kpi-title">Pendiente de pago</p><p class="kpi-subtitle">Informes cerrados sin pagar</p></article>
-    <article class="theme-surface kpi-card" style="border-left:3px solid #3B82F6"><p class="kpi-value" style="color:#3B82F6">12</p><p class="kpi-title">En proceso</p><p class="kpi-subtitle">Informes activos ahora</p></article>
+
+  <!-- Header de la página -->
+  <div class="theme-surface rd-card p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <div>
+      <h1 class="table-panel-title">Reportería de informes</h1>
+      <p class="table-panel-subtitle">Monitorea informes aprobados, pagados y en proceso · Exporta para contabilidad</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="btn btn-outline h-10" onclick="resetFiltros()" title="Limpiar todos los filtros"><i data-lucide="filter-x" class="w-3.5 h-3.5"></i> Limpiar filtros</button>
+      <button class="btn btn-outline h-10" onclick="renderAll(); showToast('Datos actualizados','info')" title="Actualizar"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Actualizar</button>
+      <div class="relative">
+        <button class="btn btn-primary h-10" onclick="toggleExportMenu()"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Exportar reporte <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
+        <div id="exportMenu" class="rep-export-menu">
+          <div class="rep-export-item" onclick="exportCSV(); closeExportMenu()"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar CSV (filtrado)</div>
+          <div class="rep-export-item" onclick="exportJSON(); closeExportMenu()"><i data-lucide="braces" class="w-4 h-4"></i> Exportar JSON</div>
+          <div class="rep-export-item" onclick="window.print(); closeExportMenu()"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir resumen</div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="theme-surface rd-card overflow-hidden"><div class="px-4 py-3 border-b border-border"><h2 class="table-panel-title">Detalle de informes</h2></div><div class="px-2 pb-2 overflow-x-auto"><table class="rd-table w-full min-w-[1280px]"><thead><tr class="text-left border-b border-[#E5E7EF]"><th class="py-2.5 px-2">Nro</th><th class="py-2.5 px-2">Rendidor</th><th class="py-2.5 px-2">Política</th><th class="py-2.5 px-2">Tipo</th><th class="py-2.5 px-2">Fondo</th><th class="py-2.5 px-2">Fecha envío</th><th class="py-2.5 px-2">Monto total</th><th class="py-2.5 px-2">Monto aprobado</th><th class="py-2.5 px-2">Estado</th><th class="py-2.5 px-2 text-right">Acciones</th></tr></thead><tbody><tr class="border-b"><td class="py-2 px-2">IR-00089</td><td class="py-2 px-2">Ana Guevara</td><td class="py-2 px-2">Política General PEN</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">28/04/2026</td><td class="py-2 px-2">S/455.50</td><td class="py-2 px-2">S/430.00</td><td class="py-2 px-2"><span class="status-pill status-active">CERRADO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00088</td><td class="py-2 px-2">Carlos Mendoza</td><td class="py-2 px-2">Política General PEN</td><td class="py-2 px-2">Fondo x Rendir</td><td class="py-2 px-2"><span class="text-xs font-semibold text-primary">FX-002</span></td><td class="py-2 px-2">25/04/2026</td><td class="py-2 px-2">S/1,200.00</td><td class="py-2 px-2">S/1,200.00</td><td class="py-2 px-2"><span class="text-[10px] bg-info-light text-info px-2 py-0.5 rounded">PAGADO</span></td><td class="py-2 px-2 text-right"><a href="fondos-listar.html" class="text-primary font-semibold">Fondo</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00087</td><td class="py-2 px-2">Pedro Morales</td><td class="py-2 px-2">Política Gerencia</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">22/04/2026</td><td class="py-2 px-2">S/2,300.00</td><td class="py-2 px-2">—</td><td class="py-2 px-2"><span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded">EN PROCESO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00086</td><td class="py-2 px-2">Rosa Flores</td><td class="py-2 px-2">Política General PEN</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">20/04/2026</td><td class="py-2 px-2">S/820.00</td><td class="py-2 px-2">S/810.00</td><td class="py-2 px-2"><span class="status-pill status-active">CERRADO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00085</td><td class="py-2 px-2">Luis Ramos</td><td class="py-2 px-2">Política USD Internacional</td><td class="py-2 px-2">Fondo x Rendir</td><td class="py-2 px-2"><span class="text-xs font-semibold text-primary">FX-003</span></td><td class="py-2 px-2">18/04/2026</td><td class="py-2 px-2">S/5,200.00</td><td class="py-2 px-2">S/5,000.00</td><td class="py-2 px-2"><span class="text-[10px] bg-info-light text-info px-2 py-0.5 rounded">PAGADO</span></td><td class="py-2 px-2 text-right"><a href="fondos-listar.html" class="text-primary font-semibold">Fondo</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00084</td><td class="py-2 px-2">María Torres</td><td class="py-2 px-2">Política General PEN</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">15/04/2026</td><td class="py-2 px-2">S/1,050.00</td><td class="py-2 px-2">S/980.00</td><td class="py-2 px-2"><span class="status-pill status-active">CERRADO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr><tr class="border-b"><td class="py-2 px-2">IR-00083</td><td class="py-2 px-2">Jorge Paredes</td><td class="py-2 px-2">Política Gerencia</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">13/04/2026</td><td class="py-2 px-2">S/3,950.00</td><td class="py-2 px-2">—</td><td class="py-2 px-2"><span class="text-[10px] bg-warning-light text-warning px-2 py-0.5 rounded">EN PROCESO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr><tr><td class="py-2 px-2">IR-00082</td><td class="py-2 px-2">Beatriz Torres</td><td class="py-2 px-2">Política General PEN</td><td class="py-2 px-2">Reembolso</td><td class="py-2 px-2"><span class="text-ink-muted">—</span></td><td class="py-2 px-2">10/04/2026</td><td class="py-2 px-2">S/1,120.00</td><td class="py-2 px-2">S/1,100.00</td><td class="py-2 px-2"><span class="status-pill status-active">CERRADO</span></td><td class="py-2 px-2 text-right"><a href="#" class="text-primary font-semibold">Ver</a></td></tr></tbody></table></div><div class="px-4 py-3 border-t border-border text-sm text-ink-muted">Total mostrado: <strong>S/ 48,250.00</strong> aprobado de <strong>S/ 52,100.00</strong> solicitado</div></div>
+
+  <!-- Filtros -->
+  <div class="theme-surface rd-card p-4 space-y-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-2">
+      <select id="fPeriodo" class="rd-select h-10 px-3 text-sm uppercase">
+        <option value="mes">Este mes</option>
+        <option value="anio">Este año</option>
+        <option value="3meses">Últimos 3 meses</option>
+        <option value="todos" selected>Todos los períodos</option>
+        <option value="rango">Rango personalizado</option>
+      </select>
+      <select id="fRendidor" class="rd-select h-10 px-3 text-sm uppercase"><option value="">Todos los rendidores</option></select>
+      <select id="fPolitica" class="rd-select h-10 px-3 text-sm uppercase"><option value="">Todas las políticas</option></select>
+      <select id="fFondo" class="rd-select h-10 px-3 text-sm uppercase">
+        <option value="">Todos los fondos</option>
+        <option value="con_fondo">Con fondo asignado</option>
+        <option value="sin_fondo">Sin fondo (reembolso)</option>
+      </select>
+      <select id="fEstado" class="rd-select h-10 px-3 text-sm uppercase">
+        <option value="">Todos los estados</option>
+        <option value="EN_PROCESO">En proceso</option>
+        <option value="OBSERVADO">Observado</option>
+        <option value="CERRADO">Cerrado</option>
+        <option value="PAGADO">Pagado</option>
+        <option value="CANCELADO">Cancelado</option>
+      </select>
+      <label class="relative">
+        <i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i>
+        <input id="fBusqueda" class="rd-input h-10 w-full pl-9 pr-3 text-sm uppercase" placeholder="BUSCAR (Nº, RENDIDOR, FONDO...)">
+      </label>
+    </div>
+    <div id="fRangoFechas" class="rep-date-range">
+      <div class="flex-1">
+        <label class="rd-label block mb-1">Desde</label>
+        <input id="fDesde" type="date" class="rd-input h-10 w-full px-3">
+      </div>
+      <div class="flex-1">
+        <label class="rd-label block mb-1">Hasta</label>
+        <input id="fHasta" type="date" class="rd-input h-10 w-full px-3">
+      </div>
+    </div>
+    <p class="text-xs text-ink-muted">Los informes <strong>Fondo x rendir</strong> muestran el código del fondo asignado; los de <strong>Reembolso</strong> no llevan fondo.</p>
+  </div>
+
+  <!-- KPIs reactivos -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+    <article class="theme-surface kpi-card kpi-primary">
+      <p id="kpiTotal" class="kpi-value text-3xl">S/ 0</p>
+      <p class="kpi-title">Total aprobado</p>
+      <p id="kpiTotalSub" class="kpi-subtitle">—</p>
+    </article>
+    <article class="theme-surface kpi-card kpi-success">
+      <p id="kpiCerrados" class="kpi-value">0</p>
+      <p class="kpi-title">Informes cerrados</p>
+      <p id="kpiCerradosSub" class="kpi-subtitle">—</p>
+    </article>
+    <article class="theme-surface kpi-card" style="border-left:3px solid #F59E0B">
+      <p id="kpiPendiente" class="kpi-value text-3xl" style="color:#F59E0B">S/ 0</p>
+      <p class="kpi-title">Pendiente de pago</p>
+      <p class="kpi-subtitle">Cerrados sin pagar</p>
+    </article>
+    <article class="theme-surface kpi-card" style="border-left:3px solid #3B82F6">
+      <p id="kpiProceso" class="kpi-value" style="color:#3B82F6">0</p>
+      <p class="kpi-title">En proceso</p>
+      <p class="kpi-subtitle">Informes activos ahora</p>
+    </article>
+  </div>
+
+  <!-- Tabla de detalle -->
+  <div class="theme-surface rd-card overflow-hidden">
+    <div class="px-4 py-3 border-b border-border flex items-center justify-between gap-2 flex-wrap">
+      <h2 class="table-panel-title">Detalle de informes</h2>
+      <p id="resumenFiltro" class="text-xs text-ink-muted">—</p>
+    </div>
+    <div class="px-2 pb-2 overflow-x-auto">
+      <table class="rd-table w-full min-w-[1280px]">
+        <thead>
+          <tr class="text-left border-b border-[#E5E7EF]">
+            <th class="py-2.5 px-2"><span class="rep-sort-btn" data-sort="nro">Nro <i data-lucide="arrow-up-down" class="rep-sort-icon"></i></span></th>
+            <th class="py-2.5 px-2"><span class="rep-sort-btn" data-sort="rendidor">Rendidor <i data-lucide="arrow-up-down" class="rep-sort-icon"></i></span></th>
+            <th class="py-2.5 px-2">Política</th>
+            <th class="py-2.5 px-2">Tipo</th>
+            <th class="py-2.5 px-2">Fondo</th>
+            <th class="py-2.5 px-2"><span class="rep-sort-btn" data-sort="fechaEnvio">Fecha envío <i data-lucide="arrow-up-down" class="rep-sort-icon"></i></span></th>
+            <th class="py-2.5 px-2 text-right"><span class="rep-sort-btn" data-sort="total">Monto total <i data-lucide="arrow-up-down" class="rep-sort-icon"></i></span></th>
+            <th class="py-2.5 px-2 text-right"><span class="rep-sort-btn" data-sort="aprobado">Monto aprobado <i data-lucide="arrow-up-down" class="rep-sort-icon"></i></span></th>
+            <th class="py-2.5 px-2">Estado</th>
+            <th class="py-2.5 px-2 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="repTbody"></tbody>
+      </table>
+    </div>
+    <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+      <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+        <span>Elementos por página:</span>
+        <select id="repRowsPerPage" class="rd-select h-8 px-2 text-sm">
+          <option>10</option><option selected>15</option><option>25</option><option>50</option>
+        </select>
+      </div>
+      <div id="repRange" class="text-sm text-ink-muted">0-0 de 0</div>
+      <div class="inline-flex items-center gap-2">
+        <button id="repFirst" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+        <button id="repPrev" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(page-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+        <span id="repPageInfo" class="text-sm text-ink-muted px-2">1 / 1</span>
+        <button id="repNext" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(page+1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        <button id="repLast" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+  </div>
 </main>
-<script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/components-loader.js"></script><script src="../assets/js/ui.js"></script>
-<script>initLayout('RINDE GASTOS / REPORTERÍA', '../components').then(()=>{if(window.lucide)lucide.createIcons();});</script>
-</body></html>
+
+<!-- MODAL: Detalle del informe -->
+<div id="modal-ver-informe" data-modal class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+  <div class="w-full max-w-4xl bg-white border border-border rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="rd-modal-header bg-gradient-to-r from-primary-light/60 via-info-light/40 to-success-light/40 border-b border-primary/15">
+      <div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+          <h3 id="miTitle" class="rd-modal-title">VISTA DETALLE DEL INFORME</h3>
+        </div>
+        <p id="miSubtitle" class="rd-modal-subtitle">—</p>
+      </div>
+      <button class="rd-modal-close bg-white/80" onclick="closeModal('modal-ver-informe')"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <div class="p-5 overflow-y-auto space-y-4 bg-[#FCFCFE]">
+      <!-- Cabecera con estado y monto -->
+      <div class="rd-card p-4 border border-primary/15 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold uppercase text-ink-muted">Número de informe</p>
+          <p id="miNro" class="text-xl font-extrabold text-primary mt-1">—</p>
+          <p id="miPolitica" class="text-xs text-ink-muted mt-1 uppercase">—</p>
+        </div>
+        <div class="text-right">
+          <span id="miEstado" class="rep-pill">—</span>
+          <p id="miTotal" class="text-2xl font-extrabold text-ink mt-2">—</p>
+          <p id="miAprobado" class="text-xs text-ink-muted">—</p>
+        </div>
+      </div>
+
+      <!-- Mini cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="rep-mini-card">
+          <p class="lbl">Rendidor</p>
+          <p id="miRendidor" class="val text-sm">—</p>
+        </div>
+        <div class="rep-mini-card">
+          <p class="lbl">Tipo</p>
+          <p id="miTipo" class="val text-sm">—</p>
+        </div>
+        <div class="rep-mini-card">
+          <p class="lbl">Fondo</p>
+          <p id="miFondo" class="val text-sm">—</p>
+        </div>
+        <div class="rep-mini-card">
+          <p class="lbl">Fecha envío</p>
+          <p id="miFecha" class="val text-sm">—</p>
+        </div>
+      </div>
+
+      <!-- Tabla de gastos -->
+      <div class="rd-card border border-border">
+        <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h4 class="text-sm font-bold uppercase text-ink">Gastos incluidos</h4>
+          <span id="miGastosCount" class="text-xs text-ink-muted">—</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr class="text-left border-b border-border bg-bg text-xs uppercase text-ink-muted">
+                <th class="py-2 px-3">Proveedor</th>
+                <th class="py-2 px-3">Categoría</th>
+                <th class="py-2 px-3">Fecha</th>
+                <th class="py-2 px-3 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody id="miGastos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Flujo / historial resumido -->
+      <div class="rd-card border border-info/20 p-4 bg-gradient-to-br from-info-light/15 to-white">
+        <h4 class="text-sm font-bold uppercase text-info mb-3">Flujo de revisión</h4>
+        <div id="miFlujo" class="grid grid-cols-1 md:grid-cols-4 gap-2"></div>
+      </div>
+    </div>
+
+    <div class="rd-modal-footer px-5 py-3 bg-white border-t border-border flex-wrap gap-2">
+      <button type="button" class="btn btn-muted" onclick="closeModal('modal-ver-informe')">Cerrar</button>
+      <button type="button" class="btn btn-outline" onclick="exportInformeActual()"><i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar este informe</button>
+      <button type="button" id="miBtnFondo" class="btn btn-primary hidden" onclick="abrirFondoDesdeInforme()"><i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i> Ver fondo asignado</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Detalle del fondo -->
+<div id="modal-ver-fondo" data-modal class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+  <div class="w-full max-w-3xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div class="rd-modal-header bg-gradient-to-r from-primary-light/60 via-info-light/40 to-success-light/40 border-b border-primary/15">
+      <div>
+        <span id="mfCode" class="text-xs bg-primary text-white px-2 py-1 rounded font-semibold">—</span>
+        <h3 id="mfName" class="rd-modal-title mt-2">—</h3>
+        <span id="mfEstado" class="status-pill status-active mt-1">—</span>
+      </div>
+      <button class="rd-modal-close bg-white/80" onclick="closeModal('modal-ver-fondo')"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <div class="p-5 overflow-y-auto space-y-3 bg-[#FCFCFE]">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div class="rd-card p-3 border border-primary/15">
+          <p class="rd-label mb-2 text-primary">Información general</p>
+          <p class="text-sm"><strong>RENDIDOR:</strong> <span id="mfRendidor">—</span></p>
+          <p class="text-sm"><strong>MONEDA:</strong> <span id="mfMoneda">—</span></p>
+          <p class="text-sm"><strong>TIPO:</strong> Fondo por Rendir</p>
+          <p class="text-sm"><strong>CREADO:</strong> <span id="mfCreado">—</span></p>
+        </div>
+        <div class="rd-card p-3 border border-success/20">
+          <p class="rd-label mb-2 text-success">Resumen de saldo</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div><p id="mfInicial" class="text-xl font-bold text-primary">—</p><p class="text-xs uppercase text-ink-muted">Monto inicial</p></div>
+            <div>
+              <p id="mfDisponible" class="text-xl font-bold text-success">—</p>
+              <p class="text-xs uppercase text-ink-muted">Disponible</p>
+              <div class="rep-progress"><div id="mfBarra" class="rep-progress-fill" style="width:0%"></div></div>
+            </div>
+            <div><p id="mfCargado" class="text-xl font-bold text-danger">—</p><p class="text-xs uppercase text-ink-muted">Cargado</p></div>
+            <div><p id="mfRevision" class="text-xl font-bold text-warning">—</p><p class="text-xs uppercase text-ink-muted">En revisión</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rd-card p-3 border border-info/20 bg-gradient-to-br from-info-light/15 to-white">
+        <p class="rd-label mb-2 text-info">Informes vinculados a este fondo</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="border-b text-ink-muted">
+                <th class="text-left py-2 font-bold">NRO</th>
+                <th class="text-left py-2 font-bold">RENDIDOR</th>
+                <th class="text-left py-2 font-bold">ENVÍO</th>
+                <th class="text-right py-2 font-bold">TOTAL</th>
+                <th class="text-right py-2 font-bold">APROB.</th>
+                <th class="text-left py-2 font-bold pl-3">ESTADO</th>
+                <th class="text-right py-2 font-bold">ACCIÓN</th>
+              </tr>
+            </thead>
+            <tbody id="mfInformes"></tbody>
+          </table>
+        </div>
+        <p id="mfResumen" class="text-xs text-ink-muted mt-2">—</p>
+      </div>
+    </div>
+
+    <div class="rd-modal-footer px-5 py-3 bg-white border-t border-border">
+      <button type="button" class="btn btn-muted" onclick="closeModal('modal-ver-fondo')">Cerrar</button>
+      <a href="fondos-listar.html" class="btn btn-outline"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Ir a gestión de fondos</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="../assets/js/components-loader.js"></script>
+<script src="../assets/js/ui.js"></script>
+<script>
+/* ============================================================
+   DATOS MOCK - Reportería de informes
+   ============================================================ */
+const FONDOS = [
+  { code: 'FX-001', name: 'FXR - Mayo - Ana',         rendidor: 'Ana Guevara',     moneda: 'PEN', inicial: 2000, disponible: 1200, cargado: 500,  revision: 300, estado: 'ACTIVO',     creado: '01/05/2026' },
+  { code: 'FX-002', name: 'Fondo Viaje Cusco',        rendidor: 'Carlos Mendoza',  moneda: 'PEN', inicial: 1500, disponible: 150,  cargado: 1350, revision: 0,   estado: 'ACTIVO',     creado: '15/04/2026' },
+  { code: 'FX-003', name: 'Fondo USD - Gerencia',     rendidor: 'Luis Ramos',      moneda: 'USD', inicial: 500,  disponible: 250,  cargado: 250,  revision: 0,   estado: 'ACTIVO',     creado: '10/04/2026' },
+  { code: 'FX-004', name: 'FXR - Abril - María',      rendidor: 'María Torres',    moneda: 'PEN', inicial: 800,  disponible: 800,  cargado: 0,    revision: 0,   estado: 'ACTIVO',     creado: '01/04/2026' },
+  { code: 'FX-006', name: 'FXR - Marzo - Rosa',       rendidor: 'Rosa Flores',     moneda: 'PEN', inicial: 600,  disponible: 200,  cargado: 400,  revision: 0,   estado: 'ACTIVO',     creado: '01/03/2026' }
+];
+
+const POLITICAS = [
+  'POL-001 · Política General PEN',
+  'POL-002 · Política Gerencia',
+  'POL-003 · Política USD Internacional',
+  'POL-004 · Política Viajes'
+];
+
+const RENDIDORES = ['Ana Guevara', 'Carlos Mendoza', 'Pedro Morales', 'Rosa Flores', 'Luis Ramos', 'María Torres', 'Jorge Paredes', 'Beatriz Torres'];
+
+const PROVEEDORES_POOL = [
+  ['Taxi Beat',           'Movilidad'],
+  ['Uber',                'Movilidad'],
+  ['Restaurante El Cordano','Alimentación'],
+  ['Café Z',              'Alimentación'],
+  ['Wong',                'Suministros'],
+  ['Plaza Vea',           'Suministros'],
+  ['Hotel Casa Andina',   'Hospedaje'],
+  ['Latam Airlines',      'Pasajes'],
+  ['Star Perú',           'Pasajes'],
+  ['Sodexo',              'Alimentación'],
+  ['Office Depot',        'Materiales'],
+  ['Tai Loy',             'Materiales']
+];
+
+function gastosFor(total, n) {
+  // genera n filas que sumen aprox 'total'
+  const out = [];
+  let restante = total;
+  for (let i = 0; i < n; i++) {
+    const p = PROVEEDORES_POOL[Math.floor((i * 7 + n) % PROVEEDORES_POOL.length)];
+    const monto = i === n - 1 ? +restante.toFixed(2) : +(restante * (0.25 + (i % 3) * 0.10)).toFixed(2);
+    restante = +(restante - monto).toFixed(2);
+    out.push({ proveedor: p[0], categoria: p[1], fecha: '—', monto: Math.max(monto, 1) });
+  }
+  return out;
+}
+
+// 24 informes de prueba con datos variados
+const INFORMES = [
+  { nro:'IR-00089', rendidor:'Ana Guevara',     politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-28', total:455.50,   aprobado:430.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00088', rendidor:'Carlos Mendoza',  politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-002',fechaEnvio:'2026-04-25', total:1200.00,  aprobado:1200.00,  moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00087', rendidor:'Pedro Morales',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-22', total:2300.00,  aprobado:null,     moneda:'PEN', estado:'EN_PROCESO',gastos:null },
+  { nro:'IR-00086', rendidor:'Rosa Flores',     politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-20', total:820.00,   aprobado:810.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00085', rendidor:'Luis Ramos',      politica:'POL-003 · Política USD Internacional',tipo:'fondo',    fondoCode:'FX-003',fechaEnvio:'2026-04-18', total:5200.00,  aprobado:5000.00,  moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00084', rendidor:'María Torres',    politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-15', total:1050.00,  aprobado:980.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00083', rendidor:'Jorge Paredes',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-13', total:3950.00,  aprobado:null,     moneda:'PEN', estado:'EN_PROCESO',gastos:null },
+  { nro:'IR-00082', rendidor:'Beatriz Torres',  politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-04-10', total:1120.00,  aprobado:1100.00,  moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00081', rendidor:'Ana Guevara',     politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-001',fechaEnvio:'2026-04-08', total:500.00,   aprobado:500.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00080', rendidor:'Carlos Mendoza',  politica:'POL-004 · Política Viajes',          tipo:'fondo',     fondoCode:'FX-002',fechaEnvio:'2026-04-05', total:300.00,   aprobado:null,     moneda:'PEN', estado:'OBSERVADO', gastos:null },
+  { nro:'IR-00079', rendidor:'Rosa Flores',     politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-006',fechaEnvio:'2026-04-02', total:400.00,   aprobado:400.00,   moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00078', rendidor:'Pedro Morales',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-03-30', total:680.00,   aprobado:680.00,   moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00077', rendidor:'Luis Ramos',      politica:'POL-003 · Política USD Internacional',tipo:'reembolso',fondoCode:null,    fechaEnvio:'2026-03-28', total:2750.00,  aprobado:2600.00,  moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00076', rendidor:'María Torres',    politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-03-25', total:200.00,   aprobado:null,     moneda:'PEN', estado:'CANCELADO', gastos:null },
+  { nro:'IR-00075', rendidor:'Ana Guevara',     politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-001',fechaEnvio:'2026-03-22', total:800.00,   aprobado:null,     moneda:'PEN', estado:'EN_PROCESO',gastos:null },
+  { nro:'IR-00074', rendidor:'Jorge Paredes',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-03-18', total:1450.00,  aprobado:1450.00,  moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00073', rendidor:'Beatriz Torres',  politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-03-15', total:730.00,   aprobado:710.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00072', rendidor:'Carlos Mendoza',  politica:'POL-004 · Política Viajes',          tipo:'fondo',     fondoCode:'FX-002',fechaEnvio:'2026-03-12', total:1800.00,  aprobado:1750.00,  moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00071', rendidor:'Rosa Flores',     politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-006',fechaEnvio:'2026-03-10', total:280.00,   aprobado:280.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00070', rendidor:'Pedro Morales',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-03-05', total:560.00,   aprobado:560.00,   moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00069', rendidor:'Ana Guevara',     politica:'POL-001 · Política General PEN',     tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-02-28', total:380.00,   aprobado:380.00,   moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00068', rendidor:'María Torres',    politica:'POL-001 · Política General PEN',     tipo:'fondo',     fondoCode:'FX-004',fechaEnvio:'2026-02-22', total:600.00,   aprobado:600.00,   moneda:'PEN', estado:'PAGADO',    gastos:null },
+  { nro:'IR-00067', rendidor:'Luis Ramos',      politica:'POL-003 · Política USD Internacional',tipo:'reembolso',fondoCode:null,    fechaEnvio:'2026-02-18', total:920.00,   aprobado:920.00,   moneda:'PEN', estado:'CERRADO',   gastos:null },
+  { nro:'IR-00066', rendidor:'Jorge Paredes',   politica:'POL-002 · Política Gerencia',        tipo:'reembolso', fondoCode:null,    fechaEnvio:'2026-02-12', total:1230.00,  aprobado:null,     moneda:'PEN', estado:'OBSERVADO', gastos:null }
+];
+
+// Genera gastos sintéticos para cada informe (lazy)
+INFORMES.forEach(inf => { inf.gastos = gastosFor(inf.total, 3 + (inf.nro.charCodeAt(5) % 3)); });
+
+/* ============================================================
+   ESTADO Y UTILIDADES
+   ============================================================ */
+let page = 1, lastPage = 1, pageSize = 15;
+let sortField = 'fechaEnvio', sortDir = 'desc';
+let currentInformeNro = null;
+
+const money = (v) => `S/ ${Number(v||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+const ESTADO_MAP = {
+  CERRADO:   { c: 'rep-pill--cerrado',   t: 'Cerrado' },
+  PAGADO:    { c: 'rep-pill--pagado',    t: 'Pagado' },
+  EN_PROCESO:{ c: 'rep-pill--proceso',   t: 'En proceso' },
+  OBSERVADO: { c: 'rep-pill--observado', t: 'Observado' },
+  CANCELADO: { c: 'rep-pill--cancelado', t: 'Cancelado' }
+};
+function estadoPill(estado) {
+  const cfg = ESTADO_MAP[estado] || { c: 'rep-pill--cancelado', t: estado };
+  return `<span class="rep-pill ${cfg.c}">${cfg.t}</span>`;
+}
+
+function tipoLabel(t) {
+  return t === 'fondo' ? 'Fondo x Rendir' : 'Reembolso';
+}
+
+function periodoIncluye(inf, periodo, desde, hasta) {
+  if (periodo === 'todos') return true;
+  const f = new Date(inf.fechaEnvio + 'T00:00:00');
+  const hoy = new Date('2026-05-20'); // fecha de referencia del mockup
+  if (periodo === 'mes') {
+    return f.getFullYear() === hoy.getFullYear() && f.getMonth() === hoy.getMonth();
+  }
+  if (periodo === 'anio') {
+    return f.getFullYear() === hoy.getFullYear();
+  }
+  if (periodo === '3meses') {
+    const limite = new Date(hoy); limite.setMonth(limite.getMonth() - 3);
+    return f >= limite;
+  }
+  if (periodo === 'rango') {
+    if (desde && f < new Date(desde + 'T00:00:00')) return false;
+    if (hasta && f > new Date(hasta + 'T23:59:59')) return false;
+    return true;
+  }
+  return true;
+}
+
+/* ============================================================
+   FILTRO + ORDEN + PAGINACIÓN
+   ============================================================ */
+function aplicarFiltros() {
+  const periodo = document.getElementById('fPeriodo').value;
+  const rendidor = document.getElementById('fRendidor').value;
+  const politica = document.getElementById('fPolitica').value;
+  const fondo = document.getElementById('fFondo').value;
+  const estado = document.getElementById('fEstado').value;
+  const q = document.getElementById('fBusqueda').value.trim().toLowerCase();
+  const desde = document.getElementById('fDesde').value;
+  const hasta = document.getElementById('fHasta').value;
+
+  let data = INFORMES.filter(inf => {
+    if (rendidor && inf.rendidor !== rendidor) return false;
+    if (politica && inf.politica !== politica) return false;
+    if (estado && inf.estado !== estado) return false;
+    if (fondo === 'con_fondo' && !inf.fondoCode) return false;
+    if (fondo === 'sin_fondo' && inf.fondoCode) return false;
+    if (fondo && fondo !== 'con_fondo' && fondo !== 'sin_fondo' && inf.fondoCode !== fondo) return false;
+    if (!periodoIncluye(inf, periodo, desde, hasta)) return false;
+    if (q) {
+      const hay = (inf.nro + ' ' + inf.rendidor + ' ' + inf.politica + ' ' + (inf.fondoCode || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Orden
+  data.sort((a, b) => {
+    let av = a[sortField], bv = b[sortField];
+    if (av == null) av = sortField === 'aprobado' ? -1 : '';
+    if (bv == null) bv = sortField === 'aprobado' ? -1 : '';
+    if (typeof av === 'string') {
+      return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    }
+    return sortDir === 'asc' ? av - bv : bv - av;
+  });
+
+  return data;
+}
+
+function renderKpis(data) {
+  const totalAprob = data.filter(i => i.aprobado != null).reduce((s,i) => s + i.aprobado, 0);
+  const totalSolic = data.reduce((s,i) => s + i.total, 0);
+  const cerrados = data.filter(i => i.estado === 'CERRADO' || i.estado === 'PAGADO').length;
+  const pendiente = data.filter(i => i.estado === 'CERRADO').reduce((s,i) => s + (i.aprobado || 0), 0);
+  const enProceso = data.filter(i => i.estado === 'EN_PROCESO' || i.estado === 'OBSERVADO').length;
+
+  document.getElementById('kpiTotal').textContent = money(totalAprob);
+  document.getElementById('kpiTotalSub').textContent = `De ${money(totalSolic)} solicitado`;
+  document.getElementById('kpiCerrados').textContent = cerrados;
+  document.getElementById('kpiCerradosSub').textContent = `De ${data.length} informes totales`;
+  document.getElementById('kpiPendiente').textContent = money(pendiente);
+  document.getElementById('kpiProceso').textContent = enProceso;
+}
+
+function renderTabla(data) {
+  lastPage = Math.max(1, Math.ceil(data.length / pageSize));
+  if (page > lastPage) page = lastPage;
+  const start = (page - 1) * pageSize;
+  const pageData = data.slice(start, start + pageSize);
+
+  const tbody = document.getElementById('repTbody');
+  if (pageData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="rep-empty"><i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2"></i><p class="text-sm font-semibold">No hay informes que coincidan con los filtros</p><p class="text-xs mt-1">Ajusta los filtros o limpia para ver todos.</p></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(inf => {
+      const fondoCell = inf.fondoCode
+        ? `<span class="rep-fondo-pill" onclick="abrirFondo('${inf.fondoCode}')" title="Ver detalle del fondo"><i data-lucide="wallet-cards" class="w-3 h-3 mr-1"></i>${inf.fondoCode}</span>`
+        : `<span class="text-ink-muted text-xs">—</span>`;
+      const acciones = `
+        <div class="flex justify-end gap-1">
+          <span class="rep-action-link" onclick="abrirInforme('${inf.nro}')" title="Ver detalle del informe"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Ver</span>
+          ${inf.fondoCode ? `<span class="rep-action-link" onclick="abrirFondo('${inf.fondoCode}')" title="Ver fondo asignado"><i data-lucide="wallet-cards" class="w-3.5 h-3.5"></i> Fondo</span>` : ''}
+        </div>`;
+      return `<tr class="rep-row border-b border-[#ECEEF4]">
+        <td class="py-2 px-2 font-semibold text-primary">${inf.nro}</td>
+        <td class="py-2 px-2"><span class="rep-rendidor-link" onclick="filtrarPorRendidor('${inf.rendidor}')" title="Filtrar por rendidor">${inf.rendidor}</span></td>
+        <td class="py-2 px-2 text-xs">${inf.politica}</td>
+        <td class="py-2 px-2 text-xs">${tipoLabel(inf.tipo)}</td>
+        <td class="py-2 px-2">${fondoCell}</td>
+        <td class="py-2 px-2 text-xs">${fmtDate(inf.fechaEnvio)}</td>
+        <td class="py-2 px-2 text-right font-semibold">${money(inf.total)}</td>
+        <td class="py-2 px-2 text-right">${inf.aprobado != null ? `<span class="font-semibold text-success">${money(inf.aprobado)}</span>` : `<span class="text-ink-muted">—</span>`}</td>
+        <td class="py-2 px-2">${estadoPill(inf.estado)}</td>
+        <td class="py-2 px-2 text-right">${acciones}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const from = data.length === 0 ? 0 : start + 1;
+  const to = Math.min(start + pageSize, data.length);
+  document.getElementById('repRange').textContent = `${from}-${to} de ${data.length}`;
+  document.getElementById('repPageInfo').textContent = `${page} / ${lastPage}`;
+  ['repFirst','repPrev'].forEach(id => document.getElementById(id).disabled = page === 1);
+  ['repNext','repLast'].forEach(id => document.getElementById(id).disabled = page === lastPage);
+
+  // Resumen
+  const totAprob = data.filter(i => i.aprobado != null).reduce((s,i) => s + i.aprobado, 0);
+  const totSolic = data.reduce((s,i) => s + i.total, 0);
+  document.getElementById('resumenFiltro').innerHTML = `Mostrando <strong>${data.length}</strong> informes · Total aprobado <strong>${money(totAprob)}</strong> de <strong>${money(totSolic)}</strong> solicitado`;
+
+  // Iconos sort
+  document.querySelectorAll('.rep-sort-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.sort === sortField);
+  });
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderAll() {
+  const data = aplicarFiltros();
+  renderKpis(data);
+  renderTabla(data);
+  window._lastFilteredData = data;
+}
+
+function goToPage(p) {
+  if (p < 1) p = 1;
+  if (p > lastPage) p = lastPage;
+  page = p;
+  renderAll();
+}
+
+function filtrarPorRendidor(nombre) {
+  document.getElementById('fRendidor').value = nombre;
+  page = 1;
+  renderAll();
+  showToast(`Filtrando por ${nombre}`, 'info');
+}
+
+function resetFiltros() {
+  document.getElementById('fPeriodo').value = 'todos';
+  document.getElementById('fRendidor').value = '';
+  document.getElementById('fPolitica').value = '';
+  document.getElementById('fFondo').value = '';
+  document.getElementById('fEstado').value = '';
+  document.getElementById('fBusqueda').value = '';
+  document.getElementById('fDesde').value = '';
+  document.getElementById('fHasta').value = '';
+  document.getElementById('fRangoFechas').classList.remove('show');
+  page = 1;
+  renderAll();
+  showToast('Filtros limpiados', 'success');
+}
+
+/* ============================================================
+   MODAL: VER INFORME
+   ============================================================ */
+function abrirInforme(nro) {
+  const inf = INFORMES.find(i => i.nro === nro);
+  if (!inf) return;
+  currentInformeNro = nro;
+
+  document.getElementById('miSubtitle').textContent = `${inf.rendidor} · ${tipoLabel(inf.tipo)}`;
+  document.getElementById('miNro').textContent = inf.nro;
+  document.getElementById('miPolitica').textContent = inf.politica;
+  const estadoEl = document.getElementById('miEstado');
+  const eCfg = ESTADO_MAP[inf.estado] || { c: 'rep-pill--cancelado', t: inf.estado };
+  estadoEl.className = `rep-pill ${eCfg.c}`;
+  estadoEl.textContent = eCfg.t;
+  document.getElementById('miTotal').textContent = money(inf.total);
+  document.getElementById('miAprobado').textContent = inf.aprobado != null ? `Aprobado: ${money(inf.aprobado)}` : 'Aprobado: pendiente';
+  document.getElementById('miRendidor').textContent = inf.rendidor;
+  document.getElementById('miTipo').textContent = tipoLabel(inf.tipo);
+  document.getElementById('miFondo').textContent = inf.fondoCode || '—';
+  document.getElementById('miFecha').textContent = fmtDate(inf.fechaEnvio);
+
+  // Gastos
+  document.getElementById('miGastosCount').textContent = `${inf.gastos.length} gastos`;
+  document.getElementById('miGastos').innerHTML = inf.gastos.map(g => `
+    <tr class="rep-gasto-row">
+      <td>${g.proveedor}</td>
+      <td><span class="text-xs bg-bg px-2 py-0.5 rounded">${g.categoria}</span></td>
+      <td class="text-ink-muted">${fmtDate(inf.fechaEnvio)}</td>
+      <td class="text-right font-semibold">${money(g.monto)}</td>
+    </tr>
+  `).join('');
+
+  // Flujo
+  const pasosBase = ['Enviado', 'En revisión', 'Aprobado', 'Pagado'];
+  let pasoActual = 0;
+  if (inf.estado === 'EN_PROCESO' || inf.estado === 'OBSERVADO') pasoActual = 1;
+  else if (inf.estado === 'CERRADO') pasoActual = 2;
+  else if (inf.estado === 'PAGADO') pasoActual = 3;
+  else if (inf.estado === 'CANCELADO') pasoActual = -1;
+
+  document.getElementById('miFlujo').innerHTML = pasosBase.map((p, i) => {
+    const cls = inf.estado === 'CANCELADO' && i > 0
+      ? ''
+      : (i < pasoActual ? 'done' : (i === pasoActual ? 'active' : ''));
+    const icon = cls === 'done' ? 'check' : (cls === 'active' ? 'clock' : 'circle');
+    return `<div class="rep-flujo-step ${cls}">
+      <span class="rep-flujo-dot"><i data-lucide="${icon}" class="w-3 h-3"></i></span>
+      <span class="text-xs font-semibold">${p}</span>
+    </div>`;
+  }).join('');
+
+  // Botón fondo
+  const btnFondo = document.getElementById('miBtnFondo');
+  if (inf.fondoCode) {
+    btnFondo.classList.remove('hidden');
+    btnFondo.dataset.code = inf.fondoCode;
+  } else {
+    btnFondo.classList.add('hidden');
+  }
+
+  openModal('modal-ver-informe');
+  if (window.lucide) lucide.createIcons();
+}
+
+function abrirFondoDesdeInforme() {
+  const code = document.getElementById('miBtnFondo').dataset.code;
+  if (!code) return;
+  closeModal('modal-ver-informe');
+  setTimeout(() => abrirFondo(code), 150);
+}
+
+function exportInformeActual() {
+  const inf = INFORMES.find(i => i.nro === currentInformeNro);
+  if (!inf) return;
+  const headers = ['Proveedor','Categoria','Fecha','Monto'];
+  const rows = inf.gastos.map(g => [g.proveedor, g.categoria, fmtDate(inf.fechaEnvio), g.monto.toFixed(2)]);
+  downloadCSV(`${inf.nro}_gastos.csv`, headers, rows);
+  showToast('Informe exportado como CSV', 'success');
+}
+
+/* ============================================================
+   MODAL: VER FONDO
+   ============================================================ */
+function abrirFondo(code) {
+  const f = FONDOS.find(x => x.code === code);
+  if (!f) {
+    showToast(`Fondo ${code} no encontrado en el catálogo`, 'warning');
+    return;
+  }
+
+  document.getElementById('mfCode').textContent = f.code;
+  document.getElementById('mfName').textContent = f.name;
+
+  const estadoMap = {
+    ACTIVO: ['status-active', 'Activo'],
+    CERRADO: ['status-inactive', 'Cerrado'],
+    BLOQUEADO: ['status-inactive', 'Bloqueado']
+  };
+  const e = estadoMap[f.estado] || ['status-active', f.estado];
+  const mfe = document.getElementById('mfEstado');
+  mfe.className = `status-pill ${e[0]} mt-1`;
+  mfe.textContent = e[1];
+
+  document.getElementById('mfRendidor').textContent = f.rendidor;
+  document.getElementById('mfMoneda').textContent = f.moneda === 'PEN' ? 'S/ PEN — Soles' : (f.moneda === 'USD' ? 'US$ USD — Dólares' : f.moneda);
+  document.getElementById('mfCreado').textContent = f.creado;
+  document.getElementById('mfInicial').textContent = money(f.inicial);
+  document.getElementById('mfDisponible').textContent = money(f.disponible);
+  document.getElementById('mfCargado').textContent = money(f.cargado);
+  document.getElementById('mfRevision').textContent = money(f.revision);
+  const pct = f.inicial > 0 ? Math.round((f.disponible / f.inicial) * 100) : 0;
+  document.getElementById('mfBarra').style.width = Math.min(100, Math.max(0, pct)) + '%';
+
+  // Informes vinculados
+  const vinculados = INFORMES.filter(i => i.fondoCode === code);
+  document.getElementById('mfInformes').innerHTML = vinculados.length === 0
+    ? `<tr><td colspan="7" class="text-center text-ink-muted py-4 text-xs">Sin informes vinculados a este fondo.</td></tr>`
+    : vinculados.map(i => `
+        <tr class="border-b">
+          <td class="py-2 font-semibold text-primary">${i.nro}</td>
+          <td class="py-2">${i.rendidor}</td>
+          <td class="py-2">${fmtDate(i.fechaEnvio)}</td>
+          <td class="py-2 text-right">${money(i.total)}</td>
+          <td class="py-2 text-right">${i.aprobado != null ? money(i.aprobado) : '<span class="text-ink-muted">—</span>'}</td>
+          <td class="py-2 pl-3">${estadoPill(i.estado)}</td>
+          <td class="py-2 text-right"><span class="rep-action-link" onclick="closeModal('modal-ver-fondo'); setTimeout(()=>abrirInforme('${i.nro}'),150)"><i data-lucide="eye" class="w-3 h-3"></i> Ver</span></td>
+        </tr>
+      `).join('');
+
+  const totalVinc = vinculados.reduce((s,i) => s + i.total, 0);
+  document.getElementById('mfResumen').textContent = `${vinculados.length} informes · Total ${money(totalVinc)}`;
+
+  openModal('modal-ver-fondo');
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ============================================================
+   EXPORTAR
+   ============================================================ */
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('open');
+}
+function closeExportMenu() {
+  document.getElementById('exportMenu').classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#exportMenu') && !e.target.closest('button[onclick*="toggleExportMenu"]')) {
+    closeExportMenu();
+  }
+});
+
+function downloadCSV(filename, headers, rows) {
+  const esc = (v) => {
+    const s = String(v ?? '');
+    return /[",\n;]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const csv = [headers.map(esc).join(';'), ...rows.map(r => r.map(esc).join(';'))].join('\n');
+  // BOM para Excel
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+function exportCSV() {
+  const data = window._lastFilteredData || aplicarFiltros();
+  if (data.length === 0) {
+    showToast('No hay datos para exportar', 'warning');
+    return;
+  }
+  const headers = ['Nro','Rendidor','Politica','Tipo','Fondo','FechaEnvio','MontoTotal','MontoAprobado','Estado'];
+  const rows = data.map(i => [
+    i.nro, i.rendidor, i.politica, tipoLabel(i.tipo), i.fondoCode || '',
+    fmtDate(i.fechaEnvio), i.total.toFixed(2), i.aprobado != null ? i.aprobado.toFixed(2) : '',
+    i.estado
+  ]);
+  downloadCSV(`reporte_informes_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+  showToast(`Se exportaron ${data.length} informes a CSV`, 'success');
+}
+
+function exportJSON() {
+  const data = window._lastFilteredData || aplicarFiltros();
+  if (data.length === 0) {
+    showToast('No hay datos para exportar', 'warning');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `reporte_informes_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  showToast(`Se exportaron ${data.length} informes a JSON`, 'success');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function poblarFiltros() {
+  const selR = document.getElementById('fRendidor');
+  RENDIDORES.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r; o.textContent = r;
+    selR.appendChild(o);
+  });
+  const selP = document.getElementById('fPolitica');
+  POLITICAS.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    selP.appendChild(o);
+  });
+  const selF = document.getElementById('fFondo');
+  FONDOS.forEach(f => {
+    const o = document.createElement('option');
+    o.value = f.code; o.textContent = `${f.code} · ${f.name}`;
+    selF.appendChild(o);
+  });
+}
+
+function bindEvents() {
+  ['fRendidor','fPolitica','fFondo','fEstado'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { page = 1; renderAll(); });
+  });
+  document.getElementById('fBusqueda').addEventListener('input', () => { page = 1; renderAll(); });
+  document.getElementById('fDesde').addEventListener('change', () => { page = 1; renderAll(); });
+  document.getElementById('fHasta').addEventListener('change', () => { page = 1; renderAll(); });
+  document.getElementById('fPeriodo').addEventListener('change', (e) => {
+    document.getElementById('fRangoFechas').classList.toggle('show', e.target.value === 'rango');
+    page = 1; renderAll();
+  });
+  document.getElementById('repRowsPerPage').addEventListener('change', (e) => {
+    pageSize = Number(e.target.value); page = 1; renderAll();
+  });
+
+  document.querySelectorAll('.rep-sort-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const f = b.dataset.sort;
+      if (sortField === f) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      else { sortField = f; sortDir = 'asc'; }
+      renderAll();
+    });
+  });
+}
+
+initLayout('RINDE GASTOS / REPORTERÍA', '../components').then(() => {
+  poblarFiltros();
+  bindEvents();
+  renderAll();
+  if (window.lucide) lucide.createIcons();
+});
+</script>
+</body>
+</html>
