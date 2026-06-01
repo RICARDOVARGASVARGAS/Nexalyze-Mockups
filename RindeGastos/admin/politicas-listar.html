@@ -61,7 +61,7 @@
             <button type="button" onclick="searchPolicies()" class="btn btn-primary h-10">Buscar</button>
           </div>
           <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los estados</option><option value="activo">Activas</option><option value="inactivo">Inactivas</option></select>
-          <select id="filtroMoneda" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todas las monedas</option><option value="PEN">PEN</option><option value="USD">USD</option><option value="CLP">CLP</option></select>
+          <select id="filtroPais" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los países</option></select>
         </div>
         <div><span id="resultadosChip" class="inline-flex h-8 items-center gap-1.5 px-3 rounded-md bg-primary-light text-primary text-[12px] font-semibold uppercase tracking-wide"><i data-lucide="chevrons-down" class="w-3.5 h-3.5"></i> 4 resultados</span></div>
       </div>
@@ -76,10 +76,10 @@
               <tr class="text-left border-b border-[#E5E7EF]">
                 <th class="py-2.5 px-2">Código</th>
                 <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">País</th>
                 <th class="py-2.5 px-2">Moneda</th>
                 <th class="py-2.5 px-2">Flujo de revisión</th>
                 <th class="py-2.5 px-2">Rendidores</th>
-                <th class="py-2.5 px-2">Impuestos</th>
                 <th class="py-2.5 px-2">Estado</th>
                 <th class="py-2.5 px-2 text-right">Acciones</th>
               </tr>
@@ -129,9 +129,9 @@
       <div class="p-5 space-y-4 text-sm overflow-y-auto bg-[#FCFCFE]">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div class="rounded-xl border border-primary/20 bg-gradient-to-br from-primary-light/50 to-white p-3"><p class="text-[11px] uppercase text-primary font-semibold tracking-wide">Código</p><p id="dCodigo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">País</p><p id="dPais" class="text-base font-semibold mt-1"></p></div>
           <div class="rounded-xl border border-info/20 bg-gradient-to-br from-info-light/50 to-white p-3"><p class="text-[11px] uppercase text-info font-semibold tracking-wide">Moneda</p><p id="dMoneda" class="text-base font-semibold mt-1"></p></div>
           <div class="rounded-xl border border-warning/20 bg-gradient-to-br from-warning-light/50 to-white p-3"><p class="text-[11px] uppercase text-warning font-semibold tracking-wide">Flujo revisión</p><p id="dFlujo" class="text-base font-semibold mt-1"></p></div>
-          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">Impuestos</p><p id="dTaxStatus" class="text-base font-semibold mt-1">ACTIVO</p></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -179,7 +179,6 @@
               <button type="button" data-modal-tab="general" onclick="switchModalTab('modal-politica-crear-container','general')" class="pb-2 text-primary border-b-2 border-primary">General</button>
               <button type="button" data-modal-tab="rendidores" onclick="switchModalTab('modal-politica-crear-container','rendidores')" class="pb-2 text-ink-muted">Rendidores</button>
               <button type="button" data-modal-tab="categorias" onclick="switchModalTab('modal-politica-crear-container','categorias')" class="pb-2 text-ink-muted">Categorías</button>
-              <button type="button" data-modal-tab="impuestos" onclick="switchModalTab('modal-politica-crear-container','impuestos')" class="pb-2 text-ink-muted">Impuestos</button>
             </nav>
           </div>
           <section data-modal-content="general" class="space-y-3">
@@ -187,9 +186,12 @@
             <div><label class="rd-label block mb-1">Código</label><input id="crearCodigo" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: POL-001"></div>
             <div><label class="rd-label block mb-1">Descripción</label><textarea id="crearDesc" rows="3" class="rd-textarea w-full px-3 py-2 text-sm" placeholder="DESCRIPCIÓN DE LA POLÍTICA (OPCIONAL)"></textarea></div>
             <div><label class="rd-label block mb-1">Flujo de revisión</label><select id="crearFlujo" class="rd-select w-full h-10 px-3 text-sm"><option value="">Sin flujo asignado</option><option>Flujo Standard 2 Niveles</option><option>Flujo Gerencia 3 Niveles</option><option>Flujo Internacional</option></select><p id="crearFlujoWarn" class="text-xs text-warning mt-1 hidden">⚠️ Sin flujo asignado, los rendidores no podrán enviar informes</p></div>
-            <div><label class="rd-label block mb-1">Moneda *</label><select id="crearMoneda" class="rd-select w-full h-10 px-3 text-sm"><option value="PEN">S/ PEN — Soles</option><option value="USD">US$ USD — Dólares</option><option value="CLP">CLP$ — Pesos chilenos</option></select></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><label class="rd-label block mb-1">Moneda *</label><select id="crearMoneda" required class="rd-select w-full h-10 px-3 text-sm"></select><p class="text-xs text-ink-muted mt-1">El gasto hereda la moneda de la política.</p></div>
+              <div><label class="rd-label block mb-1">País * <span id="crearPaisAutoBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-info-light text-info text-[10px] align-middle">AUTO</span></label><select id="crearPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select><p class="text-xs text-ink-muted mt-1">Por defecto, el país es el de la moneda. Puedes cambiarlo: los impuestos del gasto vendrán del país que elijas.</p></div>
+            </div>
             <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las políticas activas pueden ser usadas</p></div><span class="rd-switch"><input id="crearEstado" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
-            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button></div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR</button></div>
           </section>
           <section data-modal-content="rendidores" class="space-y-3 hidden">
             <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
@@ -238,24 +240,6 @@
                 </div>
               </div>
             </div>
-            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button></div>
-          </section>
-          <section data-modal-content="impuestos" class="space-y-3 hidden">
-            <div class="rounded-xl border border-success/20 p-4 bg-gradient-to-br from-success-light/20 to-white">
-              <p class="rd-label mb-3 text-success">Configuración de impuestos</p>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <input id="crearTaxNombre" class="rd-input h-10 px-3 text-sm" placeholder="NOMBRE IMPUESTO">
-                <input id="crearTaxPct" type="number" step="0.01" class="rd-input h-10 px-3 text-sm" placeholder="%">
-                <input id="crearTaxCodigo" class="rd-input h-10 px-3 text-sm" placeholder="CÓDIGO">
-              </div>
-              <button type="button" onclick="addPolicyTax('crear')" class="btn btn-outline w-full mt-3 text-success border-success hover:bg-success-light">+ AGREGAR IMPUESTO</button>
-              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
-                <table class="w-full text-sm">
-                  <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">%</th><th class="text-left px-3 py-2">Código</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
-                  <tbody id="crearTaxList"></tbody>
-                </table>
-              </div>
-            </div>
             <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-crear-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR</button></div>
           </section>
         </div>
@@ -274,7 +258,6 @@
               <button type="button" data-modal-tab="general" onclick="switchModalTab('modal-politica-editar-container','general')" class="pb-2 text-primary border-b-2 border-primary">General</button>
               <button type="button" data-modal-tab="rendidores" onclick="switchModalTab('modal-politica-editar-container','rendidores')" class="pb-2 text-ink-muted">Rendidores</button>
               <button type="button" data-modal-tab="categorias" onclick="switchModalTab('modal-politica-editar-container','categorias')" class="pb-2 text-ink-muted">Categorías</button>
-              <button type="button" data-modal-tab="impuestos" onclick="switchModalTab('modal-politica-editar-container','impuestos')" class="pb-2 text-ink-muted">Impuestos</button>
             </nav>
           </div>
           <section data-modal-content="general" class="space-y-3">
@@ -282,9 +265,12 @@
             <div><label class="rd-label block mb-1">Código</label><input id="editarCodigo" class="rd-input w-full h-10 px-3 text-sm"></div>
             <div><label class="rd-label block mb-1">Descripción</label><textarea id="editarDesc" rows="3" class="rd-textarea w-full px-3 py-2 text-sm"></textarea></div>
             <div><label class="rd-label block mb-1">Flujo de revisión</label><select id="editarFlujo" class="rd-select w-full h-10 px-3 text-sm"><option value="">Sin flujo asignado</option><option>Flujo Standard 2 Niveles</option><option>Flujo Gerencia 3 Niveles</option><option>Flujo Internacional</option></select><p id="editarFlujoWarn" class="text-xs text-warning mt-1 hidden">⚠️ Sin flujo asignado, los rendidores no podrán enviar informes</p></div>
-            <div><label class="rd-label block mb-1">Moneda *</label><select id="editarMoneda" class="rd-select w-full h-10 px-3 text-sm"><option value="PEN">S/ PEN — Soles</option><option value="USD">US$ USD — Dólares</option><option value="CLP">CLP$ — Pesos chilenos</option></select></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><label class="rd-label block mb-1">Moneda *</label><select id="editarMoneda" required class="rd-select w-full h-10 px-3 text-sm"></select><p class="text-xs text-ink-muted mt-1">El gasto hereda la moneda de la política.</p></div>
+              <div><label class="rd-label block mb-1">País * <span id="editarPaisAutoBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-info-light text-info text-[10px] align-middle">AUTO</span></label><select id="editarPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select><p class="text-xs text-ink-muted mt-1">Por defecto, el país es el de la moneda. Puedes cambiarlo: los impuestos del gasto vendrán del país que elijas.</p></div>
+            </div>
             <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las políticas activas pueden ser usadas</p></div><span class="rd-switch"><input id="editarEstado" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
-            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button></div>
+            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
           </section>
           <section data-modal-content="rendidores" class="space-y-3 hidden">
             <div class="rounded-xl border border-primary/20 p-4 bg-gradient-to-br from-primary-light/20 to-white">
@@ -331,24 +317,6 @@
                     <tbody id="editarCategoriasList"></tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-            <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button></div>
-          </section>
-          <section data-modal-content="impuestos" class="space-y-3 hidden">
-            <div class="rounded-xl border border-success/20 p-4 bg-gradient-to-br from-success-light/20 to-white">
-              <p class="rd-label mb-3 text-success">Configuración de impuestos</p>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <input id="editarTaxNombre" class="rd-input h-10 px-3 text-sm" placeholder="NOMBRE IMPUESTO">
-                <input id="editarTaxPct" type="number" step="0.01" class="rd-input h-10 px-3 text-sm" placeholder="%">
-                <input id="editarTaxCodigo" class="rd-input h-10 px-3 text-sm" placeholder="CÓDIGO">
-              </div>
-              <button type="button" onclick="addPolicyTax('editar')" class="btn btn-outline w-full mt-3 text-success border-success hover:bg-success-light">+ AGREGAR IMPUESTO</button>
-              <div class="mt-3 overflow-x-auto border border-border rounded-lg">
-                <table class="w-full text-sm">
-                  <thead class="bg-bg"><tr><th class="text-left px-3 py-2">Nombre</th><th class="text-left px-3 py-2">%</th><th class="text-left px-3 py-2">Código</th><th class="text-right px-3 py-2">Quitar</th></tr></thead>
-                  <tbody id="editarTaxList"></tbody>
-                </table>
               </div>
             </div>
             <div class="rd-modal-footer border-t border-border pt-3"><button type="button" onclick="closeModal('modal-editar-politica')" class="btn btn-muted">CANCELAR</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
@@ -421,17 +389,67 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../assets/js/components-loader.js"></script>
   <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/catalog.js"></script>
   <script>
     const politicas = [
-      { id: 1, code: 'POL-001', name: 'Política General PEN', description: 'Política estándar para empleados de Lima', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 12, status: true, taxes_enabled: true },
-      { id: 2, code: 'POL-002', name: 'Política Gerencia', description: 'Política para viáticos de gerencia', workflow: 'Flujo Gerencia 3 Niveles', workflow_id: 2, currency: 'PEN', users: 3, status: true, taxes_enabled: true },
-      { id: 3, code: 'POL-003', name: 'Política USD Internacional', description: 'Política para viajes internacionales', workflow: 'Flujo Internacional', workflow_id: 3, currency: 'USD', users: 5, status: true, taxes_enabled: false },
-      { id: 4, code: 'POL-004', name: 'Política Temporal 2024', description: '', workflow: '', workflow_id: null, currency: 'PEN', users: 0, status: false, taxes_enabled: false },
-      { id: 5, code: 'POL-005', name: 'Política Proyecto Sur', description: 'Uso exclusivo proyecto sur', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 4, status: true, taxes_enabled: true },
-      { id: 6, code: 'POL-006', name: 'Política Chile CLP', description: 'Rendición para filial Chile', workflow: 'Flujo Internacional', workflow_id: 3, currency: 'CLP', users: 2, status: true, taxes_enabled: false },
-      { id: 7, code: 'POL-007', name: 'Política Operaciones Norte', description: 'Operaciones Trujillo', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, currency: 'PEN', users: 6, status: true, taxes_enabled: true },
-      { id: 8, code: 'POL-008', name: 'Política Ejecutivo USD', description: 'Gastos ejecutivos en dólares', workflow: '', workflow_id: null, currency: 'USD', users: 1, status: false, taxes_enabled: false }
+      { id: 1, code: 'POL-001', name: 'Política General PEN', description: 'Política estándar para empleados de Lima', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, country_id: 1, currency_id: 1, users: 12, status: true },
+      { id: 2, code: 'POL-002', name: 'Política Gerencia', description: 'Política para viáticos de gerencia', workflow: 'Flujo Gerencia 3 Niveles', workflow_id: 2, country_id: 1, currency_id: 1, users: 3, status: true },
+      { id: 3, code: 'POL-003', name: 'Política USD Internacional', description: 'Política para viajes internacionales', workflow: 'Flujo Internacional', workflow_id: 3, country_id: 2, currency_id: 2, users: 5, status: true },
+      { id: 4, code: 'POL-004', name: 'Política Temporal 2024', description: '', workflow: '', workflow_id: null, country_id: 1, currency_id: 1, users: 0, status: false },
+      { id: 5, code: 'POL-005', name: 'Política Proyecto Sur', description: 'Uso exclusivo proyecto sur', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, country_id: 1, currency_id: 1, users: 4, status: true },
+      { id: 6, code: 'POL-006', name: 'Política Chile CLP', description: 'Rendición para filial Chile', workflow: 'Flujo Internacional', workflow_id: 3, country_id: 3, currency_id: 3, users: 2, status: true },
+      { id: 7, code: 'POL-007', name: 'Política Operaciones Norte', description: 'Operaciones Trujillo', workflow: 'Flujo Standard 2 Niveles', workflow_id: 1, country_id: 1, currency_id: 1, users: 6, status: true },
+      { id: 8, code: 'POL-008', name: 'Política Ejecutivo USD', description: 'Gastos ejecutivos en dólares', workflow: '', workflow_id: null, country_id: 2, currency_id: 2, users: 1, status: false }
     ];
+
+    const PAISES = RD_CATALOG.paises;
+    const MONEDAS = RD_CATALOG.monedas;
+
+    function paisName(id) {
+      const p = PAISES.find((x) => x.id === id);
+      return p ? `${p.flag || ''} ${p.name}` : '—';
+    }
+    function monedaInfo(id) {
+      return MONEDAS.find((x) => x.id === id) || null;
+    }
+    function monedaLabel(id) {
+      const m = monedaInfo(id);
+      return m ? `${m.symbol} ${m.code}` : '—';
+    }
+    function fillPaisesSelect(selectId, includeInactive = false) {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      const lista = includeInactive ? PAISES : PAISES.filter((p) => p.status);
+      select.innerHTML = '<option value="">SELECCIONA PAÍS</option>' +
+        lista.map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
+    }
+    function fillAllMonedasSelect(selectId, selectedCurrencyId = '') {
+      const select = document.getElementById(selectId);
+      if (!select) return;
+      const monedas = MONEDAS.filter((m) => m.status);
+      const grupos = {};
+      monedas.forEach((m) => {
+        if (!grupos[m.country_id]) grupos[m.country_id] = [];
+        grupos[m.country_id].push(m);
+      });
+      const sortedCountryIds = Object.keys(grupos).sort((a, b) => {
+        const pa = PAISES.find((p) => p.id === Number(a));
+        const pb = PAISES.find((p) => p.id === Number(b));
+        return (pa ? pa.name : '').localeCompare(pb ? pb.name : '');
+      });
+      const optgroups = sortedCountryIds.map((cid) => {
+        const pais = PAISES.find((p) => p.id === Number(cid));
+        const label = pais ? `${pais.flag || ''} ${pais.name}` : 'Sin país';
+        const opts = grupos[cid].map((m) => `<option value="${m.id}" data-country="${m.country_id}">${pais ? pais.flag || '' : ''} ${m.symbol} ${m.code} — ${m.name}${m.is_default ? ' (default)' : ''}</option>`).join('');
+        return `<optgroup label="${label}">${opts}</optgroup>`;
+      }).join('');
+      select.innerHTML = '<option value="">SELECCIONA MONEDA</option>' + optgroups;
+      if (selectedCurrencyId) select.value = String(selectedCurrencyId);
+    }
+    function getCurrencyCountry(currencyId) {
+      const m = monedaInfo(Number(currencyId));
+      return m ? m.country_id : null;
+    }
     let currentPage = 1;
     let pageSize = 15;
     let lastPage = 1;
@@ -451,22 +469,28 @@
     const policyRendidores = { crear: [], editar: [] };
     let usuariosPoliticaModal = [];
 
-    function currencyLabel(currency) {
-      if (currency === 'USD') return 'US$ USD';
-      if (currency === 'CLP') return 'CLP$';
-      return 'S/ PEN';
+    function currencyLabel(currencyId) {
+      const m = monedaInfo(currencyId);
+      return m ? `${m.symbol} ${m.code}` : '—';
     }
 
     function getFilteredPolicies() {
       const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
       const estado = document.getElementById('filtroEstado').value;
-      const moneda = document.getElementById('filtroMoneda').value;
+      const pais = document.getElementById('filtroPais').value;
       return politicas.filter((p) => {
         const byText = !txt || p.name.toLowerCase().includes(txt) || p.code.toLowerCase().includes(txt);
         const byState = estado === 'todos' || (estado === 'activo' ? p.status : !p.status);
-        const byCurrency = moneda === 'todos' || p.currency === moneda;
-        return byText && byState && byCurrency;
+        const byCountry = pais === 'todos' || String(p.country_id) === pais;
+        return byText && byState && byCountry;
       });
+    }
+
+    function fillFiltroPaises() {
+      const select = document.getElementById('filtroPais');
+      if (!select) return;
+      select.innerHTML = '<option value="todos">Todos los países</option>' +
+        PAISES.map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
     }
 
     function renderPoliciesTable() {
@@ -481,10 +505,10 @@
         <tr class="border-b border-[#ECEEF4] last:border-0">
           <td class="py-2.5 px-2">${p.code}</td>
           <td class="py-2.5 px-2">${p.name}</td>
-          <td class="py-2.5 px-2">${currencyLabel(p.currency)}</td>
+          <td class="py-2.5 px-2"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold"><i data-lucide="globe" class="w-3.5 h-3.5"></i>${paisName(p.country_id)}</span></td>
+          <td class="py-2.5 px-2">${currencyLabel(p.currency_id)}</td>
           <td class="py-2.5 px-2">${p.workflow_id ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-info-light text-info text-xs font-semibold"><i data-lucide="git-branch" class="w-3.5 h-3.5"></i>${p.workflow}</span>` : `<span class="inline-flex px-2 py-0.5 rounded bg-warning-light text-warning text-xs font-semibold">SIN FLUJO ⚠️</span>`}</td>
           <td class="py-2.5 px-2">${p.users > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-light text-primary text-xs font-semibold"><i data-lucide="users" class="w-3.5 h-3.5"></i>${p.users}</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold"><i data-lucide="users" class="w-3.5 h-3.5"></i>0</span>`}</td>
-          <td class="py-2.5 px-2">${p.taxes_enabled ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>ACTIVO</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>NO</span>`}</td>
           <td class="py-2.5 px-2">${p.status ? '<span class="status-pill status-active">ACTIVO</span>' : '<span class="status-pill status-inactive">INACTIVO</span>'}</td>
           <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${p.id})" class="rd-action-btn" title="Ver detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${p.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${p.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
         </tr>
@@ -521,14 +545,15 @@
       selectedPolicyId = id;
       const p = politicas.find((x) => x.id === id);
       if (!p) return;
+      const m = monedaInfo(p.currency_id);
       document.getElementById('dCodigoBadge').textContent = p.code;
       document.getElementById('dTitulo').textContent = p.name.toUpperCase();
       document.getElementById('dEstadoBadge').textContent = p.status ? 'ACTIVO' : 'INACTIVO';
       document.getElementById('dEstadoBadge').className = `inline-flex px-2 py-0.5 rounded text-xs font-semibold mt-1 ${p.status ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}`;
       document.getElementById('dCodigo').textContent = p.code;
-      document.getElementById('dMoneda').textContent = `${currencyLabel(p.currency)} — ${p.currency === 'PEN' ? 'Soles' : (p.currency === 'USD' ? 'Dólares' : 'Pesos chilenos')}`;
+      document.getElementById('dPais').textContent = paisName(p.country_id);
+      document.getElementById('dMoneda').textContent = m ? `${m.symbol} ${m.code} — ${m.name}` : '—';
       document.getElementById('dFlujo').textContent = p.workflow || 'Sin flujo asignado';
-      document.getElementById('dTaxStatus').textContent = p.taxes_enabled ? 'ACTIVO' : 'NO ACTIVO';
       document.getElementById('dUsersCount').textContent = p.users;
       document.getElementById('dDescripcion').textContent = p.description || 'Sin descripción';
       openModal('modal-detalle-politica');
@@ -538,12 +563,10 @@
       document.getElementById('formCrearPolitica').reset();
       document.getElementById('crearEstado').checked = true;
       document.getElementById('crearFlujoWarn').classList.add('hidden');
-      policyTaxes.crear = [
-        { name: 'EXENTO', pct: '0.00', codigo: 'EX' },
-        { name: 'IGV', pct: '18.00', codigo: 'IGV' }
-      ];
+      fillAllMonedasSelect('crearMoneda', '');
+      fillPaisesSelect('crearPais');
+      document.getElementById('crearPaisAutoBadge').classList.add('hidden');
       policyCategories.crear = [];
-      renderPolicyTaxes('crear');
       renderSelectedCategories('crear');
       policyRendidores.crear = [
         { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
@@ -556,7 +579,11 @@
 
     function submitCreatePolicy() {
       const name = document.getElementById('crearNombre').value.trim();
+      const countryId = Number(document.getElementById('crearPais').value);
+      const currencyId = Number(document.getElementById('crearMoneda').value);
       if (!name) return showToast('El nombre es obligatorio', 'warning');
+      if (!currencyId) return showToast('Selecciona una moneda', 'warning');
+      if (!countryId) return showToast('Selecciona un país', 'warning');
       showToast('Política creada', 'success');
       closeModal('modal-crear-politica');
     }
@@ -566,28 +593,28 @@
       editingPolicyId = id;
       const p = politicas.find((x) => x.id === id);
       if (!p) return;
+      fillAllMonedasSelect('editarMoneda', p.currency_id);
+      fillPaisesSelect('editarPais', true);
       document.getElementById('editarId').value = String(p.id);
       document.getElementById('editarNombre').value = p.name;
       document.getElementById('editarCodigo').value = p.code;
       document.getElementById('editarDesc').value = p.description;
       document.getElementById('editarFlujo').value = p.workflow || '';
-      document.getElementById('editarMoneda').value = p.currency;
+      document.getElementById('editarPais').value = String(p.country_id || '');
       document.getElementById('editarEstado').checked = !!p.status;
       document.getElementById('editarFlujoWarn').classList.toggle('hidden', !!p.workflow_id);
+      const naturalCountry = getCurrencyCountry(p.currency_id);
+      const isAuto = naturalCountry && naturalCountry === p.country_id;
+      document.getElementById('editarPaisAutoBadge').classList.toggle('hidden', !isAuto);
       editInitialData = {
         name: p.name, code: p.code, description: p.description, workflow: p.workflow || '',
-        currency: p.currency, status: !!p.status
+        country_id: String(p.country_id || ''), currency_id: String(p.currency_id || ''), status: !!p.status
       };
       document.getElementById('editModifiedBadge').classList.add('hidden');
-      policyTaxes.editar = [
-        { name: 'EXENTO', pct: '0.00', codigo: 'EX' },
-        { name: 'IGV', pct: '18.00', codigo: 'IGV' }
-      ];
       policyCategories.editar = [
         { code: 'CB-001', name: 'CB-001 - COMBUSTIBLE' },
         { code: 'AL-001', name: 'AL-001 - ALIMENTACIÓN' }
       ];
-      renderPolicyTaxes('editar');
       renderSelectedCategories('editar');
       policyRendidores.editar = [
         { id: 'u-ana', name: 'Ana Guevara Muñoz', email: 'ana.guevara@empresa.com.pe' },
@@ -621,7 +648,7 @@
       document.getElementById('deletePolicyName').textContent = `"${p.name}"`;
       document.getElementById('deletePolicyName2').textContent = p.name;
       document.getElementById('deletePolicyCode').textContent = p.code;
-      document.getElementById('deletePolicyCurrency').textContent = currencyLabel(p.currency);
+      document.getElementById('deletePolicyCurrency').textContent = currencyLabel(p.currency_id);
       document.getElementById('deletePolicyUsers').textContent = String(p.users);
       document.getElementById('deactivateConfirm').checked = false;
       document.getElementById('btnDesactivar').disabled = true;
@@ -658,7 +685,38 @@
 
     document.getElementById('filtroTexto').addEventListener('input', () => { currentPage = 1; renderPoliciesTable(); });
     document.getElementById('filtroEstado').addEventListener('change', () => { currentPage = 1; renderPoliciesTable(); });
-    document.getElementById('filtroMoneda').addEventListener('change', () => { currentPage = 1; renderPoliciesTable(); });
+    document.getElementById('filtroPais').addEventListener('change', () => { currentPage = 1; renderPoliciesTable(); });
+
+    // CREAR: al elegir moneda, auto-completar país con el país natural de la moneda.
+    document.getElementById('crearMoneda').addEventListener('change', (e) => {
+      const cid = getCurrencyCountry(e.target.value);
+      if (cid) {
+        document.getElementById('crearPais').value = String(cid);
+        document.getElementById('crearPaisAutoBadge').classList.remove('hidden');
+      } else {
+        document.getElementById('crearPaisAutoBadge').classList.add('hidden');
+      }
+    });
+    // CREAR: si el usuario cambia manualmente el país, quitar el badge AUTO.
+    document.getElementById('crearPais').addEventListener('change', () => {
+      document.getElementById('crearPaisAutoBadge').classList.add('hidden');
+    });
+
+    // EDITAR: misma lógica.
+    document.getElementById('editarMoneda').addEventListener('change', (e) => {
+      const cid = getCurrencyCountry(e.target.value);
+      if (cid) {
+        document.getElementById('editarPais').value = String(cid);
+        document.getElementById('editarPaisAutoBadge').classList.remove('hidden');
+      } else {
+        document.getElementById('editarPaisAutoBadge').classList.add('hidden');
+      }
+      updateEditModifiedBadge();
+    });
+    document.getElementById('editarPais').addEventListener('change', () => {
+      document.getElementById('editarPaisAutoBadge').classList.add('hidden');
+      updateEditModifiedBadge();
+    });
     document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderPoliciesTable(); });
     document.getElementById('deactivateConfirm').addEventListener('change', (e) => { document.getElementById('btnDesactivar').disabled = !e.target.checked; });
     document.getElementById('crearFlujo').addEventListener('change', (e) => { document.getElementById('crearFlujoWarn').classList.toggle('hidden', !!e.target.value); });
@@ -674,12 +732,17 @@
       e.preventDefault();
       const p = politicas.find((x) => x.id === editingPolicyId);
       if (!p) return;
+      const countryId = Number(document.getElementById('editarPais').value);
+      const currencyId = Number(document.getElementById('editarMoneda').value);
+      if (!countryId) return showToast('Selecciona un país', 'warning');
+      if (!currencyId) return showToast('Selecciona una moneda', 'warning');
       p.name = document.getElementById('editarNombre').value.trim();
       p.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
       p.description = document.getElementById('editarDesc').value.trim();
       p.workflow = document.getElementById('editarFlujo').value;
       p.workflow_id = p.workflow ? 1 : null;
-      p.currency = document.getElementById('editarMoneda').value;
+      p.country_id = countryId;
+      p.currency_id = currencyId;
       p.status = document.getElementById('editarEstado').checked;
       showToast('Política actualizada', 'success');
       closeModal('modal-editar-politica');
@@ -693,18 +756,18 @@
         document.getElementById('editarCodigo').value !== editInitialData.code ||
         document.getElementById('editarDesc').value !== editInitialData.description ||
         document.getElementById('editarFlujo').value !== editInitialData.workflow ||
-        document.getElementById('editarMoneda').value !== editInitialData.currency ||
+        document.getElementById('editarPais').value !== editInitialData.country_id ||
+        document.getElementById('editarMoneda').value !== editInitialData.currency_id ||
         document.getElementById('editarEstado').checked !== editInitialData.status
       );
       document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
     }
 
-    ['editarNombre', 'editarCodigo', 'editarDesc', 'editarFlujo', 'editarMoneda', 'editarEstado'].forEach((id) => {
+    ['editarNombre', 'editarCodigo', 'editarDesc', 'editarFlujo', 'editarPais', 'editarMoneda', 'editarEstado'].forEach((id) => {
       document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
       document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
     });
 
-    const policyTaxes = { crear: [], editar: [] };
     const policyCategories = { crear: [], editar: [] };
 
     function refreshRendSelect(mode) {
@@ -838,33 +901,8 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function addPolicyTax(mode) {
-      const name = document.getElementById(`${mode}TaxNombre`).value.trim();
-      const pct = document.getElementById(`${mode}TaxPct`).value.trim();
-      const codigo = document.getElementById(`${mode}TaxCodigo`).value.trim();
-      if (!name || !pct) return showToast('Completa nombre y porcentaje del impuesto', 'warning');
-      policyTaxes[mode].push({ name, pct, codigo });
-      ['TaxNombre', 'TaxPct', 'TaxCodigo'].forEach((key) => { document.getElementById(`${mode}${key}`).value = ''; });
-      renderPolicyTaxes(mode);
-    }
-
-    function renderPolicyTaxes(mode) {
-      const wrap = document.getElementById(`${mode}TaxList`);
-      if (!wrap) return;
-      if (!policyTaxes[mode].length) {
-        wrap.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-ink-muted">Sin impuestos agregados.</td></tr>';
-        return;
-      }
-      wrap.innerHTML = policyTaxes[mode].map((t, idx) => `<tr class="border-t border-border"><td class="px-3 py-2 font-semibold">${t.name}</td><td class="px-3 py-2">${t.pct}</td><td class="px-3 py-2">${t.codigo || '—'}</td><td class="px-3 py-2 text-right"><button type="button" class="text-danger" onclick="removePolicyTax('${mode}',${idx})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function removePolicyTax(mode, idx) {
-      policyTaxes[mode].splice(idx, 1);
-      renderPolicyTaxes(mode);
-    }
-
     initLayout('RINDE GASTOS / POLÍTICAS', '../components').then(() => {
+      fillFiltroPaises();
       renderPoliciesTable();
     });
   </script>

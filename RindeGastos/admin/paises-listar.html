@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Países</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <article class="theme-surface kpi-card kpi-primary"><p id="cardTotal" class="kpi-value">0</p><p class="kpi-title">Total países</p><p class="kpi-subtitle">Registrados en el sistema</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p id="cardActivos" class="kpi-value">0</p><p class="kpi-title">Activos</p><p class="kpi-subtitle">Disponibles para uso</p></article>
+        <article class="theme-surface kpi-card kpi-danger"><p id="cardInactivos" class="kpi-value">0</p><p class="kpi-title">Inactivos</p><p class="kpi-subtitle">No disponibles</p></article>
+        <article class="theme-surface kpi-card kpi-info"><p id="cardConMonedas" class="kpi-value">0</p><p class="kpi-title">Con monedas</p><p class="kpi-subtitle">Configurados con catálogo</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Tabla de países</h1>
+            <p class="table-panel-subtitle">Gestiona los países disponibles para configurar monedas, impuestos y políticas</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="renderAll(); showToast('Países actualizados', 'info')" class="btn btn-outline"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+            <button onclick="openModal('modalExportarPaises')" class="btn btn-outline"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> Exportar</button>
+            <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nuevo país</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <label class="relative md:col-span-2"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="filtroTexto" type="text" placeholder="BUSCAR POR NOMBRE O CÓDIGO..." class="rd-input w-full h-10 pl-9 pr-3 text-[13px] uppercase"></label>
+          <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los estados</option><option value="activo">Activos</option><option value="inactivo">Inactivos</option></select>
+          <select id="filtroOrden" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="name">Ordenar por nombre</option><option value="code">Ordenar por código</option></select>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de países</h2>
+          <span id="resultadosLabel" class="text-[12px] text-primary font-semibold uppercase"></span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[900px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Bandera</th>
+                <th class="py-2.5 px-2">Código</th>
+                <th class="py-2.5 px-2">ISO3</th>
+                <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">Prefijo</th>
+                <th class="py-2.5 px-2">Monedas</th>
+                <th class="py-2.5 px-2">Impuestos</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="paisesTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">0-0 de 0</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage - 1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage + 1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalCrear" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="globe" class="w-5 h-5"></i></span>
+          <div><h3 class="rd-modal-title">NUEVO PAÍS</h3><p class="rd-modal-subtitle">REGISTRA UN NUEVO PAÍS PARA ASOCIAR MONEDAS E IMPUESTOS</p></div>
+        </div>
+        <button onclick="closeModal('modalCrear')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formCrear" class="p-5 space-y-4 overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="rd-label block mb-1">Bandera (emoji)</label><input id="crearFlag" maxlength="4" class="rd-input w-full h-10 px-3 text-base text-center" placeholder="🇵🇪"></div>
+          <div><label class="rd-label block mb-1">Código ISO 2 *</label><input id="crearCodigo" required maxlength="2" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="PE"></div>
+          <div><label class="rd-label block mb-1">Código ISO 3</label><input id="crearIso3" maxlength="3" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="PER"></div>
+        </div>
+        <div><label class="rd-label block mb-1">Nombre *</label><input id="crearNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="EJ: PERÚ"></div>
+        <div><label class="rd-label block mb-1">Prefijo telefónico</label><input id="crearPhone" maxlength="6" class="rd-input w-full h-10 px-3 text-sm" placeholder="+51"></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo los países activos pueden asociarse a monedas, impuestos y políticas</p></div><span class="rd-switch"><input id="crearActivo" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalCrear')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEditar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+          <div><h3 class="rd-modal-title">EDITAR PAÍS</h3><p class="rd-modal-subtitle">MODIFICA LA INFORMACIÓN DEL PAÍS</p></div>
+        </div>
+        <button onclick="closeModal('modalEditar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formEditar" class="p-5 space-y-4 overflow-y-auto">
+        <input id="editarId" type="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="rd-label block mb-1">Bandera (emoji)</label><input id="editarFlag" maxlength="4" class="rd-input w-full h-10 px-3 text-base text-center"></div>
+          <div><label class="rd-label block mb-1">Código ISO 2 *</label><input id="editarCodigo" required maxlength="2" class="rd-input w-full h-10 px-3 text-sm uppercase"></div>
+          <div><label class="rd-label block mb-1">Código ISO 3</label><input id="editarIso3" maxlength="3" class="rd-input w-full h-10 px-3 text-sm uppercase"></div>
+        </div>
+        <div><label class="rd-label block mb-1">Nombre * <span id="editModifiedBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-warning-light text-warning text-[10px] align-middle">MODIFICADO</span></label><input id="editarNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm uppercase"></div>
+        <div><label class="rd-label block mb-1">Prefijo telefónico</label><input id="editarPhone" maxlength="6" class="rd-input w-full h-10 px-3 text-sm"></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo los países activos pueden usarse en políticas</p></div><span class="rd-switch"><input id="editarActivo" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalEditar')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalDetalle" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header bg-gradient-to-r from-primary-light/70 via-info-light/50 to-success-light/50 border-b border-primary/15">
+        <div class="flex items-start gap-3">
+          <span id="dFlagBig" class="w-12 h-12 rounded-xl bg-white/85 border border-primary/20 inline-flex items-center justify-center text-2xl shadow-sm">🌐</span>
+          <div>
+            <span id="dCodigoBadge" class="inline-flex px-2 py-1 rounded bg-primary text-white text-xs font-semibold">PE</span>
+            <h3 id="dTitulo" class="rd-modal-title mt-2">PERÚ</h3>
+            <span id="dEstadoBadge" class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold mt-1">ACTIVO</span>
+          </div>
+        </div>
+        <button class="rd-modal-close bg-white/85" onclick="closeModal('modalDetalle')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-sm overflow-y-auto bg-[#FCFCFE]">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="rounded-xl border border-primary/20 bg-gradient-to-br from-primary-light/50 to-white p-3"><p class="text-[11px] uppercase text-primary font-semibold tracking-wide">Código ISO 2</p><p id="dCodigo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-info/20 bg-gradient-to-br from-info-light/50 to-white p-3"><p class="text-[11px] uppercase text-info font-semibold tracking-wide">Código ISO 3</p><p id="dIso3" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-warning/20 bg-gradient-to-br from-warning-light/50 to-white p-3"><p class="text-[11px] uppercase text-warning font-semibold tracking-wide">Prefijo</p><p id="dPhone" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">Bandera</p><p id="dFlagText" class="text-2xl font-semibold mt-1"></p></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="rd-card p-4 border border-info/15">
+            <p class="rd-label mb-3 text-info">Monedas asociadas</p>
+            <ul id="dMonedas" class="space-y-1.5 text-sm"></ul>
+            <a href="monedas-listar.html" class="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-info hover:underline"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> Administrar monedas</a>
+          </div>
+          <div class="rd-card p-4 border border-success/15">
+            <p class="rd-label mb-3 text-success">Impuestos asociados</p>
+            <ul id="dImpuestos" class="space-y-1.5 text-sm"></ul>
+            <a href="impuestos-listar.html" class="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-success hover:underline"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i> Administrar impuestos</a>
+          </div>
+        </div>
+
+        <div class="rd-card p-4 border border-warning/15 bg-gradient-to-br from-warning-light/20 to-white">
+          <p class="rd-label mb-2 text-warning">Historial</p>
+          <p id="dHistorial" class="text-sm text-ink-muted"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalEliminar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-danger/40 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 text-danger mt-0.5"></i><div><h3 class="rd-modal-title">ELIMINAR PAÍS</h3><p class="rd-modal-subtitle">REVISA EL IMPACTO ANTES DE ELIMINAR</p></div></div>
+        <button onclick="closeModal('modalEliminar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p id="deleteQuestion" class="text-sm"></p>
+        <div id="deleteScenario" class="rounded-lg border border-warning/30 bg-warning-light/40 px-3 py-2 text-sm text-[#A16207]"></div>
+        <label class="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"><input id="deleteConfirm" type="checkbox" class="h-4 w-4"> ¿Estás de acuerdo con ejecutar esta eliminación?</label>
+        <div class="rd-modal-footer border-0 pt-0"><button onclick="closeModal('modalEliminar')" class="btn btn-muted">Cancelar</button><button id="btnConfirmDelete" onclick="confirmDelete()" disabled class="btn btn-danger">Eliminar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalExportarPaises" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EXPORTAR PAÍSES</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div></div><button onclick="closeModal('modalExportarPaises')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-4">
+        <div class="rounded-lg border border-border bg-bg p-3 flex items-center gap-2 text-sm"><i data-lucide="file-spreadsheet" class="w-5 h-5 text-success"></i><p>Se exportará el catálogo completo en formato Excel (.xlsx).</p></div>
+        <div><p class="rd-label mb-2">FORMATO:</p><div class="space-y-2"><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypePaises" value="xlsx" checked> EXCEL (.XLSX)</label><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypePaises" value="csv"> CSV (.CSV)</label></div></div>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalExportarPaises')" class="btn btn-muted">CANCELAR</button><button type="button" onclick="confirmExport()" class="btn btn-primary"><i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/catalog.js"></script>
+  <script>
+    const paises = RD_CATALOG.paises.map((p) => ({ ...p }));
+    let currentPage = 1;
+    let pageSize = 15;
+    let lastPage = 1;
+    let deleteId = null;
+    let editInitialData = null;
+
+    function countCurrencies(countryId) { return RD_CATALOG.monedas.filter((m) => m.country_id === countryId).length; }
+    function countTaxes(countryId) { return RD_CATALOG.impuestos.filter((t) => t.country_id === countryId).length; }
+
+    function renderCards() {
+      const total = paises.length;
+      const activos = paises.filter((p) => p.status).length;
+      const conMonedas = paises.filter((p) => countCurrencies(p.id) > 0).length;
+      document.getElementById('cardTotal').textContent = total;
+      document.getElementById('cardActivos').textContent = activos;
+      document.getElementById('cardInactivos').textContent = total - activos;
+      document.getElementById('cardConMonedas').textContent = conMonedas;
+    }
+
+    function getFiltered() {
+      const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const estado = document.getElementById('filtroEstado').value;
+      const orden = document.getElementById('filtroOrden').value;
+      let rows = paises.filter((p) => {
+        const matchTxt = !txt || p.name.toLowerCase().includes(txt) || p.code.toLowerCase().includes(txt) || (p.iso3 || '').toLowerCase().includes(txt);
+        const matchEstado = estado === 'todos' || (estado === 'activo' ? p.status : !p.status);
+        return matchTxt && matchEstado;
+      });
+      rows.sort((a, b) => a[orden].localeCompare(b[orden]));
+      return rows;
+    }
+
+    function renderTable() {
+      const rows = getFiltered();
+      document.getElementById('resultadosLabel').textContent = `${rows.length} resultados`;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      lastPage = totalPages;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const paged = rows.slice(start, start + pageSize);
+      document.getElementById('paisesTbody').innerHTML = paged.map((p) => `
+        <tr class="border-b border-[#ECEEF4] last:border-0">
+          <td class="py-2.5 px-2 text-xl">${p.flag || '🌐'}</td>
+          <td class="py-2.5 px-2 font-semibold">${p.code}</td>
+          <td class="py-2.5 px-2 text-ink-muted">${p.iso3 || '—'}</td>
+          <td class="py-2.5 px-2">${p.name}</td>
+          <td class="py-2.5 px-2">${p.phone || '—'}</td>
+          <td class="py-2.5 px-2">${countCurrencies(p.id) > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-info-light text-info text-xs font-semibold"><i data-lucide="coins" class="w-3.5 h-3.5"></i>${countCurrencies(p.id)}</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold">0</span>`}</td>
+          <td class="py-2.5 px-2">${countTaxes(p.id) > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold"><i data-lucide="receipt-text" class="w-3.5 h-3.5"></i>${countTaxes(p.id)}</span>` : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 text-ink-muted text-xs font-semibold">0</span>`}</td>
+          <td class="py-2.5 px-2">${p.status ? '<span class="status-pill status-active">ACTIVO</span>' : '<span class="status-pill status-inactive">INACTIVO</span>'}</td>
+          <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${p.id})" class="rd-action-btn" title="Detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${p.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${p.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
+        </tr>`).join('');
+      const from = rows.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, rows.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${rows.length}`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('btnLastPage').disabled = currentPage === totalPages;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goToPage(p) {
+      if (p < 1) p = 1;
+      if (p > lastPage) p = lastPage;
+      currentPage = p;
+      renderTable();
+    }
+
+    function renderAll() { renderCards(); renderTable(); }
+
+    function openCreateModal() {
+      document.getElementById('formCrear').reset();
+      document.getElementById('crearActivo').checked = true;
+      openModal('modalCrear');
+    }
+
+    function submitCreate() {
+      const code = document.getElementById('crearCodigo').value.trim().toUpperCase();
+      const name = document.getElementById('crearNombre').value.trim().toUpperCase();
+      if (!code) return showToast('El código ISO 2 es obligatorio', 'warning');
+      if (!name) return showToast('El nombre es obligatorio', 'warning');
+      if (paises.some((p) => p.code === code)) return showToast('Ya existe un país con ese código', 'warning');
+      paises.push({
+        id: Math.max(...paises.map((p) => p.id)) + 1,
+        code,
+        iso3: document.getElementById('crearIso3').value.trim().toUpperCase(),
+        name,
+        phone: document.getElementById('crearPhone').value.trim(),
+        flag: document.getElementById('crearFlag').value.trim() || '🌐',
+        status: document.getElementById('crearActivo').checked,
+        created_by: 'María Rojas', created_at: '2026-06-01', updated_by: 'María Rojas', updated_at: '2026-06-01'
+      });
+      showToast('País creado', 'success');
+      closeModal('modalCrear');
+      renderAll();
+    }
+
+    function openEditModal(id) {
+      const p = paises.find((x) => x.id === id); if (!p) return;
+      document.getElementById('editarId').value = String(p.id);
+      document.getElementById('editarCodigo').value = p.code;
+      document.getElementById('editarIso3').value = p.iso3 || '';
+      document.getElementById('editarNombre').value = p.name;
+      document.getElementById('editarPhone').value = p.phone || '';
+      document.getElementById('editarFlag').value = p.flag || '';
+      document.getElementById('editarActivo').checked = !!p.status;
+      editInitialData = { code: p.code, iso3: p.iso3 || '', name: p.name, phone: p.phone || '', flag: p.flag || '', status: !!p.status };
+      document.getElementById('editModifiedBadge').classList.add('hidden');
+      openModal('modalEditar');
+    }
+
+    function openDetailModal(id) {
+      const p = paises.find((x) => x.id === id); if (!p) return;
+      document.getElementById('dCodigoBadge').textContent = p.code;
+      document.getElementById('dTitulo').textContent = p.name.toUpperCase();
+      const estadoEl = document.getElementById('dEstadoBadge');
+      estadoEl.textContent = p.status ? 'ACTIVO' : 'INACTIVO';
+      estadoEl.className = `inline-flex px-2 py-0.5 rounded text-xs font-semibold mt-1 ${p.status ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}`;
+      document.getElementById('dFlagBig').textContent = p.flag || '🌐';
+      document.getElementById('dCodigo').textContent = p.code;
+      document.getElementById('dIso3').textContent = p.iso3 || '—';
+      document.getElementById('dPhone').textContent = p.phone || '—';
+      document.getElementById('dFlagText').textContent = p.flag || '—';
+      const monedas = RD_CATALOG.monedas.filter((m) => m.country_id === p.id);
+      document.getElementById('dMonedas').innerHTML = monedas.length
+        ? monedas.map((m) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong class="text-info">${m.symbol}</strong> ${m.code} — ${m.name}</span>${m.is_default ? '<span class="text-[10px] uppercase bg-info-light text-info px-2 py-0.5 rounded font-semibold">Default</span>' : ''}</li>`).join('')
+        : '<li class="text-ink-muted">Sin monedas asociadas</li>';
+      const impuestos = RD_CATALOG.impuestos.filter((t) => t.country_id === p.id);
+      document.getElementById('dImpuestos').innerHTML = impuestos.length
+        ? impuestos.map((t) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong class="text-success">${t.code}</strong> ${t.name}</span><span class="text-xs font-bold ${t.pct < 0 ? 'text-danger' : 'text-success'}">${t.pct}%</span></li>`).join('')
+        : '<li class="text-ink-muted">Sin impuestos configurados</li>';
+      document.getElementById('dHistorial').textContent = `Creado por ${p.created_by || '—'} el ${p.created_at || '—'}. Última modificación por ${p.updated_by || '—'} el ${p.updated_at || '—'}.`;
+      openModal('modalDetalle');
+    }
+
+    function getDeleteScenario(p) {
+      const monedasUso = countCurrencies(p.id);
+      const impuestosUso = countTaxes(p.id);
+      if (monedasUso > 0 && impuestosUso > 0) return { code: 'C', allow: false, msg: `Escenario C: el país tiene ${monedasUso} moneda(s) y ${impuestosUso} impuesto(s) asociado(s). Elimina primero esas relaciones.` };
+      if (monedasUso > 0) return { code: 'B', allow: false, msg: `Escenario B: el país tiene ${monedasUso} moneda(s) asociada(s). Elimínalas antes de continuar.` };
+      if (impuestosUso > 0) return { code: 'B', allow: false, msg: `Escenario B: el país tiene ${impuestosUso} impuesto(s) asociado(s). Elimínalos antes de continuar.` };
+      return { code: 'A', allow: true, msg: 'Escenario A: país sin uso. Eliminación permitida.' };
+    }
+
+    function openDeleteModal(id) {
+      deleteId = id;
+      const p = paises.find((x) => x.id === id); if (!p) return;
+      const scenario = getDeleteScenario(p);
+      document.getElementById('deleteQuestion').innerHTML = `¿Estás seguro de eliminar el país <strong>"${p.name}"</strong>?`;
+      document.getElementById('deleteScenario').textContent = scenario.msg;
+      document.getElementById('deleteConfirm').checked = false;
+      document.getElementById('btnConfirmDelete').disabled = true;
+      openModal('modalEliminar');
+    }
+
+    function confirmDelete() {
+      if (!deleteId) return;
+      const p = paises.find((x) => x.id === deleteId); if (!p) return;
+      const scenario = getDeleteScenario(p);
+      if (!scenario.allow) { showToast('No se puede eliminar en este escenario', 'warning'); return; }
+      const idx = paises.findIndex((x) => x.id === deleteId);
+      if (idx >= 0) paises.splice(idx, 1);
+      closeModal('modalEliminar');
+      deleteId = null;
+      renderAll();
+      showToast('País eliminado', 'danger');
+    }
+
+    function confirmExport() {
+      showToast('Exportación de países completada', 'success');
+      closeModal('modalExportarPaises');
+    }
+
+    function updateEditModifiedBadge() {
+      if (!editInitialData) return;
+      const hasChanges = (
+        document.getElementById('editarCodigo').value !== editInitialData.code ||
+        document.getElementById('editarIso3').value !== editInitialData.iso3 ||
+        document.getElementById('editarNombre').value !== editInitialData.name ||
+        document.getElementById('editarPhone').value !== editInitialData.phone ||
+        document.getElementById('editarFlag').value !== editInitialData.flag ||
+        document.getElementById('editarActivo').checked !== editInitialData.status
+      );
+      document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
+    }
+
+    document.getElementById('formCrear').addEventListener('submit', (e) => { e.preventDefault(); submitCreate(); });
+    document.getElementById('formEditar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById('editarId').value);
+      const p = paises.find((x) => x.id === id); if (!p) return;
+      p.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
+      p.iso3 = document.getElementById('editarIso3').value.trim().toUpperCase();
+      p.name = document.getElementById('editarNombre').value.trim().toUpperCase();
+      p.phone = document.getElementById('editarPhone').value.trim();
+      p.flag = document.getElementById('editarFlag').value.trim();
+      p.status = document.getElementById('editarActivo').checked;
+      p.updated_by = 'María Rojas';
+      p.updated_at = '2026-06-01';
+      closeModal('modalEditar');
+      renderAll();
+      showToast('País actualizado', 'success');
+    });
+    ['editarCodigo', 'editarIso3', 'editarNombre', 'editarPhone', 'editarFlag', 'editarActivo'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
+      document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
+    });
+    document.getElementById('deleteConfirm').addEventListener('change', (e) => { document.getElementById('btnConfirmDelete').disabled = !e.target.checked; });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderTable(); });
+    ['filtroTexto', 'filtroEstado', 'filtroOrden'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => { currentPage = 1; renderTable(); });
+      document.getElementById(id).addEventListener('change', () => { currentPage = 1; renderTable(); });
+    });
+
+    initLayout('ADMINISTRADOR / PAÍSES', '../components').then(() => { renderAll(); });
+  </script>
+</body>
+</html>

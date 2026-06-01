@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Impuestos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <article class="theme-surface kpi-card kpi-primary"><p id="cardTotal" class="kpi-value">0</p><p class="kpi-title">Total impuestos</p><p class="kpi-subtitle">Registrados en el sistema</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p id="cardActivos" class="kpi-value">0</p><p class="kpi-title">Activos</p><p class="kpi-subtitle">Disponibles para gastos</p></article>
+        <article class="theme-surface kpi-card kpi-info"><p id="cardImpuestos" class="kpi-value">0</p><p class="kpi-title">Cargos positivos</p><p class="kpi-subtitle">Impuestos / retenciones</p></article>
+        <article class="theme-surface kpi-card kpi-warning"><p id="cardDescuentos" class="kpi-value">0</p><p class="kpi-title">Descuentos</p><p class="kpi-subtitle">Porcentajes negativos</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Tabla de impuestos</h1>
+            <p class="table-panel-subtitle">Cada impuesto pertenece a un país. Los gastos los heredan según el país de su política.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="renderAll(); showToast('Impuestos actualizados', 'info')" class="btn btn-outline"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+            <button onclick="openModal('modalExportarImp')" class="btn btn-outline"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> Exportar</button>
+            <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nuevo impuesto</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
+          <label class="relative md:col-span-2"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="filtroTexto" type="text" placeholder="BUSCAR POR NOMBRE O CÓDIGO..." class="rd-input w-full h-10 pl-9 pr-3 text-[13px] uppercase"></label>
+          <select id="filtroPais" class="rd-select h-10 px-3 text-[13px] uppercase"></select>
+          <select id="filtroTipo" class="rd-select h-10 px-3 text-[13px] uppercase">
+            <option value="todos">Todos los tipos</option>
+            <option value="impuesto">Impuesto</option>
+            <option value="retencion">Retención</option>
+            <option value="detraccion">Detracción</option>
+            <option value="descuento">Descuento</option>
+          </select>
+          <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los estados</option><option value="activo">Activos</option><option value="inactivo">Inactivos</option></select>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de impuestos</h2>
+          <span id="resultadosLabel" class="text-[12px] text-primary font-semibold uppercase"></span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1000px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Código</th>
+                <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">País</th>
+                <th class="py-2.5 px-2">Tipo</th>
+                <th class="py-2.5 px-2 text-right">Porcentaje</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="impuestosTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">0-0 de 0</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage - 1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage + 1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalCrear" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-success-light text-success inline-flex items-center justify-center"><i data-lucide="receipt-text" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">NUEVO IMPUESTO</h3><p class="rd-modal-subtitle">CADA IMPUESTO PERTENECE A UN PAÍS Y APLICA A LOS GASTOS DE SUS POLÍTICAS</p></div></div>
+        <button onclick="closeModal('modalCrear')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formCrear" class="p-5 space-y-4 overflow-y-auto">
+        <div><label class="rd-label block mb-1">País * <span class="text-ink-muted normal-case font-medium text-[11px]">— solo países activos</span></label><select id="crearPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Código *</label><input id="crearCodigo" required maxlength="20" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="IGV"></div>
+          <div><label class="rd-label block mb-1">Nombre *</label><input id="crearNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: IGV 18%"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="rd-label block mb-1">Tipo *</label>
+            <select id="crearTipo" required class="rd-select w-full h-10 px-3 text-sm uppercase">
+              <option value="impuesto">Impuesto</option>
+              <option value="retencion">Retención</option>
+              <option value="detraccion">Detracción</option>
+              <option value="descuento">Descuento</option>
+            </select>
+          </div>
+          <div><label class="rd-label block mb-1">Porcentaje * <span class="text-ink-muted normal-case font-medium text-[11px]">— usa negativo para descuentos</span></label><input id="crearPct" type="number" step="0.01" required class="rd-input w-full h-10 px-3 text-sm" placeholder="18"></div>
+        </div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo los impuestos activos aparecen al crear un gasto</p></div><span class="rd-switch"><input id="crearActivo" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalCrear')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEditar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="pencil" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EDITAR IMPUESTO</h3><p class="rd-modal-subtitle">MODIFICA LOS DATOS DEL IMPUESTO</p></div></div>
+        <button onclick="closeModal('modalEditar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formEditar" class="p-5 space-y-4 overflow-y-auto">
+        <input id="editarId" type="hidden">
+        <div><label class="rd-label block mb-1">País *</label><select id="editarPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Código *</label><input id="editarCodigo" required maxlength="20" class="rd-input w-full h-10 px-3 text-sm uppercase"></div>
+          <div><label class="rd-label block mb-1">Nombre * <span id="editModifiedBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-warning-light text-warning text-[10px] align-middle">MODIFICADO</span></label><input id="editarNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><label class="rd-label block mb-1">Tipo *</label><select id="editarTipo" required class="rd-select w-full h-10 px-3 text-sm uppercase"><option value="impuesto">Impuesto</option><option value="retencion">Retención</option><option value="detraccion">Detracción</option><option value="descuento">Descuento</option></select></div>
+          <div><label class="rd-label block mb-1">Porcentaje *</label><input id="editarPct" type="number" step="0.01" required class="rd-input w-full h-10 px-3 text-sm"></div>
+        </div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo los impuestos activos están disponibles</p></div><span class="rd-switch"><input id="editarActivo" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalEditar')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalDetalle" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header bg-gradient-to-r from-success-light/70 via-primary-light/40 to-info-light/40 border-b border-success/15">
+        <div class="flex items-start gap-3">
+          <span class="w-12 h-12 rounded-xl bg-white/85 border border-success/20 inline-flex items-center justify-center text-success shadow-sm"><i data-lucide="receipt-text" class="w-6 h-6"></i></span>
+          <div>
+            <span id="dCodigoBadge" class="inline-flex px-2 py-1 rounded bg-success text-white text-xs font-semibold">IGV</span>
+            <h3 id="dTitulo" class="rd-modal-title mt-2">IGV</h3>
+            <span id="dEstadoBadge" class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold mt-1">ACTIVO</span>
+          </div>
+        </div>
+        <button class="rd-modal-close bg-white/85" onclick="closeModal('modalDetalle')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-sm overflow-y-auto bg-[#FCFCFE]">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="rounded-xl border border-info/20 bg-gradient-to-br from-info-light/50 to-white p-3"><p class="text-[11px] uppercase text-info font-semibold tracking-wide">País</p><p id="dPais" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-primary/20 bg-gradient-to-br from-primary-light/50 to-white p-3"><p class="text-[11px] uppercase text-primary font-semibold tracking-wide">Tipo</p><p id="dTipo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-warning/20 bg-gradient-to-br from-warning-light/50 to-white p-3"><p class="text-[11px] uppercase text-warning font-semibold tracking-wide">Código</p><p id="dCodigo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">Porcentaje</p><p id="dPct" class="text-base font-extrabold mt-1"></p></div>
+        </div>
+        <div class="rd-card p-4 border border-primary/15">
+          <p class="rd-label mb-2 text-primary">Otros impuestos del mismo país</p>
+          <ul id="dHermanos" class="space-y-1.5 text-sm"></ul>
+        </div>
+        <div class="rd-card p-4 border border-warning/15 bg-gradient-to-br from-warning-light/20 to-white">
+          <p class="rd-label mb-2 text-warning">Simulación rápida</p>
+          <div class="flex items-end gap-3 flex-wrap">
+            <div>
+              <label class="rd-label block mb-1">Monto base</label>
+              <input id="dBase" type="number" step="0.01" value="100" class="rd-input h-10 w-32 px-3 text-sm">
+            </div>
+            <p class="text-xs text-ink-muted">Aplicando <span id="dPctMini" class="font-extrabold text-warning"></span>:</p>
+            <p class="text-lg font-extrabold text-primary tabular-nums">Total: <span id="dCalc"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalEliminar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-danger/40 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 text-danger mt-0.5"></i><div><h3 class="rd-modal-title">ELIMINAR IMPUESTO</h3><p class="rd-modal-subtitle">REVISA EL IMPACTO ANTES DE ELIMINAR</p></div></div><button onclick="closeModal('modalEliminar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p id="deleteQuestion" class="text-sm"></p>
+        <div id="deleteScenario" class="rounded-lg border border-warning/30 bg-warning-light/40 px-3 py-2 text-sm text-[#A16207]"></div>
+        <label class="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"><input id="deleteConfirm" type="checkbox" class="h-4 w-4"> ¿Estás de acuerdo con ejecutar esta eliminación?</label>
+        <div class="rd-modal-footer border-0 pt-0"><button onclick="closeModal('modalEliminar')" class="btn btn-muted">Cancelar</button><button id="btnConfirmDelete" onclick="confirmDelete()" disabled class="btn btn-danger">Eliminar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalExportarImp" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EXPORTAR IMPUESTOS</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div></div><button onclick="closeModal('modalExportarImp')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-4">
+        <div class="rounded-lg border border-border bg-bg p-3 flex items-center gap-2 text-sm"><i data-lucide="file-spreadsheet" class="w-5 h-5 text-success"></i><p>Se exportará el catálogo de impuestos con su país asociado.</p></div>
+        <div><p class="rd-label mb-2">FORMATO:</p><div class="space-y-2"><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypeImp" value="xlsx" checked> EXCEL (.XLSX)</label><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypeImp" value="csv"> CSV (.CSV)</label></div></div>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalExportarImp')" class="btn btn-muted">CANCELAR</button><button type="button" onclick="confirmExport()" class="btn btn-primary"><i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/catalog.js"></script>
+  <script>
+    const impuestos = RD_CATALOG.impuestos.map((t) => ({ ...t }));
+    const paises = RD_CATALOG.paises;
+    let currentPage = 1;
+    let pageSize = 15;
+    let lastPage = 1;
+    let deleteId = null;
+    let editInitialData = null;
+
+    const TIPO_LABEL = {
+      impuesto: { label: 'Impuesto', cls: 'bg-success-light text-success' },
+      retencion: { label: 'Retención', cls: 'bg-info-light text-info' },
+      detraccion: { label: 'Detracción', cls: 'bg-warning-light text-warning' },
+      descuento: { label: 'Descuento', cls: 'bg-danger-light text-danger' }
+    };
+
+    function paisName(id) {
+      const p = paises.find((x) => x.id === id);
+      return p ? `${p.flag || ''} ${p.name}` : '—';
+    }
+
+    function fillPaisesSelects() {
+      const activos = paises.filter((p) => p.status).map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
+      const todos = paises.map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
+      document.getElementById('filtroPais').innerHTML = `<option value="todos">Todos los países</option>${todos}`;
+      document.getElementById('crearPais').innerHTML = `<option value="">SELECCIONA PAÍS</option>${activos}`;
+      document.getElementById('editarPais').innerHTML = `<option value="">SELECCIONA PAÍS</option>${todos}`;
+    }
+
+    function renderCards() {
+      const total = impuestos.length;
+      const activos = impuestos.filter((t) => t.status).length;
+      const cargos = impuestos.filter((t) => t.pct >= 0).length;
+      const descuentos = impuestos.filter((t) => t.pct < 0).length;
+      document.getElementById('cardTotal').textContent = total;
+      document.getElementById('cardActivos').textContent = activos;
+      document.getElementById('cardImpuestos').textContent = cargos;
+      document.getElementById('cardDescuentos').textContent = descuentos;
+    }
+
+    function getFiltered() {
+      const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const pais = document.getElementById('filtroPais').value;
+      const tipo = document.getElementById('filtroTipo').value;
+      const estado = document.getElementById('filtroEstado').value;
+      return impuestos.filter((t) => {
+        const matchTxt = !txt || t.name.toLowerCase().includes(txt) || t.code.toLowerCase().includes(txt);
+        const matchPais = pais === 'todos' || String(t.country_id) === pais;
+        const matchTipo = tipo === 'todos' || t.type === tipo;
+        const matchEstado = estado === 'todos' || (estado === 'activo' ? t.status : !t.status);
+        return matchTxt && matchPais && matchTipo && matchEstado;
+      });
+    }
+
+    function renderTable() {
+      const rows = getFiltered();
+      document.getElementById('resultadosLabel').textContent = `${rows.length} resultados`;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      lastPage = totalPages;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const paged = rows.slice(start, start + pageSize);
+      document.getElementById('impuestosTbody').innerHTML = paged.map((t) => {
+        const meta = TIPO_LABEL[t.type] || { label: t.type, cls: 'bg-gray-100 text-ink-muted' };
+        const pctCls = t.pct < 0 ? 'text-danger' : 'text-success';
+        return `
+        <tr class="border-b border-[#ECEEF4] last:border-0">
+          <td class="py-2.5 px-2 font-semibold">${t.code}</td>
+          <td class="py-2.5 px-2">${t.name}</td>
+          <td class="py-2.5 px-2">${paisName(t.country_id)}</td>
+          <td class="py-2.5 px-2"><span class="inline-flex px-2 py-0.5 rounded ${meta.cls} text-xs font-semibold uppercase">${meta.label}</span></td>
+          <td class="py-2.5 px-2 text-right font-extrabold tabular-nums ${pctCls}">${t.pct}%</td>
+          <td class="py-2.5 px-2">${t.status ? '<span class="status-pill status-active">ACTIVO</span>' : '<span class="status-pill status-inactive">INACTIVO</span>'}</td>
+          <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${t.id})" class="rd-action-btn" title="Detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${t.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${t.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
+        </tr>`;
+      }).join('');
+      const from = rows.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, rows.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${rows.length}`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('btnLastPage').disabled = currentPage === totalPages;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goToPage(p) {
+      if (p < 1) p = 1;
+      if (p > lastPage) p = lastPage;
+      currentPage = p;
+      renderTable();
+    }
+
+    function renderAll() { fillPaisesSelects(); renderCards(); renderTable(); }
+
+    function openCreateModal() {
+      document.getElementById('formCrear').reset();
+      document.getElementById('crearActivo').checked = true;
+      document.getElementById('crearTipo').value = 'impuesto';
+      fillPaisesSelects();
+      openModal('modalCrear');
+    }
+
+    function submitCreate() {
+      const countryId = Number(document.getElementById('crearPais').value);
+      const code = document.getElementById('crearCodigo').value.trim().toUpperCase();
+      const name = document.getElementById('crearNombre').value.trim();
+      const pct = parseFloat(document.getElementById('crearPct').value);
+      if (!countryId) return showToast('Selecciona un país', 'warning');
+      if (!code) return showToast('El código es obligatorio', 'warning');
+      if (!name) return showToast('El nombre es obligatorio', 'warning');
+      if (isNaN(pct)) return showToast('Indica el porcentaje', 'warning');
+      if (impuestos.some((t) => t.code === code && t.country_id === countryId)) return showToast('Ya existe un impuesto con ese código en el país', 'warning');
+      impuestos.push({
+        id: Math.max(...impuestos.map((t) => t.id)) + 1,
+        code, name, pct,
+        country_id: countryId,
+        type: document.getElementById('crearTipo').value,
+        status: document.getElementById('crearActivo').checked,
+        created_at: '2026-06-01', updated_at: '2026-06-01'
+      });
+      showToast('Impuesto creado', 'success');
+      closeModal('modalCrear');
+      renderAll();
+    }
+
+    function openEditModal(id) {
+      const t = impuestos.find((x) => x.id === id); if (!t) return;
+      fillPaisesSelects();
+      document.getElementById('editarId').value = String(t.id);
+      document.getElementById('editarPais').value = String(t.country_id);
+      document.getElementById('editarCodigo').value = t.code;
+      document.getElementById('editarNombre').value = t.name;
+      document.getElementById('editarTipo').value = t.type;
+      document.getElementById('editarPct').value = t.pct;
+      document.getElementById('editarActivo').checked = !!t.status;
+      editInitialData = { country_id: String(t.country_id), code: t.code, name: t.name, type: t.type, pct: String(t.pct), status: !!t.status };
+      document.getElementById('editModifiedBadge').classList.add('hidden');
+      openModal('modalEditar');
+    }
+
+    function openDetailModal(id) {
+      const t = impuestos.find((x) => x.id === id); if (!t) return;
+      document.getElementById('dCodigoBadge').textContent = t.code;
+      document.getElementById('dTitulo').textContent = t.name;
+      const estadoEl = document.getElementById('dEstadoBadge');
+      estadoEl.textContent = t.status ? 'ACTIVO' : 'INACTIVO';
+      estadoEl.className = `inline-flex px-2 py-0.5 rounded text-xs font-semibold mt-1 ${t.status ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}`;
+      document.getElementById('dPais').textContent = paisName(t.country_id);
+      document.getElementById('dCodigo').textContent = t.code;
+      document.getElementById('dTipo').textContent = (TIPO_LABEL[t.type] || { label: t.type }).label;
+      document.getElementById('dPct').textContent = `${t.pct}%`;
+      document.getElementById('dPct').className = `text-base font-extrabold mt-1 ${t.pct < 0 ? 'text-danger' : 'text-success'}`;
+      document.getElementById('dPctMini').textContent = `${t.pct}%`;
+      const hermanos = impuestos.filter((x) => x.country_id === t.country_id && x.id !== t.id);
+      document.getElementById('dHermanos').innerHTML = hermanos.length
+        ? hermanos.map((h) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong>${h.code}</strong> ${h.name}</span><span class="text-xs font-bold ${h.pct < 0 ? 'text-danger' : 'text-success'}">${h.pct}%</span></li>`).join('')
+        : '<li class="text-ink-muted">Es el único impuesto del país</li>';
+      const base = parseFloat(document.getElementById('dBase').value) || 0;
+      const total = base + base * (t.pct / 100);
+      document.getElementById('dCalc').textContent = total.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      document.getElementById('dBase').oninput = () => {
+        const b = parseFloat(document.getElementById('dBase').value) || 0;
+        document.getElementById('dCalc').textContent = (b + b * (t.pct / 100)).toLocaleString('es-PE', { minimumFractionDigits: 2 });
+      };
+      openModal('modalDetalle');
+    }
+
+    function getDeleteScenario(t) {
+      if (!t.status) return { allow: true, msg: 'Escenario A: impuesto inactivo. Eliminación permitida.' };
+      return { allow: true, msg: 'Escenario A: el impuesto se quitará del catálogo del país. Gastos históricos no se modifican.' };
+    }
+
+    function openDeleteModal(id) {
+      deleteId = id;
+      const t = impuestos.find((x) => x.id === id); if (!t) return;
+      const scenario = getDeleteScenario(t);
+      document.getElementById('deleteQuestion').innerHTML = `¿Estás seguro de eliminar el impuesto <strong>"${t.code} — ${t.name}"</strong>?`;
+      document.getElementById('deleteScenario').textContent = scenario.msg;
+      document.getElementById('deleteConfirm').checked = false;
+      document.getElementById('btnConfirmDelete').disabled = true;
+      openModal('modalEliminar');
+    }
+
+    function confirmDelete() {
+      if (!deleteId) return;
+      const idx = impuestos.findIndex((x) => x.id === deleteId);
+      if (idx >= 0) impuestos.splice(idx, 1);
+      closeModal('modalEliminar');
+      deleteId = null;
+      renderAll();
+      showToast('Impuesto eliminado', 'danger');
+    }
+
+    function confirmExport() {
+      showToast('Exportación de impuestos completada', 'success');
+      closeModal('modalExportarImp');
+    }
+
+    function updateEditModifiedBadge() {
+      if (!editInitialData) return;
+      const hasChanges = (
+        document.getElementById('editarPais').value !== editInitialData.country_id ||
+        document.getElementById('editarCodigo').value !== editInitialData.code ||
+        document.getElementById('editarNombre').value !== editInitialData.name ||
+        document.getElementById('editarTipo').value !== editInitialData.type ||
+        document.getElementById('editarPct').value !== editInitialData.pct ||
+        document.getElementById('editarActivo').checked !== editInitialData.status
+      );
+      document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
+    }
+
+    document.getElementById('formCrear').addEventListener('submit', (e) => { e.preventDefault(); submitCreate(); });
+    document.getElementById('formEditar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById('editarId').value);
+      const t = impuestos.find((x) => x.id === id); if (!t) return;
+      t.country_id = Number(document.getElementById('editarPais').value);
+      t.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
+      t.name = document.getElementById('editarNombre').value.trim();
+      t.type = document.getElementById('editarTipo').value;
+      t.pct = parseFloat(document.getElementById('editarPct').value) || 0;
+      t.status = document.getElementById('editarActivo').checked;
+      t.updated_at = '2026-06-01';
+      closeModal('modalEditar');
+      renderAll();
+      showToast('Impuesto actualizado', 'success');
+    });
+    ['editarPais', 'editarCodigo', 'editarNombre', 'editarTipo', 'editarPct', 'editarActivo'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
+      document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
+    });
+    document.getElementById('deleteConfirm').addEventListener('change', (e) => { document.getElementById('btnConfirmDelete').disabled = !e.target.checked; });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderTable(); });
+    ['filtroTexto', 'filtroPais', 'filtroTipo', 'filtroEstado'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => { currentPage = 1; renderTable(); });
+      document.getElementById(id).addEventListener('change', () => { currentPage = 1; renderTable(); });
+    });
+
+    initLayout('ADMINISTRADOR / IMPUESTOS', '../components').then(() => { renderAll(); });
+  </script>
+</body>
+</html>

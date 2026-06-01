@@ -28,15 +28,16 @@
 
       <article class="theme-surface rd-card p-4 bg-primary-light/40 border-primary/20">
         <h2 class="table-panel-title">Contexto global del registro</h2>
-        <p class="text-xs text-ink-muted mb-3">Define la política (moneda y catálogo de impuestos/descuentos vienen de ella), proyecto, centro de costo y solicitud. El tipo de impuesto o descuento es opcional (por defecto <strong>null</strong>); si eliges uno, aplica a todas las filas. Si cambias de política, se reinicia la selección.</p>
+        <p class="text-xs text-ink-muted mb-3">Define la política (moneda y catálogo de impuestos/descuentos vienen del <strong>país</strong> de la política), proyecto, centro de costo y solicitud. El tipo de impuesto o descuento es opcional (por defecto <strong>null</strong>); si eliges uno, aplica a todas las filas. Si cambias de política, se reinicia la selección.</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div>
             <label class="rd-label block mb-1">Política *</label>
             <select id="sharedPolitica" class="rd-select w-full h-9 px-2 text-xs uppercase">
               <option value="">SELECCIONA POLÍTICA</option>
-              <option value="POL-001">POL-001 · POLÍTICA GENERAL PEN</option>
-              <option value="POL-003">POL-003 · POLÍTICA USD INTERNACIONAL</option>
-              <option value="POL-007">POL-007 · POLÍTICA OPERACIONES</option>
+              <option value="POL-001">POL-001 · POLÍTICA GENERAL PEN (PERÚ)</option>
+              <option value="POL-003">POL-003 · POLÍTICA USD INTERNACIONAL (EE.UU.)</option>
+              <option value="POL-006">POL-006 · POLÍTICA CHILE CLP (CHILE)</option>
+              <option value="POL-007">POL-007 · POLÍTICA OPERACIONES NORTE (PERÚ)</option>
             </select>
           </div>
           <div>
@@ -121,54 +122,34 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../assets/js/components-loader.js"></script>
   <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/catalog.js"></script>
   <script>
     const today = new Date().toISOString().slice(0, 10);
     let filas = [];
     const MAX = 20;
 
-    const POLITICAS_CONFIG = {
-      'POL-001': {
-        currency: 'PEN',
-        taxes: [
-          { id: 'igv', label: 'IGV 18%', pct: 18 },
-          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
-          { id: 'ret_3', label: 'Retención / detracción referencial (3%)', pct: 3 },
-          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
-          { id: 'dto_com', label: 'Descuento comercial (−3%)', pct: -3 },
-          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
-        ]
-      },
-      'POL-003': {
-        currency: 'USD',
-        taxes: [
-          { id: 'loc', label: 'Cargo / impuesto referencial (10%)', pct: 10 },
-          { id: 'sin_cargo', label: 'Sin cargo adicional (0%)', pct: 0 },
-          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
-          { id: 'dto_vol', label: 'Descuento por volumen (−4%)', pct: -4 },
-          { id: 'dto_linea', label: 'Descuento en línea (−1,5%)', pct: -1.5 }
-        ]
-      },
-      'POL-007': {
-        currency: 'PEN',
-        taxes: [
-          { id: 'igv', label: 'IGV 18%', pct: 18 },
-          { id: 'exento', label: 'Operación exonerada (0%)', pct: 0 },
-          { id: 'dto_pronto', label: 'Descuento pronto pago (−2%)', pct: -2 },
-          { id: 'dto_vol', label: 'Descuento por volumen (−5%)', pct: -5 }
-        ]
-      }
-    };
+    // El catálogo de impuestos viene del PAÍS de la política seleccionada.
+    function getPolicyConfig(key) {
+      const pc = RD_CATALOG.policyCountry(key);
+      if (!pc) return null;
+      return {
+        country: RD_CATALOG.getCountry(pc.country_id),
+        currency: RD_CATALOG.getCurrency(pc.currency_id),
+        taxes: RD_CATALOG.taxesByCountry(pc.country_id).filter((t) => t.status)
+      };
+    }
 
     function symForCurrency(c) {
       if (c === 'USD') return 'US$';
       if (c === 'CLP') return 'CLP$';
+      if (c === 'MXN') return 'MX$';
+      if (c === 'COP') return 'COP$';
       return 'S/';
     }
 
-    function labelMonedaPolitica(c) {
-      if (c === 'USD') return 'US$ USD — Dólares';
-      if (c === 'CLP') return 'CLP$ — Pesos chilenos';
-      return 'S/ PEN — Soles';
+    function labelMonedaPolitica(currency) {
+      if (!currency) return '';
+      return `${currency.symbol} ${currency.code} — ${currency.name}`;
     }
 
     function getPolicyKeyMult() {
@@ -176,8 +157,8 @@
     }
 
     function getCurrencyFromPolicyMult() {
-      const key = getPolicyKeyMult();
-      return (key && POLITICAS_CONFIG[key]) ? POLITICAS_CONFIG[key].currency : 'PEN';
+      const cfg = getPolicyConfig(getPolicyKeyMult());
+      return cfg && cfg.currency ? cfg.currency.code : 'PEN';
     }
 
     function sym() {
@@ -190,7 +171,8 @@
       const wrap = document.getElementById('wrapImpuestoPoliticaMult');
       const monedaEl = document.getElementById('monedaPoliticaMultDisplay');
 
-      if (!key || !POLITICAS_CONFIG[key]) {
+      const cfg = getPolicyConfig(key);
+      if (!key || !cfg || !cfg.currency) {
         monedaEl.textContent = '— Selecciona una política';
         monedaEl.classList.add('text-ink-muted');
         impSel.innerHTML = '<option value="">Primero selecciona una política</option>';
@@ -202,13 +184,13 @@
         return;
       }
 
-      const cfg = POLITICAS_CONFIG[key];
-      monedaEl.textContent = `${labelMonedaPolitica(cfg.currency)} · ${cfg.currency}`;
+      const paisLabel = cfg.country ? `${cfg.country.flag || ''} ${cfg.country.name} · ` : '';
+      monedaEl.textContent = `${paisLabel}${labelMonedaPolitica(cfg.currency)}`;
       monedaEl.classList.remove('text-ink-muted');
       impSel.disabled = false;
       wrap.classList.remove('opacity-60');
       impSel.innerHTML = '<option value="">Sin seleccionar (null)</option>' +
-        cfg.taxes.map((t) => `<option value="${t.id}">${t.label}</option>`).join('');
+        cfg.taxes.map((t) => `<option value="${t.id}">${t.code} — ${t.name} (${t.pct}%)</option>`).join('');
       impSel.value = '';
       render();
     }
@@ -216,8 +198,10 @@
     function getTaxPctMult() {
       const key = getPolicyKeyMult();
       const taxId = document.getElementById('sharedImpuestoPolitica').value;
-      if (!key || !taxId || !POLITICAS_CONFIG[key]) return null;
-      const t = POLITICAS_CONFIG[key].taxes.find((x) => x.id === taxId);
+      if (!key || !taxId) return null;
+      const cfg = getPolicyConfig(key);
+      if (!cfg) return null;
+      const t = cfg.taxes.find((x) => String(x.id) === String(taxId));
       return t ? t.pct : null;
     }
 

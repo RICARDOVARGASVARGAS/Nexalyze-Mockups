@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rinde Gastos | Monedas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            danger: { DEFAULT: '#EF4444', light: '#FEE2E2' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            info: { DEFAULT: '#3B82F6', light: '#DBEAFE' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB',
+            bg: '#F5F7FA'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/custom.css">
+</head>
+<body class="bg-[#EEF0F5] text-ink font-sans min-h-screen">
+  <div id="sidebar-mount"></div>
+  <div id="header-mount"></div>
+
+  <main class="ml-0 md:ml-[220px] pt-16 min-h-screen">
+    <section class="px-3 py-3 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <article class="theme-surface kpi-card kpi-primary"><p id="cardTotal" class="kpi-value">0</p><p class="kpi-title">Total monedas</p><p class="kpi-subtitle">Registradas en el sistema</p></article>
+        <article class="theme-surface kpi-card kpi-success"><p id="cardActivas" class="kpi-value">0</p><p class="kpi-title">Activas</p><p class="kpi-subtitle">Disponibles para gastos</p></article>
+        <article class="theme-surface kpi-card kpi-info"><p id="cardPaises" class="kpi-value">0</p><p class="kpi-title">Países cubiertos</p><p class="kpi-subtitle">Con al menos una moneda</p></article>
+        <article class="theme-surface kpi-card kpi-warning"><p id="cardDefaults" class="kpi-value">0</p><p class="kpi-title">Default por país</p><p class="kpi-subtitle">Marcadas como principal</p></article>
+      </div>
+
+      <div class="theme-surface rd-card p-4 space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div>
+            <h1 class="table-panel-title">Tabla de monedas</h1>
+            <p class="table-panel-subtitle">Cada moneda pertenece a un país. Marca una como default para usarla por defecto en sus políticas.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="renderAll(); showToast('Monedas actualizadas', 'info')" class="btn btn-outline"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Generar</button>
+            <button onclick="openModal('modalExportarMonedas')" class="btn btn-outline"><i data-lucide="file-down" class="w-3.5 h-3.5"></i> Exportar</button>
+            <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Nueva moneda</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <label class="relative md:col-span-2"><i data-lucide="search" class="w-4 h-4 text-ink-soft absolute left-3 top-1/2 -translate-y-1/2"></i><input id="filtroTexto" type="text" placeholder="BUSCAR POR NOMBRE O CÓDIGO..." class="rd-input w-full h-10 pl-9 pr-3 text-[13px] uppercase"></label>
+          <select id="filtroPais" class="rd-select h-10 px-3 text-[13px] uppercase"></select>
+          <select id="filtroEstado" class="rd-select h-10 px-3 text-[13px] uppercase"><option value="todos">Todos los estados</option><option value="activo">Activas</option><option value="inactivo">Inactivas</option></select>
+        </div>
+      </div>
+
+      <div class="theme-surface rd-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-[#E3E6EE] flex items-center justify-between">
+          <h2 class="table-panel-title">Lista de monedas</h2>
+          <span id="resultadosLabel" class="text-[12px] text-primary font-semibold uppercase"></span>
+        </div>
+        <div class="px-2 pb-2 overflow-x-auto">
+          <table class="rd-table w-full min-w-[1000px]">
+            <thead>
+              <tr class="text-left border-b border-[#E5E7EF]">
+                <th class="py-2.5 px-2">Símbolo</th>
+                <th class="py-2.5 px-2">Código</th>
+                <th class="py-2.5 px-2">Nombre</th>
+                <th class="py-2.5 px-2">País</th>
+                <th class="py-2.5 px-2">Decimales</th>
+                <th class="py-2.5 px-2">Tipo cambio (a PEN)</th>
+                <th class="py-2.5 px-2">Default</th>
+                <th class="py-2.5 px-2">Estado</th>
+                <th class="py-2.5 px-2 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="monedasTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-4 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <span>Elementos por página:</span>
+            <select id="rowsPerPage" class="rd-select h-8 px-2 text-sm">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div id="pageRange" class="text-sm text-ink-muted">0-0 de 0</div>
+          <div class="inline-flex items-center gap-2">
+            <button id="btnFirstPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(1)"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
+            <button id="btnPrevPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage - 1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button id="btnNextPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(currentPage + 1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button id="btnLastPage" type="button" class="w-8 h-8 border border-border rounded-lg hover:bg-bg flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" onclick="goToPage(lastPage)"><i data-lucide="chevrons-right" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalCrear" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="coins" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">NUEVA MONEDA</h3><p class="rd-modal-subtitle">CADA MONEDA DEBE PERTENECER A UN PAÍS</p></div></div>
+        <button onclick="closeModal('modalCrear')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formCrear" class="p-5 space-y-4 overflow-y-auto">
+        <div><label class="rd-label block mb-1">País * <span class="text-ink-muted normal-case font-medium text-[11px]">— solo se listan países activos</span></label><select id="crearPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="rd-label block mb-1">Símbolo *</label><input id="crearSimbolo" required maxlength="6" class="rd-input w-full h-10 px-3 text-sm" placeholder="S/"></div>
+          <div><label class="rd-label block mb-1">Código *</label><input id="crearCodigo" required maxlength="10" class="rd-input w-full h-10 px-3 text-sm uppercase" placeholder="PEN"></div>
+          <div><label class="rd-label block mb-1">Decimales</label><input id="crearDecimales" type="number" min="0" max="4" value="2" class="rd-input w-full h-10 px-3 text-sm"></div>
+        </div>
+        <div><label class="rd-label block mb-1">Nombre *</label><input id="crearNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm" placeholder="EJ: Sol Peruano"></div>
+        <div><label class="rd-label block mb-1">Tipo de cambio a PEN <span class="text-ink-muted normal-case font-medium text-[11px]">— referencial</span></label><input id="crearTC" type="number" step="0.0001" min="0" class="rd-input w-full h-10 px-3 text-sm" placeholder="3.75"></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-info-light/40"><div><p class="text-sm font-semibold uppercase">Moneda default del país</p><p class="text-xs text-ink-muted">Si marcas esta opción, será la moneda principal del país. Reemplaza la default actual.</p></div><span class="rd-switch"><input id="crearDefault" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las monedas activas pueden usarse en políticas</p></div><span class="rd-switch"><input id="crearActiva" type="checkbox" checked class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalCrear')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalEditar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white border border-border rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header">
+        <div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="pencil" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EDITAR MONEDA</h3><p class="rd-modal-subtitle">MODIFICA LOS DATOS DE LA MONEDA</p></div></div>
+        <button onclick="closeModal('modalEditar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formEditar" class="p-5 space-y-4 overflow-y-auto">
+        <input id="editarId" type="hidden">
+        <div><label class="rd-label block mb-1">País *</label><select id="editarPais" required class="rd-select w-full h-10 px-3 text-sm uppercase"></select></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="rd-label block mb-1">Símbolo *</label><input id="editarSimbolo" required maxlength="6" class="rd-input w-full h-10 px-3 text-sm"></div>
+          <div><label class="rd-label block mb-1">Código *</label><input id="editarCodigo" required maxlength="10" class="rd-input w-full h-10 px-3 text-sm uppercase"></div>
+          <div><label class="rd-label block mb-1">Decimales</label><input id="editarDecimales" type="number" min="0" max="4" class="rd-input w-full h-10 px-3 text-sm"></div>
+        </div>
+        <div><label class="rd-label block mb-1">Nombre * <span id="editModifiedBadge" class="hidden inline-flex ml-1 px-2 py-0.5 rounded bg-warning-light text-warning text-[10px] align-middle">MODIFICADO</span></label><input id="editarNombre" required maxlength="80" class="rd-input w-full h-10 px-3 text-sm"></div>
+        <div><label class="rd-label block mb-1">Tipo de cambio a PEN</label><input id="editarTC" type="number" step="0.0001" min="0" class="rd-input w-full h-10 px-3 text-sm"></div>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-info-light/40"><div><p class="text-sm font-semibold uppercase">Moneda default del país</p><p class="text-xs text-ink-muted">Reemplaza la default actual si marcas esta opción</p></div><span class="rd-switch"><input id="editarDefault" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <label class="flex items-center justify-between rounded-lg border border-border px-3 py-3 bg-primary-light/40"><div><p class="text-sm font-semibold uppercase">Estado activo</p><p class="text-xs text-ink-muted">Solo las monedas activas pueden usarse</p></div><span class="rd-switch"><input id="editarActiva" type="checkbox" class="rd-switch-input"><span class="rd-switch-slider"></span></span></label>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalEditar')" class="btn btn-muted">Cancelar</button><button type="submit" class="btn btn-primary">GUARDAR CAMBIOS</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalDetalle" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white border border-border rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="rd-modal-header bg-gradient-to-r from-info-light/70 via-primary-light/40 to-success-light/50 border-b border-info/15">
+        <div class="flex items-start gap-3">
+          <span id="dSimboloBig" class="w-12 h-12 rounded-xl bg-white/85 border border-info/20 inline-flex items-center justify-center text-lg font-extrabold text-info shadow-sm">S/</span>
+          <div>
+            <span id="dCodigoBadge" class="inline-flex px-2 py-1 rounded bg-info text-white text-xs font-semibold">PEN</span>
+            <h3 id="dTitulo" class="rd-modal-title mt-2">Sol Peruano</h3>
+            <span id="dEstadoBadge" class="inline-flex px-2 py-0.5 rounded bg-success-light text-success text-xs font-semibold mt-1">ACTIVA</span>
+          </div>
+        </div>
+        <button class="rd-modal-close bg-white/85" onclick="closeModal('modalDetalle')"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-4 text-sm overflow-y-auto bg-[#FCFCFE]">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="rounded-xl border border-info/20 bg-gradient-to-br from-info-light/50 to-white p-3"><p class="text-[11px] uppercase text-info font-semibold tracking-wide">País</p><p id="dPais" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-primary/20 bg-gradient-to-br from-primary-light/50 to-white p-3"><p class="text-[11px] uppercase text-primary font-semibold tracking-wide">Símbolo</p><p id="dSimbolo" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-warning/20 bg-gradient-to-br from-warning-light/50 to-white p-3"><p class="text-[11px] uppercase text-warning font-semibold tracking-wide">Decimales</p><p id="dDecimales" class="text-base font-semibold mt-1"></p></div>
+          <div class="rounded-xl border border-success/20 bg-gradient-to-br from-success-light/50 to-white p-3"><p class="text-[11px] uppercase text-success font-semibold tracking-wide">Tipo cambio</p><p id="dTC" class="text-base font-semibold mt-1"></p></div>
+        </div>
+        <div class="rd-card p-4 border border-primary/15">
+          <p class="rd-label mb-2 text-primary">Otras monedas del mismo país</p>
+          <ul id="dHermanas" class="space-y-1.5 text-sm"></ul>
+        </div>
+        <div class="rd-card p-4 border border-warning/15 bg-gradient-to-br from-warning-light/20 to-white">
+          <p class="rd-label mb-2 text-warning">Historial</p>
+          <p id="dHistorial" class="text-sm text-ink-muted"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalEliminar" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-danger/40 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 text-danger mt-0.5"></i><div><h3 class="rd-modal-title">ELIMINAR MONEDA</h3><p class="rd-modal-subtitle">REVISA EL IMPACTO ANTES DE ELIMINAR</p></div></div><button onclick="closeModal('modalEliminar')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-3 overflow-y-auto">
+        <p id="deleteQuestion" class="text-sm"></p>
+        <div id="deleteScenario" class="rounded-lg border border-warning/30 bg-warning-light/40 px-3 py-2 text-sm text-[#A16207]"></div>
+        <label class="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"><input id="deleteConfirm" type="checkbox" class="h-4 w-4"> ¿Estás de acuerdo con ejecutar esta eliminación?</label>
+        <div class="rd-modal-footer border-0 pt-0"><button onclick="closeModal('modalEliminar')" class="btn btn-muted">Cancelar</button><button id="btnConfirmDelete" onclick="confirmDelete()" disabled class="btn btn-danger">Eliminar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalExportarMonedas" data-modal class="hidden fixed inset-0 z-50 bg-black/35 items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white border border-border rounded-xl shadow-xl">
+      <div class="rd-modal-header"><div class="flex items-start gap-3"><span class="w-10 h-10 rounded-lg bg-primary-light text-primary inline-flex items-center justify-center"><i data-lucide="download" class="w-5 h-5"></i></span><div><h3 class="rd-modal-title">EXPORTAR MONEDAS</h3><p class="rd-modal-subtitle">GENERA UN ARCHIVO CON LOS DATOS</p></div></div><button onclick="closeModal('modalExportarMonedas')" class="rd-modal-close"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+      <div class="p-5 space-y-4">
+        <div class="rounded-lg border border-border bg-bg p-3 flex items-center gap-2 text-sm"><i data-lucide="file-spreadsheet" class="w-5 h-5 text-success"></i><p>Se exportará el catálogo de monedas con su país asociado.</p></div>
+        <div><p class="rd-label mb-2">FORMATO:</p><div class="space-y-2"><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypeMonedas" value="xlsx" checked> EXCEL (.XLSX)</label><label class="flex items-center gap-2 border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-bg"><input type="radio" name="exportTypeMonedas" value="csv"> CSV (.CSV)</label></div></div>
+        <div class="rd-modal-footer"><button type="button" onclick="closeModal('modalExportarMonedas')" class="btn btn-muted">CANCELAR</button><button type="button" onclick="confirmExport()" class="btn btn-primary"><i data-lucide="download" class="w-3.5 h-3.5"></i> EXPORTAR</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/components-loader.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/catalog.js"></script>
+  <script>
+    const monedas = RD_CATALOG.monedas.map((m) => ({ ...m }));
+    const paises = RD_CATALOG.paises;
+    let currentPage = 1;
+    let pageSize = 15;
+    let lastPage = 1;
+    let deleteId = null;
+    let editInitialData = null;
+
+    function paisName(id) {
+      const p = paises.find((x) => x.id === id);
+      return p ? `${p.flag || ''} ${p.name}` : '—';
+    }
+
+    function fillPaisesSelects() {
+      const activos = paises.filter((p) => p.status).map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
+      const todos = paises.map((p) => `<option value="${p.id}">${p.flag || ''} ${p.name}</option>`).join('');
+      document.getElementById('filtroPais').innerHTML = `<option value="todos">Todos los países</option>${todos}`;
+      document.getElementById('crearPais').innerHTML = `<option value="">SELECCIONA PAÍS</option>${activos}`;
+      document.getElementById('editarPais').innerHTML = `<option value="">SELECCIONA PAÍS</option>${todos}`;
+    }
+
+    function renderCards() {
+      const total = monedas.length;
+      const activas = monedas.filter((m) => m.status).length;
+      const paisesCubiertos = new Set(monedas.map((m) => m.country_id)).size;
+      const defaults = monedas.filter((m) => m.is_default).length;
+      document.getElementById('cardTotal').textContent = total;
+      document.getElementById('cardActivas').textContent = activas;
+      document.getElementById('cardPaises').textContent = paisesCubiertos;
+      document.getElementById('cardDefaults').textContent = defaults;
+    }
+
+    function getFiltered() {
+      const txt = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const pais = document.getElementById('filtroPais').value;
+      const estado = document.getElementById('filtroEstado').value;
+      return monedas.filter((m) => {
+        const matchTxt = !txt || m.name.toLowerCase().includes(txt) || m.code.toLowerCase().includes(txt);
+        const matchPais = pais === 'todos' || String(m.country_id) === pais;
+        const matchEstado = estado === 'todos' || (estado === 'activo' ? m.status : !m.status);
+        return matchTxt && matchPais && matchEstado;
+      });
+    }
+
+    function renderTable() {
+      const rows = getFiltered();
+      document.getElementById('resultadosLabel').textContent = `${rows.length} resultados`;
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      lastPage = totalPages;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const paged = rows.slice(start, start + pageSize);
+      document.getElementById('monedasTbody').innerHTML = paged.map((m) => `
+        <tr class="border-b border-[#ECEEF4] last:border-0">
+          <td class="py-2.5 px-2"><span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-info-light text-info font-extrabold">${m.symbol}</span></td>
+          <td class="py-2.5 px-2 font-semibold">${m.code}</td>
+          <td class="py-2.5 px-2">${m.name}</td>
+          <td class="py-2.5 px-2">${paisName(m.country_id)}</td>
+          <td class="py-2.5 px-2 text-ink-muted">${m.decimals}</td>
+          <td class="py-2.5 px-2 tabular-nums">${m.exchange_rate ? m.exchange_rate : '—'}</td>
+          <td class="py-2.5 px-2">${m.is_default ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-info-light text-info text-xs font-semibold"><i data-lucide="star" class="w-3.5 h-3.5"></i>DEFAULT</span>' : '<span class="text-ink-muted text-xs">—</span>'}</td>
+          <td class="py-2.5 px-2">${m.status ? '<span class="status-pill status-active">ACTIVA</span>' : '<span class="status-pill status-inactive">INACTIVA</span>'}</td>
+          <td class="py-2.5 px-2"><div class="flex items-center justify-end gap-1"><button onclick="openDetailModal(${m.id})" class="rd-action-btn" title="Detalle"><i data-lucide="eye" class="w-4 h-4"></i></button><button onclick="openEditModal(${m.id})" class="rd-action-btn" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="openDeleteModal(${m.id})" class="rd-action-btn" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>
+        </tr>`).join('');
+      const from = rows.length === 0 ? 0 : start + 1;
+      const to = Math.min(start + pageSize, rows.length);
+      document.getElementById('pageRange').textContent = `${from}-${to} de ${rows.length}`;
+      document.getElementById('btnFirstPage').disabled = currentPage === 1;
+      document.getElementById('btnPrevPage').disabled = currentPage === 1;
+      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('btnLastPage').disabled = currentPage === totalPages;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function goToPage(p) {
+      if (p < 1) p = 1;
+      if (p > lastPage) p = lastPage;
+      currentPage = p;
+      renderTable();
+    }
+
+    function renderAll() { fillPaisesSelects(); renderCards(); renderTable(); }
+
+    function openCreateModal() {
+      document.getElementById('formCrear').reset();
+      document.getElementById('crearActiva').checked = true;
+      document.getElementById('crearDecimales').value = 2;
+      fillPaisesSelects();
+      openModal('modalCrear');
+    }
+
+    function unsetDefaultsForCountry(countryId, exceptId) {
+      monedas.forEach((m) => {
+        if (m.country_id === countryId && m.id !== exceptId) m.is_default = false;
+      });
+    }
+
+    function submitCreate() {
+      const countryId = Number(document.getElementById('crearPais').value);
+      const code = document.getElementById('crearCodigo').value.trim().toUpperCase();
+      const name = document.getElementById('crearNombre').value.trim();
+      const symbol = document.getElementById('crearSimbolo').value.trim();
+      if (!countryId) return showToast('Selecciona un país', 'warning');
+      if (!code) return showToast('El código es obligatorio', 'warning');
+      if (!name) return showToast('El nombre es obligatorio', 'warning');
+      if (!symbol) return showToast('El símbolo es obligatorio', 'warning');
+      if (monedas.some((m) => m.code === code)) return showToast('Ya existe una moneda con ese código', 'warning');
+      const id = Math.max(...monedas.map((m) => m.id)) + 1;
+      const isDefault = document.getElementById('crearDefault').checked;
+      if (isDefault) unsetDefaultsForCountry(countryId, id);
+      monedas.push({
+        id, code, name, symbol,
+        country_id: countryId,
+        decimals: Number(document.getElementById('crearDecimales').value) || 2,
+        exchange_rate: parseFloat(document.getElementById('crearTC').value) || null,
+        is_default: isDefault,
+        status: document.getElementById('crearActiva').checked,
+        created_at: '2026-06-01', updated_at: '2026-06-01'
+      });
+      showToast('Moneda creada', 'success');
+      closeModal('modalCrear');
+      renderAll();
+    }
+
+    function openEditModal(id) {
+      const m = monedas.find((x) => x.id === id); if (!m) return;
+      fillPaisesSelects();
+      document.getElementById('editarId').value = String(m.id);
+      document.getElementById('editarPais').value = String(m.country_id);
+      document.getElementById('editarSimbolo').value = m.symbol;
+      document.getElementById('editarCodigo').value = m.code;
+      document.getElementById('editarDecimales').value = m.decimals;
+      document.getElementById('editarNombre').value = m.name;
+      document.getElementById('editarTC').value = m.exchange_rate || '';
+      document.getElementById('editarDefault').checked = !!m.is_default;
+      document.getElementById('editarActiva').checked = !!m.status;
+      editInitialData = { country_id: String(m.country_id), symbol: m.symbol, code: m.code, decimals: String(m.decimals), name: m.name, exchange_rate: String(m.exchange_rate || ''), is_default: !!m.is_default, status: !!m.status };
+      document.getElementById('editModifiedBadge').classList.add('hidden');
+      openModal('modalEditar');
+    }
+
+    function openDetailModal(id) {
+      const m = monedas.find((x) => x.id === id); if (!m) return;
+      document.getElementById('dSimboloBig').textContent = m.symbol;
+      document.getElementById('dCodigoBadge').textContent = m.code;
+      document.getElementById('dTitulo').textContent = m.name;
+      const estadoEl = document.getElementById('dEstadoBadge');
+      estadoEl.textContent = m.status ? 'ACTIVA' : 'INACTIVA';
+      estadoEl.className = `inline-flex px-2 py-0.5 rounded text-xs font-semibold mt-1 ${m.status ? 'bg-success-light text-success' : 'bg-gray-100 text-ink-muted'}`;
+      document.getElementById('dPais').textContent = paisName(m.country_id);
+      document.getElementById('dSimbolo').textContent = m.symbol;
+      document.getElementById('dDecimales').textContent = String(m.decimals);
+      document.getElementById('dTC').textContent = m.exchange_rate ? `1 ${m.code} = ${m.exchange_rate} PEN` : '—';
+      const hermanas = monedas.filter((x) => x.country_id === m.country_id && x.id !== m.id);
+      document.getElementById('dHermanas').innerHTML = hermanas.length
+        ? hermanas.map((h) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong class="text-info">${h.symbol}</strong> ${h.code} — ${h.name}</span>${h.is_default ? '<span class="text-[10px] uppercase bg-info-light text-info px-2 py-0.5 rounded font-semibold">Default</span>' : ''}</li>`).join('')
+        : '<li class="text-ink-muted">Es la única moneda del país</li>';
+      document.getElementById('dHistorial').textContent = `Creada el ${m.created_at || '—'}. Última modificación el ${m.updated_at || '—'}.`;
+      openModal('modalDetalle');
+    }
+
+    function getDeleteScenario(m) {
+      const polCount = Object.values(RD_CATALOG.politicasCountry).filter((pc) => pc.currency_id === m.id).length;
+      if (polCount > 0) return { allow: false, msg: `Escenario B: ${polCount} política(s) usan esta moneda. Cambia la moneda en esas políticas antes de eliminar.` };
+      if (m.is_default) return { allow: false, msg: 'Escenario C: es la moneda default del país. Reasigna otra como default antes de eliminar.' };
+      return { allow: true, msg: 'Escenario A: moneda sin uso. Eliminación permitida.' };
+    }
+
+    function openDeleteModal(id) {
+      deleteId = id;
+      const m = monedas.find((x) => x.id === id); if (!m) return;
+      const scenario = getDeleteScenario(m);
+      document.getElementById('deleteQuestion').innerHTML = `¿Estás seguro de eliminar la moneda <strong>"${m.code} — ${m.name}"</strong>?`;
+      document.getElementById('deleteScenario').textContent = scenario.msg;
+      document.getElementById('deleteConfirm').checked = false;
+      document.getElementById('btnConfirmDelete').disabled = true;
+      openModal('modalEliminar');
+    }
+
+    function confirmDelete() {
+      if (!deleteId) return;
+      const m = monedas.find((x) => x.id === deleteId); if (!m) return;
+      const scenario = getDeleteScenario(m);
+      if (!scenario.allow) { showToast('No se puede eliminar en este escenario', 'warning'); return; }
+      const idx = monedas.findIndex((x) => x.id === deleteId);
+      if (idx >= 0) monedas.splice(idx, 1);
+      closeModal('modalEliminar');
+      deleteId = null;
+      renderAll();
+      showToast('Moneda eliminada', 'danger');
+    }
+
+    function confirmExport() {
+      showToast('Exportación de monedas completada', 'success');
+      closeModal('modalExportarMonedas');
+    }
+
+    function updateEditModifiedBadge() {
+      if (!editInitialData) return;
+      const hasChanges = (
+        document.getElementById('editarPais').value !== editInitialData.country_id ||
+        document.getElementById('editarSimbolo').value !== editInitialData.symbol ||
+        document.getElementById('editarCodigo').value !== editInitialData.code ||
+        document.getElementById('editarDecimales').value !== editInitialData.decimals ||
+        document.getElementById('editarNombre').value !== editInitialData.name ||
+        document.getElementById('editarTC').value !== editInitialData.exchange_rate ||
+        document.getElementById('editarDefault').checked !== editInitialData.is_default ||
+        document.getElementById('editarActiva').checked !== editInitialData.status
+      );
+      document.getElementById('editModifiedBadge').classList.toggle('hidden', !hasChanges);
+    }
+
+    document.getElementById('formCrear').addEventListener('submit', (e) => { e.preventDefault(); submitCreate(); });
+    document.getElementById('formEditar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById('editarId').value);
+      const m = monedas.find((x) => x.id === id); if (!m) return;
+      const newCountry = Number(document.getElementById('editarPais').value);
+      const isDefault = document.getElementById('editarDefault').checked;
+      m.country_id = newCountry;
+      m.symbol = document.getElementById('editarSimbolo').value.trim();
+      m.code = document.getElementById('editarCodigo').value.trim().toUpperCase();
+      m.decimals = Number(document.getElementById('editarDecimales').value) || 2;
+      m.name = document.getElementById('editarNombre').value.trim();
+      m.exchange_rate = parseFloat(document.getElementById('editarTC').value) || null;
+      m.is_default = isDefault;
+      m.status = document.getElementById('editarActiva').checked;
+      m.updated_at = '2026-06-01';
+      if (isDefault) unsetDefaultsForCountry(newCountry, m.id);
+      closeModal('modalEditar');
+      renderAll();
+      showToast('Moneda actualizada', 'success');
+    });
+    ['editarPais', 'editarSimbolo', 'editarCodigo', 'editarDecimales', 'editarNombre', 'editarTC', 'editarDefault', 'editarActiva'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', updateEditModifiedBadge);
+      document.getElementById(id).addEventListener('change', updateEditModifiedBadge);
+    });
+    document.getElementById('deleteConfirm').addEventListener('change', (e) => { document.getElementById('btnConfirmDelete').disabled = !e.target.checked; });
+    document.getElementById('rowsPerPage').addEventListener('change', (e) => { pageSize = Number(e.target.value); currentPage = 1; renderTable(); });
+    ['filtroTexto', 'filtroPais', 'filtroEstado'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', () => { currentPage = 1; renderTable(); });
+      document.getElementById(id).addEventListener('change', () => { currentPage = 1; renderTable(); });
+    });
+
+    initLayout('ADMINISTRADOR / MONEDAS', '../components').then(() => { renderAll(); });
+  </script>
+</body>
+</html>
