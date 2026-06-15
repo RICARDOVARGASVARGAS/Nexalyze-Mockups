@@ -22,20 +22,20 @@ window.RD_CATALOG = (function () {
     { id: 6, code: 'USD-PE', name: 'Dólar (operaciones Perú)', symbol: 'US$', country_id: 1, decimals: 2, status: true, is_default: false, exchange_rate: 3.75, created_at: '2025-10-01', updated_at: '2026-02-15' }
   ];
 
+  // Esquema alineado a la migración `taxes`:
+  //   id, country_id (FK), name (120), code (60 nullable), percentage (5,2),
+  //   status (bool), timestamps + soft deletes.
   const impuestos = [
-    { id: 1, code: 'IGV', name: 'IGV', pct: 18, type: 'impuesto', country_id: 1, status: true, created_at: '2025-08-12', updated_at: '2026-01-20' },
-    { id: 2, code: 'EXO', name: 'Operación exonerada', pct: 0, type: 'impuesto', country_id: 1, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
-    { id: 3, code: 'RET-3', name: 'Retención 3%', pct: 3, type: 'retencion', country_id: 1, status: true, created_at: '2025-08-20', updated_at: '2025-08-20' },
-    { id: 4, code: 'DET-12', name: 'Detracción 12%', pct: 12, type: 'detraccion', country_id: 1, status: true, created_at: '2025-08-20', updated_at: '2025-08-20' },
-    { id: 5, code: 'DTO-PP', name: 'Descuento pronto pago', pct: -2, type: 'descuento', country_id: 1, status: true, created_at: '2025-09-01', updated_at: '2025-09-01' },
-    { id: 6, code: 'DTO-VOL', name: 'Descuento por volumen', pct: -5, type: 'descuento', country_id: 1, status: true, created_at: '2025-09-01', updated_at: '2025-09-01' },
-    { id: 7, code: 'SAL', name: 'Sales Tax', pct: 10, type: 'impuesto', country_id: 2, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
-    { id: 8, code: 'SAL-NJ', name: 'Sales Tax NJ', pct: 6.6, type: 'impuesto', country_id: 2, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
-    { id: 9, code: 'USD-DTO-PP', name: 'Descuento pronto pago (USA)', pct: -2, type: 'descuento', country_id: 2, status: true, created_at: '2025-09-15', updated_at: '2025-09-15' },
-    { id: 10, code: 'IVA-CL', name: 'IVA Chile', pct: 19, type: 'impuesto', country_id: 3, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
-    { id: 11, code: 'EXEN-CL', name: 'Operación exenta', pct: 0, type: 'impuesto', country_id: 3, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
-    { id: 12, code: 'IVA-MX', name: 'IVA México', pct: 16, type: 'impuesto', country_id: 4, status: true, created_at: '2025-09-01', updated_at: '2025-09-01' },
-    { id: 13, code: 'IVA-CO', name: 'IVA Colombia', pct: 19, type: 'impuesto', country_id: 5, status: false, created_at: '2025-09-15', updated_at: '2026-03-02' }
+    { id: 1, country_id: 1, name: 'IGV', code: 'IGV', percentage: 18.00, status: true, created_at: '2025-08-12', updated_at: '2026-01-20' },
+    { id: 2, country_id: 1, name: 'Operación exonerada', code: 'EXO', percentage: 0.00, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
+    { id: 3, country_id: 1, name: 'Retención 3%', code: 'RET-3', percentage: 3.00, status: true, created_at: '2025-08-20', updated_at: '2025-08-20' },
+    { id: 4, country_id: 1, name: 'Detracción 12%', code: 'DET-12', percentage: 12.00, status: true, created_at: '2025-08-20', updated_at: '2025-08-20' },
+    { id: 5, country_id: 2, name: 'Sales Tax', code: 'SAL', percentage: 10.00, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
+    { id: 6, country_id: 2, name: 'Sales Tax NJ', code: 'SAL-NJ', percentage: 6.60, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
+    { id: 7, country_id: 3, name: 'IVA Chile', code: 'IVA-CL', percentage: 19.00, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
+    { id: 8, country_id: 3, name: 'Operación exenta', code: 'EXEN-CL', percentage: 0.00, status: true, created_at: '2025-08-12', updated_at: '2025-08-12' },
+    { id: 9, country_id: 4, name: 'IVA México', code: 'IVA-MX', percentage: 16.00, status: true, created_at: '2025-09-01', updated_at: '2025-09-01' },
+    { id: 10, country_id: 5, name: 'IVA Colombia', code: 'IVA-CO', percentage: 19.00, status: false, created_at: '2025-09-15', updated_at: '2026-03-02' }
   ];
 
   // Mapeo políticas → país (paralelo a la lista de politicas-listar.html).

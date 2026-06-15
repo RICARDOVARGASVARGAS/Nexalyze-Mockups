@@ -238,7 +238,7 @@
       monedaEl.textContent = `${paisLabel}${cfg.currency.symbol} ${cfg.currency.code} — ${cfg.currency.name}`;
       monedaEl.classList.remove('text-ink-muted');
       impSel.innerHTML = '<option value="">Sin seleccionar (null)</option>' +
-        cfg.taxes.map((t) => `<option value="${t.id}">${t.code} — ${t.name} (${t.pct}%)</option>`).join('');
+        cfg.taxes.map((t) => `<option value="${t.id}">${t.code || ''} — ${t.name} (${Number(t.percentage).toFixed(2)}%)</option>`).join('');
       impSel.value = '';
       document.getElementById('bloqueImpResumenScan').classList.add('hidden');
     }
@@ -252,7 +252,7 @@
       const t = cfg.taxes.find((x) => String(x.id) === String(taxId));
       if (!t) { bloque.classList.add('hidden'); return; }
       const monto = 80;
-      const imp = monto * (t.pct / 100);
+      const imp = monto * (Number(t.percentage) / 100);
       bloque.classList.remove('hidden');
       document.getElementById('montoImpScanCalc').textContent =
         `${cfg.currency.symbol} ${imp.toLocaleString('es-PE', { minimumFractionDigits: 2 })} (sobre ${cfg.currency.symbol} ${monto.toFixed(2)})`;

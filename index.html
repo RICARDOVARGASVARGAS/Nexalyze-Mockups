@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexalize | Galería de mockups</title>
+  <meta name="description" content="Galería de mockups interactivos desarrollados por Nexalize.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
+            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
+            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
+            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
+            border: '#E5E7EB'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #F5F7FA; }
+    .grid-pattern {
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(107,91,255,0.12) 1px, transparent 0);
+      background-size: 22px 22px;
+    }
+  </style>
+</head>
+<body class="text-ink font-sans min-h-screen flex flex-col">
+
+  <!-- Hero -->
+  <header class="relative overflow-hidden bg-white border-b border-border">
+    <div class="absolute inset-0 grid-pattern pointer-events-none"></div>
+    <div class="relative max-w-6xl mx-auto px-5 py-12 md:py-16">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-primary text-white grid place-items-center font-black text-lg shadow-lg shadow-primary/30">N</div>
+        <span class="font-extrabold tracking-tight text-lg">Nexalize</span>
+      </div>
+      <h1 class="mt-7 text-3xl md:text-5xl font-black tracking-tight leading-tight max-w-2xl">
+        Galería de <span class="text-primary">mockups</span> interactivos
+      </h1>
+      <p class="mt-4 text-base md:text-lg text-ink-muted max-w-xl">
+        Prototipos navegables construidos en HTML, Tailwind CSS y JavaScript puro. Haz clic en un proyecto para explorarlo.
+      </p>
+      <div class="mt-6 flex items-center gap-2 text-sm text-ink-soft">
+        <span id="project-count" class="inline-flex items-center gap-2 bg-primary-light text-primary-dark font-semibold px-3 py-1 rounded-full"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Proyectos -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-5 py-10 md:py-12">
+    <div id="projects" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </main>
+
+  <footer class="border-t border-border bg-white">
+    <div class="max-w-6xl mx-auto px-5 py-6 text-xs text-ink-soft flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+      <span>&copy; <span id="year"></span> Nexalize. Mockups para validación visual.</span>
+      <span>HTML + Tailwind CSS + JavaScript</span>
+    </div>
+  </footer>
+
+  <script>
+    /*
+     * Para agregar un nuevo mockup:
+     *   1. Crea su carpeta en la raíz con su propio index.html (ej. /tienda-ropa/index.html).
+     *   2. Añade un objeto a este arreglo. Eso es todo.
+     */
+    const PROJECTS = [
+      {
+        title: 'Rendición Digital',
+        client: 'NOS OLITEL',
+        description: 'Módulo de rendición de gastos: perfiles rendidor, aprobador y administrador con flujos completos.',
+        href: 'RindeGastos/index.html',
+        tags: ['Gastos', 'Aprobaciones', 'Admin'],
+        accent: '#6B5BFF',
+        initials: 'RD',
+        status: 'Disponible'
+      }
+      // {
+      //   title: 'Tienda de ropa',
+      //   client: 'Cliente XYZ',
+      //   description: 'Catálogo y carrito de compras.',
+      //   href: 'tienda-ropa/index.html',
+      //   tags: ['E-commerce'],
+      //   accent: '#22C55E',
+      //   initials: 'TR',
+      //   status: 'En progreso'
+      // },
+    ];
+
+    const statusStyles = {
+      'Disponible': 'bg-success-light text-success',
+      'En progreso': 'bg-warning-light text-warning'
+    };
+
+    function projectCard(p) {
+      const accent = p.accent || '#6B5BFF';
+      const tags = (p.tags || []).map(t =>
+        `<span class="text-xs font-medium text-ink-muted bg-border/60 px-2 py-0.5 rounded-full">${t}</span>`
+      ).join('');
+      const statusClass = statusStyles[p.status] || 'bg-border/60 text-ink-muted';
+      const status = p.status
+        ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}">${p.status}</span>`
+        : '';
+
+      return `
+        <a href="${p.href}"
+           class="group relative flex flex-col bg-white rounded-2xl border border-border p-5 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-ink/5 hover:border-primary/40">
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-12 h-12 rounded-xl grid place-items-center font-black text-white shadow-md"
+                 style="background:${accent}">${p.initials || p.title.slice(0,2).toUpperCase()}</div>
+            ${status}
+          </div>
+          <div class="mt-4">
+            ${p.client ? `<div class="text-xs font-semibold uppercase tracking-wide text-ink-soft">${p.client}</div>` : ''}
+            <h2 class="text-lg font-extrabold leading-snug group-hover:text-primary transition-colors">${p.title}</h2>
+          </div>
+          <p class="mt-2 text-sm text-ink-muted flex-1">${p.description || ''}</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">${tags}</div>
+          <div class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+            Abrir mockup
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                 class="transition-transform group-hover:translate-x-1"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+        </a>`;
+    }
+
+    function emptyState() {
+      return `
+        <div class="col-span-full text-center py-16">
+          <p class="text-ink-muted">Aún no hay mockups publicados.</p>
+        </div>`;
+    }
+
+    document.getElementById('projects').innerHTML =
+      PROJECTS.length ? PROJECTS.map(projectCard).join('') : emptyState();
+
+    const count = PROJECTS.length;
+    document.getElementById('project-count').textContent =
+      count === 1 ? '1 proyecto' : `${count} proyectos`;
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

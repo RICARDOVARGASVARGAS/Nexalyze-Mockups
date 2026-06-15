@@ -358,7 +358,7 @@
         : '<li class="text-ink-muted">Sin monedas asociadas</li>';
       const impuestos = RD_CATALOG.impuestos.filter((t) => t.country_id === p.id);
       document.getElementById('dImpuestos').innerHTML = impuestos.length
-        ? impuestos.map((t) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong class="text-success">${t.code}</strong> ${t.name}</span><span class="text-xs font-bold ${t.pct < 0 ? 'text-danger' : 'text-success'}">${t.pct}%</span></li>`).join('')
+        ? impuestos.map((t) => `<li class="flex items-center justify-between rounded-md border border-border bg-white px-3 py-1.5"><span><strong class="text-success">${t.code || '—'}</strong> ${t.name}</span><span class="text-xs font-bold text-success">${Number(t.percentage).toFixed(2)}%</span></li>`).join('')
         : '<li class="text-ink-muted">Sin impuestos configurados</li>';
       document.getElementById('dHistorial').textContent = `Creado por ${p.created_by || '—'} el ${p.created_at || '—'}. Última modificación por ${p.updated_by || '—'} el ${p.updated_at || '—'}.`;
       openModal('modalDetalle');

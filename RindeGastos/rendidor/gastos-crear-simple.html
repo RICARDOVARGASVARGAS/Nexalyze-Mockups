@@ -299,7 +299,7 @@
       impSel.disabled = false;
       wrap.classList.remove('opacity-60');
       impSel.innerHTML = '<option value="">Sin seleccionar (null)</option>' +
-        cfg.taxes.map((t) => `<option value="${t.id}">${t.code} — ${t.name} (${t.pct}%)</option>`).join('');
+        cfg.taxes.map((t) => `<option value="${t.id}">${t.code || ''} — ${t.name} (${Number(t.percentage).toFixed(2)}%)</option>`).join('');
       impSel.value = '';
 
       document.getElementById('bloqueImpResumen').classList.add('hidden');
@@ -313,7 +313,7 @@
       const cfg = getPolicyConfig(key);
       if (!cfg) return null;
       const t = cfg.taxes.find((x) => String(x.id) === String(taxId));
-      return t ? t.pct : null;
+      return t ? Number(t.percentage) : null;
     }
 
     function actualizarImpuestoDesdePolitica() {
