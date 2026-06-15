@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nos Inventario — NOS OLITEL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+    :root {
+      --primary:      #7B6EF8;
+      --primary-dark: #6357D6;
+      --bg:           #F2F2F7;
+      --surface:      #FFFFFF;
+      --border:       #E8E8F0;
+      --text-1:       #1A1A2E;
+      --text-2:       #6B6B8A;
+      --text-3:       #A0A0B8;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- NAV -->
+  <header class="bg-white border-b px-8 py-3 flex items-center justify-between" style="border-color:var(--border)">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="flex items-center gap-2.5 hover:opacity-80 transition">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-sm"
+             style="background:var(--primary)">N</div>
+        <span class="font-extrabold text-sm tracking-tight" style="color:var(--text-1)">NOS OLITEL</span>
+      </a>
+      <span style="color:var(--border)">/</span>
+      <span class="text-xs font-bold uppercase tracking-wide" style="color:var(--primary)">Nos Inventario</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-right">
+        <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--text-1)">Administrador</div>
+        <div class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-3)">Nos Inventario</div>
+      </div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white"
+           style="background:linear-gradient(135deg,var(--primary),#9B8DFF)">AD</div>
+    </div>
+  </header>
+
+  <!-- PLACEHOLDER — se reemplaza con el contenido del módulo -->
+  <main class="flex-1 flex items-center justify-center">
+    <div class="text-center">
+      <div class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+           style="background:rgba(123,110,248,.1); color:var(--primary)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <h1 class="text-lg font-black uppercase tracking-wide mb-1" style="color:var(--text-1)">Nos Inventario</h1>
+      <p class="text-sm" style="color:var(--text-3)">Módulo en construcción</p>
+    </div>
+  </main>
+
+</body>
+</html>

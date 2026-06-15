@@ -3,153 +3,418 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexalize | Galería de mockups</title>
-  <meta name="description" content="Galería de mockups interactivos desarrollados por Nexalize.">
+  <title>NOS OLITEL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script>
-    tailwind = window.tailwind || {};
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            primary: { DEFAULT: '#6B5BFF', light: '#EDE9FE', dark: '#5849D6' },
-            success: { DEFAULT: '#22C55E', light: '#D1FAE5' },
-            warning: { DEFAULT: '#F59E0B', light: '#FEF3C7' },
-            ink: { DEFAULT: '#1F2937', muted: '#6B7280', soft: '#9CA3AF' },
-            border: '#E5E7EB'
-          }
-        }
-      }
-    };
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: #F5F7FA; }
-    .grid-pattern {
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(107,91,255,0.12) 1px, transparent 0);
-      background-size: 22px 22px;
+    /* ── DESIGN SYSTEM — NOS OLITEL ───────────────────────────────────────
+     *
+     *  COLORES LIGHT
+     *  Primary      #7B6EF8   violet — botones principales, iconos, links
+     *  Primary dark #6357D6   hover de botón primario
+     *  BG           #F2F2F7   gris hielo — fondo global
+     *  Surface      #FFFFFF   blanco — cards, nav, modals
+     *  Border       #E8E8F0   borde sutil
+     *  Text 1       #1A1A2E   casi negro — títulos
+     *  Text 2       #6B6B8A   gris medio — subtítulos / placeholders
+     *  Text 3       #A0A0B8   gris claro — labels secundarios
+     *
+     *  COLORES DARK
+     *  BG           #0F1117
+     *  Surface      #181C27
+     *  Border       #252B3B
+     *  Text 1       #F0F2F8
+     *  Text 2       #8B92A8
+     *  Text 3       #555E78
+     *
+     *  TIPOGRAFÍA
+     *  Font         Inter (400–900)
+     *  Labels       uppercase + tracking-wider + font-semibold
+     *  Títulos      font-bold o font-extrabold
+     *
+     *  BOTONES PRIMARY
+     *  bg-[--primary] rounded-lg px-6 py-3 uppercase tracking-widest font-bold text-white
+     *
+     *  INPUTS
+     *  border border-[--border] rounded-lg px-3 py-2.5 text-sm bg-[--surface] text-[--text-1]
+     *  focus: border-[--primary] shadow ring
+     *
+     *  CARDS MÓDULOS
+     *  bg-[--surface] rounded-xl border border-[--border] border-l-4 border-l-[accent]
+     *  icon-box: w-10 h-10 rounded-xl color del módulo al 12% opacidad
+     * ──────────────────────────────────────────────────────────────────── */
+
+    * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+
+    :root {
+      --primary:      #7B6EF8;
+      --primary-dark: #6357D6;
+      --bg:           #F2F2F7;
+      --surface:      #FFFFFF;
+      --border:       #E8E8F0;
+      --text-1:       #1A1A2E;
+      --text-2:       #6B6B8A;
+      --text-3:       #A0A0B8;
+      --shadow:       rgba(0,0,0,.06);
+      --track:        #EBEBF5;
     }
+
+    body.dark {
+      --bg:      #0F1117;
+      --surface: #181C27;
+      --border:  #252B3B;
+      --text-1:  #F0F2F8;
+      --text-2:  #8B92A8;
+      --text-3:  #555E78;
+      --shadow:  rgba(0,0,0,.35);
+      --track:   #252B3B;
+    }
+
+    /* Smooth transitions on theme switch */
+    body, .surf, .inp, header, footer {
+      transition: background .25s, border-color .25s, color .25s, box-shadow .25s;
+    }
+
+    body  { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); }
+
+    /* Surface class — replaces hardcoded bg-white */
+    .surf { background: var(--surface); }
+
+    /* Input */
+    .inp {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+      border-radius: .5rem;
+      padding: .625rem .75rem;
+      font-size: .875rem;
+      width: 100%;
+      outline: none;
+    }
+    .inp:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(123,110,248,.18);
+    }
+
+    /* Screen states */
+    .screen { display: none; }
+    .screen.active { display: flex; }
+
+    /* Ghost shapes behind login */
+    .ghost-shape {
+      position: absolute;
+      border: 2px solid rgba(123,110,248,.18);
+      border-radius: 20px;
+      background: rgba(123,110,248,.04);
+    }
+    body.dark .ghost-shape {
+      border-color: rgba(123,110,248,.12);
+      background: rgba(123,110,248,.03);
+    }
+
+    /* Loading bar */
+    @keyframes loadBar {
+      0%   { width: 0% }
+      30%  { width: 45% }
+      60%  { width: 72% }
+      85%  { width: 88% }
+      100% { width: 100% }
+    }
+    .load-bar { animation: loadBar 1.8s ease forwards; }
+
+    /* Module card */
+    .mod-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left-width: 4px;
+      transition: box-shadow .2s, transform .2s, background .25s, border-color .25s;
+    }
+    .mod-card:hover {
+      box-shadow: 0 6px 24px rgba(123,110,248,.12);
+      transform: translateY(-2px);
+    }
+    body.dark .mod-card:hover {
+      box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    }
+
+    /* Avatar */
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #9B8DFF);
+      color: white; font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #22C55E; border: 2px solid var(--surface);
+      position: absolute; bottom: 0; right: 0;
+    }
+
+    /* Theme button */
+    #theme-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-3);
+      border-radius: .5rem;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .25s;
+    }
+    #theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Login card shadow */
+    .login-card {
+      box-shadow: 0 8px 32px var(--shadow);
+      transition: box-shadow .25s;
+    }
+
+    input[type="password"]::-ms-reveal { display: none; }
   </style>
 </head>
-<body class="text-ink font-sans min-h-screen flex flex-col">
+<body class="min-h-screen">
 
-  <!-- Hero -->
-  <header class="relative overflow-hidden bg-white border-b border-border">
-    <div class="absolute inset-0 grid-pattern pointer-events-none"></div>
-    <div class="relative max-w-6xl mx-auto px-5 py-12 md:py-16">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-primary text-white grid place-items-center font-black text-lg shadow-lg shadow-primary/30">N</div>
-        <span class="font-extrabold tracking-tight text-lg">Nexalize</span>
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 1 — LOGIN
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-login" class="screen active min-h-screen items-center justify-center relative overflow-hidden">
+
+    <!-- Ghost shapes -->
+    <div class="ghost-shape" style="width:180px;height:130px;top:28%;left:30%;transform:rotate(-6deg)"></div>
+    <div class="ghost-shape" style="width:120px;height:90px;top:22%;left:36%;transform:rotate(-2deg)"></div>
+    <div class="ghost-shape" style="width:100px;height:70px;bottom:28%;right:30%;transform:rotate(5deg)"></div>
+    <div class="ghost-shape" style="width:65px;height:50px;bottom:24%;right:26%;transform:rotate(2deg)"></div>
+
+    <!-- Card -->
+    <div class="surf login-card relative z-10 rounded-2xl p-10 w-full max-w-sm mx-4">
+
+      <!-- Logo -->
+      <div class="flex items-center justify-center gap-2.5 mb-6">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-base"
+             style="background:var(--primary)">N</div>
+        <span class="font-extrabold text-lg tracking-tight" style="color:var(--text-1)">NOS OLITEL</span>
       </div>
-      <h1 class="mt-7 text-3xl md:text-5xl font-black tracking-tight leading-tight max-w-2xl">
-        Galería de <span class="text-primary">mockups</span> interactivos
+
+      <!-- Heading -->
+      <h1 class="text-xl font-extrabold uppercase tracking-wide mb-1" style="color:var(--text-1)">
+        ¡Bienvenido a NOS OLITEL!
       </h1>
-      <p class="mt-4 text-base md:text-lg text-ink-muted max-w-xl">
-        Prototipos navegables construidos en HTML, Tailwind CSS y JavaScript puro. Haz clic en un proyecto para explorarlo.
+      <p class="text-sm mb-7" style="color:var(--text-2)">
+        Por favor, inicia sesión en tu cuenta y comienza la aventura
       </p>
-      <div class="mt-6 flex items-center gap-2 text-sm text-ink-soft">
-        <span id="project-count" class="inline-flex items-center gap-2 bg-primary-light text-primary-dark font-semibold px-3 py-1 rounded-full"></span>
+
+      <!-- Email -->
+      <div class="mb-4">
+        <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color:var(--text-2)">
+          Correo electrónico
+        </label>
+        <input type="email" id="inp-email" value="administrador@nexalyze.io" class="inp">
+      </div>
+
+      <!-- Password -->
+      <div class="mb-5">
+        <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color:var(--text-2)">
+          Contraseña
+        </label>
+        <div class="relative">
+          <input type="password" id="inp-pass" value="123456789" class="inp" style="letter-spacing:.15em; padding-right:2.5rem">
+          <button onclick="togglePass()" class="absolute right-3 top-1/2 -translate-y-1/2" style="color:var(--text-3)">
+            <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="hidden">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Remember -->
+      <label class="flex items-center gap-2.5 mb-6 cursor-pointer select-none">
+        <input type="checkbox" checked class="w-4 h-4 rounded" style="accent-color:var(--primary)">
+        <span class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-2)">Recordar mi sesión</span>
+      </label>
+
+      <!-- Submit -->
+      <button onclick="doLogin()" id="btn-login"
+              class="w-full py-3 rounded-lg text-white font-bold text-sm uppercase tracking-widest transition-colors"
+              style="background:var(--primary)"
+              onmouseenter="this.style.background='var(--primary-dark)'"
+              onmouseleave="this.style.background='var(--primary)'">
+        Iniciar sesión
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 2 — LOADING
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-loading" class="screen min-h-screen items-center justify-center">
+    <div class="surf login-card rounded-2xl p-10 w-72 text-center">
+      <p id="load-text" class="font-bold text-sm uppercase tracking-widest mb-6" style="color:var(--text-1)">
+        Validando credenciales...
+      </p>
+      <div class="w-full rounded-full overflow-hidden" style="height:6px;background:var(--track)">
+        <div id="load-bar" class="load-bar h-full rounded-full" style="background:var(--primary);width:0%"></div>
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- Proyectos -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-5 py-10 md:py-12">
-    <div id="projects" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-  </main>
 
-  <footer class="border-t border-border bg-white">
-    <div class="max-w-6xl mx-auto px-5 py-6 text-xs text-ink-soft flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-      <span>&copy; <span id="year"></span> Nexalize. Mockups para validación visual.</span>
-      <span>HTML + Tailwind CSS + JavaScript</span>
-    </div>
-  </footer>
+  <!-- ══════════════════════════════════════════════════════════
+       SCREEN 3 — MÓDULOS
+  ══════════════════════════════════════════════════════════ -->
+  <div id="screen-modules" class="screen min-h-screen flex-col">
+
+    <!-- Top bar -->
+    <header class="surf border-b px-8 py-3 flex items-center justify-between" style="border-color:var(--border)">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-sm"
+             style="background:var(--primary)">N</div>
+        <span class="font-extrabold text-sm tracking-tight" style="color:var(--text-1)">NOS OLITEL</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Theme toggle -->
+        <button id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">
+          <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" class="hidden">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+
+        <!-- User -->
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-xs font-bold uppercase tracking-wide" style="color:var(--text-1)">Administrador</div>
+            <div class="text-xs font-medium uppercase tracking-wide" style="color:var(--text-3)">Módulo central</div>
+          </div>
+          <div class="relative">
+            <div class="avatar">AD</div>
+            <div class="avatar-dot"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 px-8 py-8 max-w-6xl w-full mx-auto">
+      <div class="mb-8">
+        <h1 class="text-2xl font-black uppercase tracking-wide mb-1" style="color:var(--text-1)">Módulos disponibles</h1>
+        <p class="text-xs font-medium uppercase tracking-wider" style="color:var(--text-3)">
+          Acceda a las diferentes áreas de gestión del sistema. Seleccione un módulo para comenzar a trabajar.
+        </p>
+      </div>
+      <div id="mod-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </main>
+  </div>
+
 
   <script>
-    /*
-     * Para agregar un nuevo mockup:
-     *   1. Crea su carpeta en la raíz con su propio index.html (ej. /tienda-ropa/index.html).
-     *   2. Añade un objeto a este arreglo. Eso es todo.
-     */
-    const PROJECTS = [
+    /* ── MODULES ──────────────────────────────────────────── */
+    const MODULES = [
       {
-        title: 'Rendición Digital',
-        client: 'NOS OLITEL',
-        description: 'Módulo de rendición de gastos: perfiles rendidor, aprobador y administrador con flujos completos.',
-        href: 'RindeGastos/index.html',
-        tags: ['Gastos', 'Aprobaciones', 'Admin'],
-        accent: '#6B5BFF',
-        initials: 'RD',
-        status: 'Disponible'
+        label:  'Nos Inventario',
+        sub:    'Administración de inventario',
+        color:  '#7B6EF8',
+        iconBg: 'rgba(123,110,248,.12)',
+        href:   'NosInventario/index.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                 <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                 <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+               </svg>`
+      },
+      {
+        label:  'Nos Rendición',
+        sub:    'Administración de rendición',
+        color:  '#6357D6',
+        iconBg: 'rgba(99,87,214,.12)',
+        href:   'RindeGastos/index.html',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                 <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                 <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+               </svg>`
       }
-      // {
-      //   title: 'Tienda de ropa',
-      //   client: 'Cliente XYZ',
-      //   description: 'Catálogo y carrito de compras.',
-      //   href: 'tienda-ropa/index.html',
-      //   tags: ['E-commerce'],
-      //   accent: '#22C55E',
-      //   initials: 'TR',
-      //   status: 'En progreso'
-      // },
     ];
 
-    const statusStyles = {
-      'Disponible': 'bg-success-light text-success',
-      'En progreso': 'bg-warning-light text-warning'
-    };
-
-    function projectCard(p) {
-      const accent = p.accent || '#6B5BFF';
-      const tags = (p.tags || []).map(t =>
-        `<span class="text-xs font-medium text-ink-muted bg-border/60 px-2 py-0.5 rounded-full">${t}</span>`
-      ).join('');
-      const statusClass = statusStyles[p.status] || 'bg-border/60 text-ink-muted';
-      const status = p.status
-        ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}">${p.status}</span>`
-        : '';
-
-      return `
-        <a href="${p.href}"
-           class="group relative flex flex-col bg-white rounded-2xl border border-border p-5 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-ink/5 hover:border-primary/40">
-          <div class="flex items-start justify-between gap-3">
-            <div class="w-12 h-12 rounded-xl grid place-items-center font-black text-white shadow-md"
-                 style="background:${accent}">${p.initials || p.title.slice(0,2).toUpperCase()}</div>
-            ${status}
+    function renderModules() {
+      document.getElementById('mod-grid').innerHTML = MODULES.map(m => `
+        <a href="${m.href}" class="mod-card rounded-xl block p-5" style="border-left-color:${m.color}">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+               style="background:${m.iconBg}; color:${m.color}">${m.icon}</div>
+          <h2 class="font-black text-sm uppercase tracking-wide mb-0.5" style="color:var(--text-1)">${m.label}</h2>
+          <p class="text-xs uppercase tracking-wider mb-5" style="color:var(--text-3)">${m.sub}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-1" style="color:${m.color}">
+              Abrir módulo
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--text-3)">
+              <path d="M7 17 17 7M7 7h10v10"/>
+            </svg>
           </div>
-          <div class="mt-4">
-            ${p.client ? `<div class="text-xs font-semibold uppercase tracking-wide text-ink-soft">${p.client}</div>` : ''}
-            <h2 class="text-lg font-extrabold leading-snug group-hover:text-primary transition-colors">${p.title}</h2>
-          </div>
-          <p class="mt-2 text-sm text-ink-muted flex-1">${p.description || ''}</p>
-          <div class="mt-4 flex flex-wrap gap-1.5">${tags}</div>
-          <div class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
-            Abrir mockup
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                 class="transition-transform group-hover:translate-x-1"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </div>
-        </a>`;
+        </a>`).join('');
     }
 
-    function emptyState() {
-      return `
-        <div class="col-span-full text-center py-16">
-          <p class="text-ink-muted">Aún no hay mockups publicados.</p>
-        </div>`;
+    /* ── SCREENS ──────────────────────────────────────────── */
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    document.getElementById('projects').innerHTML =
-      PROJECTS.length ? PROJECTS.map(projectCard).join('') : emptyState();
+    function doLogin() {
+      show('screen-loading');
+      const bar = document.getElementById('load-bar');
+      const txt = document.getElementById('load-text');
+      bar.style.animation = 'none';
+      bar.offsetHeight;
+      bar.style.animation = 'loadBar 1.8s ease forwards';
+      txt.textContent = 'Validando credenciales...';
+      setTimeout(() => { txt.textContent = 'Cargando módulos...'; }, 900);
+      setTimeout(() => { renderModules(); show('screen-modules'); }, 2000);
+    }
 
-    const count = PROJECTS.length;
-    document.getElementById('project-count').textContent =
-      count === 1 ? '1 proyecto' : `${count} proyectos`;
-    document.getElementById('year').textContent = new Date().getFullYear();
+    function togglePass() {
+      const inp = document.getElementById('inp-pass');
+      const open = document.getElementById('eye-open');
+      const closed = document.getElementById('eye-closed');
+      const isPass = inp.type === 'password';
+      inp.type = isPass ? 'text' : 'password';
+      open.classList.toggle('hidden', isPass);
+      closed.classList.toggle('hidden', !isPass);
+    }
+
+    /* ── THEME ────────────────────────────────────────────── */
+    function applyTheme(dark) {
+      document.body.classList.toggle('dark', dark);
+      document.getElementById('icon-sun').classList.toggle('hidden', dark);
+      document.getElementById('icon-moon').classList.toggle('hidden', !dark);
+      localStorage.setItem('nos-theme', dark ? 'dark' : 'light');
+    }
+
+    function toggleTheme() {
+      applyTheme(!document.body.classList.contains('dark'));
+    }
+
+    // Init
+    const saved = localStorage.getItem('nos-theme');
+    applyTheme(saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
   </script>
 </body>
 </html>
