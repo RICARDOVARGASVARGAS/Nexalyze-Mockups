@@ -1,0 +1,42 @@
+/* ============================================================
+   TOKENS — CSS variables, dark mode, base reset
+   ============================================================ */
+
+*{-webkit-font-smoothing:antialiased;box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --p:#7B6EF8;--pd:#6357D6;--pb:#EDE9FE;
+  --bg:#F2F2F7;--sur:#FFFFFF;--bor:#E8E8F0;
+  --t1:#1A1A2E;--t2:#6B6B8A;--t3:#A0A0B8;
+  --sb:#1A1D2E;
+  --shadow:rgba(0,0,0,.06);
+}
+
+body.dark{
+  --bg:#0F1117;--sur:#181C27;--bor:#252B3B;
+  --t1:#F0F2F8;--t2:#8B92A8;--t3:#555E78;
+  --pb:rgba(123,110,248,.15);
+  --shadow:rgba(0,0,0,.4);
+}
+
+/* Dark mode component overrides */
+body.dark tbody tr:hover{background:#1E2235}
+body.dark .badge-act{background:rgba(34,197,94,.15);color:#4ADE80}
+body.dark .badge-act::before{background:#4ADE80}
+body.dark .badge-ina{background:rgba(239,68,68,.15);color:#F87171}
+body.dark .badge-ina::before{background:#F87171}
+body.dark .srch-cnt{background:rgba(123,110,248,.2);color:#A89FFF}
+body.dark .pg-sel{background:var(--sur);color:var(--t1)}
+body.dark .pg-btn{background:var(--sur);color:var(--t2)}
+body.dark .bool-card.on{background:rgba(34,197,94,.1);border-color:#166534}
+body.dark .mtab-num{color:var(--t3)}
+body.dark .hist-d-old{background:rgba(239,68,68,.12);color:#FCA5A5}
+body.dark .hist-d-new{background:rgba(34,197,94,.1);color:#86EFAC}
+body.dark .hist-badge.ev-created{background:rgba(34,197,94,.15);color:#4ADE80}
+body.dark .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
+body.dark .hist-badge.ev-deleted{background:rgba(239,68,68,.15);color:#F87171}
+
+/* Smooth transitions */
+body,#topbar,.card,.sc,.mo .mc,#ld-overlay .ld-card{transition:background .25s,border-color .25s,color .25s}
+
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);display:flex;height:100vh;overflow:hidden}
