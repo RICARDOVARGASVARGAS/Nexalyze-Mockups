@@ -636,6 +636,71 @@ html.theme-dark table tbody tr {
   border-color: #3A4158 !important;
 }
 
+html.theme-dark table tbody tr:hover {
+  background: #262C3F !important;
+}
+
+html.theme-dark table thead th {
+  color: #6B7489 !important;
+}
+
+html.theme-dark table tbody td {
+  color: #C8D0E4 !important;
+}
+
+/* Cards en dark mode */
+html.theme-dark .rd-card {
+  background: #1E2333 !important;
+  border-color: #2D3348 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35) !important;
+}
+
+html.theme-dark .kpi-card {
+  background: #1E2333 !important;
+  border-color: #2D3348 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35) !important;
+}
+
+html.theme-dark .panel-soft {
+  background: #1E2333 !important;
+  border-color: #2D3348 !important;
+}
+
+/* KPI text en dark */
+html.theme-dark .kpi-value { color: #E4E8F7 !important; }
+html.theme-dark .kpi-primary .kpi-value { color: #9DA8FF !important; }
+html.theme-dark .kpi-success .kpi-value { color: #4ADE80 !important; }
+html.theme-dark .kpi-danger .kpi-value { color: #F87171 !important; }
+html.theme-dark .kpi-title { color: #C4CCE0 !important; }
+html.theme-dark .kpi-subtitle { color: #6B7489 !important; }
+
+html.theme-dark .kpi-primary .kpi-icon-wrap { background: rgba(107,91,255,.2) !important; color: #9DA8FF !important; }
+html.theme-dark .kpi-success .kpi-icon-wrap { background: rgba(74,222,128,.15) !important; color: #4ADE80 !important; }
+html.theme-dark .kpi-danger .kpi-icon-wrap { background: rgba(248,113,113,.15) !important; color: #F87171 !important; }
+
+/* Status pills en dark */
+html.theme-dark .status-pill { opacity: .9; }
+
+/* Tabs detalle informe en dark */
+html.theme-dark .inf-detail-tabs {
+  background: #181D2C !important;
+  border-color: #2D3348 !important;
+}
+html.theme-dark .inf-detail-tab { color: #6B7489 !important; }
+html.theme-dark .inf-detail-tab:hover { background: rgba(255,255,255,.05) !important; color: #A0AACC !important; }
+html.theme-dark .inf-detail-tab-active { background: #1E2333 !important; color: #9DA8FF !important; border-color: #2D3348 !important; box-shadow: 0 -1px 0 #1E2333 !important; }
+
+html.theme-dark .inf-view-topnav-item { color: #6B7489 !important; }
+html.theme-dark .inf-view-topnav-item-active { background: #1E2333 !important; color: #9DA8FF !important; border-bottom-color: #9DA8FF !important; }
+
+/* Historial y flujo en dark */
+html.theme-dark .inf-historial-card { background: #1E2333 !important; border-color: #2D3348 !important; }
+html.theme-dark .inf-historial-card--latest { border-left-color: #5B8DEF !important; }
+html.theme-dark .inf-meta-bar { background: linear-gradient(90deg, #1A2540 0%, #1C2A3C 100%) !important; border-color: #2D4060 !important; }
+
+html.theme-dark .inf-flujo-revisor { background: #1A2540 !important; border-color: #2D4060 !important; border-left-color: #5B8DEF !important; }
+html.theme-dark .inf-flujo-stepper::before { background: #2D3348 !important; }
+
 /* Vista detalle informe (tabs estilo referencia) */
 .inf-view-topnav {
   display: flex;
