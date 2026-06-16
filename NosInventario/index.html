@@ -15,7 +15,15 @@
       --bg:#F2F2F7;--sur:#FFFFFF;--bor:#E8E8F0;
       --t1:#1A1A2E;--t2:#6B6B8A;--t3:#A0A0B8;
       --sb:#1A1D2E;
+      --shadow:rgba(0,0,0,.06);
     }
+    body.dark{
+      --bg:#0F1117;--sur:#181C27;--bor:#252B3B;
+      --t1:#F0F2F8;--t2:#8B92A8;--t3:#555E78;
+      --pb:rgba(123,110,248,.15);
+      --shadow:rgba(0,0,0,.4);
+    }
+    body,#topbar,.card,.sc,.mo .mc,#ld-overlay .ld-card{transition:background .25s,border-color .25s,color .25s}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);display:flex;height:100vh;overflow:hidden}
 
     /* ── SIDEBAR ── */
@@ -126,7 +134,8 @@
     .badge-ina::before{content:'';width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0}
     .act-btn{background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;transition:background .15s,color .15s;color:var(--t3);display:inline-flex;align-items:center;justify-content:center}
     .act-btn.ed:hover{color:var(--p);background:#EDE9FE}
-    .act-btn.dl:hover{color:#EF4444;background:#FEE2E2}
+    .act-btn.dl{color:#EF4444}
+    .act-btn.dl:hover{color:#DC2626;background:#FEE2E2}
 
     /* ── PAGINATION ── */
     .pgn{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:11px 18px;border-top:1px solid var(--bor)}
@@ -293,10 +302,13 @@
       <button class="ib" title="Buscar">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       </button>
-      <button class="ib" title="Tema">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+      <button class="ib" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">
+        <svg id="icon-sun" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="4"/>
           <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg id="icon-moon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
       </button>
       <span class="tb-ul">PE</span>
@@ -588,11 +600,15 @@ const DB = {
     actLbl:'MATERIALES ACTIVOS',actSub:'CON ESTADO HABILITADO',
     inaLbl:'MATERIALES INACTIVOS',inaSub:'CON ESTADO DESHABILITADO',
     rows:[
-      {id:1,name:'CONCRETO',status:true},
-      {id:2,name:'MADERA',status:true},
-      {id:3,name:'METAL / FIERRO',status:true},
-      {id:4,name:'FIBRA DE VIDRIO',status:true},
-      {id:5,name:'MIXTO',status:false},
+      {id:1,name:'CONCRETO ARMADO',status:true},
+      {id:2,name:'MADERA TRATADA',status:true},
+      {id:3,name:'ACERO GALVANIZADO',status:true},
+      {id:4,name:'FIERRO FUNDIDO',status:true},
+      {id:5,name:'FIBRA DE VIDRIO',status:true},
+      {id:6,name:'ALUMINIO',status:true},
+      {id:7,name:'CONCRETO PRETENSADO',status:true},
+      {id:8,name:'MADERA SIN TRATAR',status:false},
+      {id:9,name:'PVC REFORZADO',status:false},
     ]
   },
   tension:{
@@ -603,10 +619,12 @@ const DB = {
     actLbl:'TENSIONES ACTIVAS',actSub:'CON ESTADO HABILITADO',
     inaLbl:'TENSIONES INACTIVAS',inaSub:'CON ESTADO DESHABILITADO',
     rows:[
-      {id:1,name:'ALTA TENSIÓN',status:true},
-      {id:2,name:'MEDIA TENSIÓN',status:true},
-      {id:3,name:'BAJA TENSIÓN',status:true},
-      {id:4,name:'SIN TENSIÓN',status:true},
+      {id:1,name:'ALTA TENSIÓN — AT (> 60 kV)',status:true},
+      {id:2,name:'MEDIA TENSIÓN — MT (1 kV – 60 kV)',status:true},
+      {id:3,name:'BAJA TENSIÓN — BT (< 1 kV)',status:true},
+      {id:4,name:'MUY BAJA TENSIÓN — MBT (< 50 V)',status:true},
+      {id:5,name:'SIN TENSIÓN ELÉCTRICA',status:true},
+      {id:6,name:'EXTRA ALTA TENSIÓN — EAT (> 220 kV)',status:false},
     ]
   },
   tipocable:{
@@ -617,12 +635,20 @@ const DB = {
     actLbl:'TIPOS ACTIVOS',actSub:'CON ESTADO HABILITADO',
     inaLbl:'TIPOS INACTIVOS',inaSub:'CON ESTADO DESHABILITADO',
     rows:[
-      {id:1,name:'FIBRA ÓPTICA',status:true},
-      {id:2,name:'COAXIAL',status:true},
-      {id:3,name:'PAR TRENZADO',status:true},
-      {id:4,name:'DROP ÓPTICO',status:true},
-      {id:5,name:'ELÉCTRICO BT',status:true},
-      {id:6,name:'AUTOSOPORTE',status:false},
+      {id:1, name:'FIBRA ÓPTICA MONOMODO (SM)',       status:true},
+      {id:2, name:'FIBRA ÓPTICA MULTIMODO (MM)',       status:true},
+      {id:3, name:'CABLE DROP ÓPTICO AUTOSOPORTADO',   status:true},
+      {id:4, name:'CABLE DROP ÓPTICO DIELÉCTRICO',     status:true},
+      {id:5, name:'CABLE COAXIAL RG-6',                status:true},
+      {id:6, name:'CABLE COAXIAL RG-11',               status:true},
+      {id:7, name:'CABLE UTP CAT 5E',                  status:true},
+      {id:8, name:'CABLE UTP CAT 6',                   status:true},
+      {id:9, name:'CABLE FTP CAT 6A',                  status:true},
+      {id:10,name:'CABLE ELÉCTRICO BAJA TENSIÓN (BT)', status:true},
+      {id:11,name:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',status:true},
+      {id:12,name:'CABLE MINIDROP ÓPTICO',             status:true},
+      {id:13,name:'CABLE FIGURA 8 AUTOSOPORTADO',      status:false},
+      {id:14,name:'CABLE COAXIAL RG-59 (OBSOLETO)',    status:false},
     ]
   },
   condicion:{
@@ -633,11 +659,15 @@ const DB = {
     actLbl:'CONDICIONES ACTIVAS',actSub:'CON ESTADO HABILITADO',
     inaLbl:'CONDICIONES INACTIVAS',inaSub:'CON ESTADO DESHABILITADO',
     rows:[
-      {id:1,name:'BUENO',status:true},
-      {id:2,name:'REGULAR',status:true},
-      {id:3,name:'MALO',status:true},
-      {id:4,name:'CRÍTICO',status:true},
-      {id:5,name:'RETIRADO',status:false},
+      {id:1,name:'EXCELENTE — Sin daños, reciente instalación',          status:true},
+      {id:2,name:'BUENO — Sin daños visibles, operativo',                status:true},
+      {id:3,name:'REGULAR — Desgaste menor, requiere supervisión',       status:true},
+      {id:4,name:'DETERIORADO — Daños visibles, programar mantenimiento',status:true},
+      {id:5,name:'MALO — Daños severos, intervención urgente',           status:true},
+      {id:6,name:'CRÍTICO — Riesgo de colapso, fuera de servicio',       status:true},
+      {id:7,name:'EN MANTENIMIENTO — Intervención en curso',             status:true},
+      {id:8,name:'RETIRADO — Dado de baja definitiva',                   status:false},
+      {id:9,name:'SINIESTRADO — Daño por accidente o fenómeno natural',  status:false},
     ]
   }
 };
@@ -864,9 +894,10 @@ function renderView(v){
 }
 
 function filteredRows(rows){
-  if(!SQ) return [...rows].sort((a,b)=>a.name.localeCompare(b.name));
+  const sorted=[...rows].sort((a,b)=>a.id-b.id);
+  if(!SQ) return sorted;
   const q=SQ.toLowerCase();
-  return rows.filter(r=>r.name.toLowerCase().includes(q));
+  return sorted.filter(r=>r.name.toLowerCase().includes(q));
 }
 
 function onSearch(v){SQ=v;CP=1;renderView(CV);}
@@ -1012,6 +1043,20 @@ function showToast(msg, type='success'){
 
 // Auto open tablas on load
 toggleG('tablas');
+
+/* ════════════════════════════════ THEME ═══ */
+function applyTheme(dark){
+  document.body.classList.toggle('dark',dark);
+  document.getElementById('icon-sun').style.display  = dark ? 'none'  : '';
+  document.getElementById('icon-moon').style.display = dark ? ''      : 'none';
+  localStorage.setItem('nos-theme', dark ? 'dark' : 'light');
+}
+function toggleTheme(){
+  applyTheme(!document.body.classList.contains('dark'));
+}
+// Init from saved preference or OS
+const _saved=localStorage.getItem('nos-theme');
+applyTheme(_saved ? _saved==='dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
 </script>
 </body>
 </html>
