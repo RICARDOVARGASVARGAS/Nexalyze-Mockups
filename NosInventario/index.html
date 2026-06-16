@@ -279,6 +279,84 @@
     .extop-cnt{background:var(--pb);color:var(--p);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
     .extop-add-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:4px}
     .extop-add-row .fl{margin-bottom:0;flex:1}
+
+    /* ─── Photo slots ─── */
+    .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:4px 0}
+    .photo-card{display:flex;flex-direction:column;gap:8px}
+    .photo-lbl-top{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t2)}
+    .photo-lbl-top span{color:var(--t3);font-weight:500;font-size:8px;letter-spacing:.04em;margin-left:3px}
+    .photo-slot{border:2px dashed var(--bor);border-radius:12px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;background:var(--bg)}
+    .photo-slot:hover{border-color:var(--p);background:var(--pb)}
+    .photo-slot.filled{border-style:solid;cursor:default}
+    .photo-slot .ps-empty{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+    .photo-slot .ps-ico{width:38px;height:38px;border-radius:50%;background:var(--pb);display:flex;align-items:center;justify-content:center;color:var(--p)}
+    .photo-slot .ps-txt{font-size:10px;font-weight:600;color:var(--t3);text-align:center;line-height:1.5}
+    .photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(2px)}
+    .photo-slot.filled:hover .photo-overlay{display:flex}
+    .photo-ov-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px 16px;color:#fff;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;transition:background .15s}
+    .photo-ov-btn:hover{background:rgba(255,255,255,.3)}
+    .photo-ov-btn.del:hover{background:rgba(239,68,68,.6)}
+
+    /* ─── View modal ─── */
+    .mc-view{max-width:660px;max-height:92vh;display:flex;flex-direction:column}
+    .vm-hdr-row{display:flex;align-items:flex-start;gap:14px}
+    .vm-ico{width:46px;height:46px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .vm-titles{flex:1;min-width:0}
+    .vm-code{font-size:19px;font-weight:900;color:var(--t1);letter-spacing:.02em;line-height:1.2}
+    .vm-meta-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+    .vm-badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .vm-body{flex:1;overflow-y:auto}
+    .vm-sec{padding:14px 22px;border-bottom:1px solid var(--bor)}
+    .vm-sec:last-child{border-bottom:none}
+    .vm-sec-ttl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .vm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 12px}
+    .vm-grid.g2{grid-template-columns:repeat(2,1fr)}
+    .vm-field{display:flex;flex-direction:column;gap:2px}
+    .vm-f-lbl{font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+    .vm-f-val{font-size:12px;font-weight:600;color:var(--t1);line-height:1.5}
+    .vm-f-val.muted{color:var(--t2);font-weight:400;font-style:italic;font-size:11px}
+    .vm-extop-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px}
+    .vm-op-lbl{font-size:11px;font-weight:700;color:var(--t1);flex:1}
+    .vm-op-cnt{font-size:10px;font-weight:700;color:var(--p);background:var(--pb);border-radius:6px;padding:2px 9px}
+    .vm-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .vm-photo-box{aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--bg);border:1px solid var(--bor);display:flex;align-items:center;justify-content:center;position:relative}
+    .vm-photo-box img{width:100%;height:100%;object-fit:cover}
+    .vm-photo-empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--t3)}
+    .vm-photo-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:5px;color:var(--t3)}
+    .vm-map{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:24px 20px;text-align:center;color:var(--t3);margin-top:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+    /* ─── History modal ─── */
+    .mc-hist{max-width:590px;max-height:92vh;display:flex;flex-direction:column}
+    .hm-body{flex:1;overflow-y:auto;padding:20px 22px}
+    .hist-timeline{padding-left:10px}
+    .hist-entry{border-left:2px solid var(--bor);padding:0 0 24px 22px;position:relative}
+    .hist-entry:last-child{padding-bottom:0;border-left-color:transparent}
+    .hist-dot{width:20px;height:20px;border-radius:50%;position:absolute;left:-11px;top:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .hist-dot.ev-created{background:#22C55E}
+    .hist-dot.ev-updated{background:var(--p)}
+    .hist-dot.ev-deleted{background:#EF4444}
+    .hist-badge{display:inline-flex;align-items:center;gap:5px;font-size:8px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;border-radius:6px;padding:3px 10px;margin-bottom:5px}
+    .hist-badge.ev-created{background:#DCFCE7;color:#15803D}
+    .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
+    .hist-badge.ev-deleted{background:#FEE2E2;color:#B91C1C}
+    .hist-ts{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:3px}
+    .hist-meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+    .hist-chip{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--t2);background:var(--bg);border:1px solid var(--bor);border-radius:6px;padding:2px 8px;font-weight:600}
+    .hist-diff{border:1px solid var(--bor);border-radius:8px;overflow:hidden}
+    .hist-diff-head{display:grid;grid-template-columns:120px 1fr 1fr}
+    .hist-diff-row{display:grid;grid-template-columns:120px 1fr 1fr;border-top:1px solid var(--bor)}
+    .hist-d-head{background:var(--bg);color:var(--t3);font-size:8px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;padding:5px 10px}
+    .hist-d-cell{padding:7px 10px;font-size:10px;font-weight:600}
+    .hist-d-field{color:var(--t2);font-size:9px;letter-spacing:.05em;text-transform:uppercase}
+    .hist-d-old{background:#FFF5F5;color:#B91C1C}
+    .hist-d-new{background:#F0FDF4;color:#16A34A}
+    .hist-create-box{background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--t2)}
+    body.dark .hist-d-old{background:rgba(239,68,68,.12);color:#FCA5A5}
+    body.dark .hist-d-new{background:rgba(34,197,94,.1);color:#86EFAC}
+    body.dark .hist-badge.ev-created{background:rgba(34,197,94,.15);color:#4ADE80}
+    body.dark .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
+    body.dark .hist-badge.ev-deleted{background:rgba(239,68,68,.15);color:#F87171}
   </style>
 </head>
 <body>
@@ -584,6 +662,9 @@
       <button class="mtab" onclick="switchPostTab(2)">
         <span class="mtab-num" id="pm-tnum-2">3</span>OPERADORES EXTERNOS
       </button>
+      <button class="mtab" onclick="switchPostTab(3)">
+        <span class="mtab-num" id="pm-tnum-3">4</span>FOTOS
+      </button>
     </div>
 
     <!-- Scroll area -->
@@ -785,6 +866,67 @@
         </div>
       </div>
 
+      <!-- ─── TAB 4: FOTOS ─── -->
+      <div class="tpnl" id="pm-pnl-3">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Fotografías del Poste
+          </div>
+          <p style="font-size:11px;color:var(--t2);margin-bottom:16px;line-height:1.6">Agrega hasta 2 fotografías del poste. Formatos admitidos: JPG, PNG, WEBP. Tamaño máximo recomendado: 5 MB por foto.</p>
+          <div class="photo-grid">
+            <!-- Slot 1: Vista General -->
+            <div class="photo-card">
+              <div class="photo-lbl-top">FOTO 1 — VISTA GENERAL<span>· Perspectiva completa del poste</span></div>
+              <div class="photo-slot" id="ps-general" onclick="triggerPhotoUpload('general')">
+                <input type="file" id="pf-general" accept="image/*" style="display:none" onchange="handlePhotoUpload('general',this)">
+                <div class="ps-empty" id="ps-empty-general">
+                  <div class="ps-ico">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+                  <div class="ps-txt">Haz clic para<br>agregar foto</div>
+                </div>
+                <img id="ps-img-general" style="display:none" alt="Vista General">
+                <div class="photo-overlay" id="ps-ov-general">
+                  <button class="photo-ov-btn" onclick="event.stopPropagation();triggerPhotoUpload('general')">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Cambiar
+                  </button>
+                  <button class="photo-ov-btn del" onclick="event.stopPropagation();removePhoto('general')">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Slot 2: Vista Detalle -->
+            <div class="photo-card">
+              <div class="photo-lbl-top">FOTO 2 — VISTA DETALLE<span>· Primer plano o zona de interés</span></div>
+              <div class="photo-slot" id="ps-detalle" onclick="triggerPhotoUpload('detalle')">
+                <input type="file" id="pf-detalle" accept="image/*" style="display:none" onchange="handlePhotoUpload('detalle',this)">
+                <div class="ps-empty" id="ps-empty-detalle">
+                  <div class="ps-ico">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+                  <div class="ps-txt">Haz clic para<br>agregar foto</div>
+                </div>
+                <img id="ps-img-detalle" style="display:none" alt="Vista Detalle">
+                <div class="photo-overlay" id="ps-ov-detalle">
+                  <button class="photo-ov-btn" onclick="event.stopPropagation();triggerPhotoUpload('detalle')">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Cambiar
+                  </button>
+                  <button class="photo-ov-btn del" onclick="event.stopPropagation();removePhoto('detalle')">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /scroll -->
 
     <!-- Footer navigation -->
@@ -798,6 +940,7 @@
           <div class="tab-dot act" id="pm-dot-0"></div>
           <div class="tab-dot" id="pm-dot-1"></div>
           <div class="tab-dot" id="pm-dot-2"></div>
+          <div class="tab-dot" id="pm-dot-3"></div>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -813,6 +956,57 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: VER POSTE ══ -->
+<div class="mo" id="mo-view">
+  <div class="mc mc-view">
+    <div class="mh">
+      <div class="vm-hdr-row">
+        <div class="vm-ico">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="vm-titles">
+          <div class="vm-code" id="vm-code">—</div>
+          <div class="vm-meta-lbl" id="vm-meta">—</div>
+          <div class="vm-badge-row" id="vm-badges"></div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-view')" style="flex-shrink:0">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="vm-body" id="vm-body"></div>
+    <div class="mf" style="justify-content:flex-end">
+      <button class="bs" onclick="closeMo('mo-view')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: HISTORIAL POSTE ══ -->
+<div class="mo" id="mo-hist">
+  <div class="mc mc-hist">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#EDE9FE">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div class="mtit" id="hm-title">Historial del Poste</div>
+          <div class="msub" id="hm-sub">Registro de cambios y auditoría</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-hist')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="hm-body">
+      <div class="hist-timeline" id="hm-timeline"></div>
+    </div>
+    <div class="mf" style="justify-content:flex-end">
+      <button class="bs" onclick="closeMo('mo-hist')">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -1407,7 +1601,7 @@ function renderPostes(){
             <th style="width:80px">Altura</th>
             <th style="width:70px">Año</th>
             <th style="width:120px">Estado</th>
-            <th style="width:90px">Acciones</th>
+            <th style="width:130px">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -1418,16 +1612,22 @@ function renderPostes(){
             <td class="td-name">${r.propietario}</td>
             <td style="font-size:11px;color:var(--t2)">${r.material}</td>
             <td>${condBadge(r.condicion)}</td>
-            <td style="font-size:12px;color:var(--t2);font-weight:600">${r.altura} m</td>
-            <td style="font-size:12px;color:var(--t2)">${r.anio}</td>
+            <td style="font-size:12px;color:var(--t2);font-weight:600">${r.height??'—'} m</td>
+            <td style="font-size:12px;color:var(--t2)">${r.installation_date?r.installation_date.split('-')[0]:'—'}</td>
             <td>${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}</td>
             <td>
               <div style="display:flex;gap:3px">
+                <button class="act-btn" title="Ver detalle" onclick="openViewPost(${r.id})" style="color:var(--p)">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
                 <button class="act-btn ed" title="Editar" onclick="openEditPost(${r.id})">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
                 <button class="act-btn dl" title="Eliminar" onclick="openDelPost(${r.id})">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                </button>
+                <button class="act-btn" title="Historial de cambios" onclick="openHistoryPost(${r.id})" style="color:var(--t2)">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </button>
               </div>
             </td>
@@ -1461,7 +1661,7 @@ function renderPostes(){
 
 /* ════════════════════════════════ POSTES: MODAL UNIFICADO ═══ */
 let postMode='new', postTabIdx=0, currentExtOps=[];
-const POST_TABS=3;
+const POST_TABS=4;
 
 function switchPostTab(idx){
   postTabIdx=idx;
@@ -1585,6 +1785,7 @@ function openPostModal(mode,id=null){
     document.getElementById('pm-extop').checked=false;
     document.getElementById('pm-retainer').checked=false;
     currentExtOps=[];
+    window._postPhotos={general:null,detalle:null};
   } else {
     const r=DB.postes.rows.find(x=>x.id===id);
     document.getElementById('pm-title').textContent=`Editar Poste ${r.codigo||'#'+r.id}`;
@@ -1612,9 +1813,13 @@ function openPostModal(mode,id=null){
     document.getElementById('pm-extop').checked       = (r.external_operators||[]).length>0;
     document.getElementById('pm-retainer').checked    = !!r.has_retainer;
     currentExtOps=[...(r.external_operators||[])];
+    const rp=r.photos||{};
+    window._postPhotos={general:rp.general||null,detalle:rp.detalle||null};
     updateCharCount('pm-findings','pm-fc-1',500);
     updateCharCount('pm-obs','pm-fc-2',500);
   }
+  renderPhotoSlot('general',window._postPhotos.general);
+  renderPhotoSlot('detalle',window._postPhotos.detalle);
   updateToggle('pm-tw','pm-status');
   syncBoolCard('pm-extop','pm-extop-card');
   syncBoolCard('pm-retainer','pm-ret-card');
@@ -1652,6 +1857,7 @@ function savePost(){
     findings:    document.getElementById('pm-findings').value.trim()||null,
     observations:document.getElementById('pm-obs').value.trim()||null,
     status:      document.getElementById('pm-status').checked,
+    photos:      {...(window._postPhotos||{general:null,detalle:null})},
   };
 
   if(postMode==='new'){
@@ -1829,6 +2035,273 @@ function showToast(msg, type='success'){
 
 // Auto open tablas on load
 toggleG('tablas');
+
+/* ════════════════════════════════ FOTOS ═══ */
+function triggerPhotoUpload(slot){
+  document.getElementById('pf-'+slot).click();
+}
+
+function handlePhotoUpload(slot,input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(!window._postPhotos) window._postPhotos={};
+    window._postPhotos[slot]=e.target.result;
+    renderPhotoSlot(slot,e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(slot){
+  if(!window._postPhotos) window._postPhotos={};
+  window._postPhotos[slot]=null;
+  renderPhotoSlot(slot,null);
+}
+
+function renderPhotoSlot(slot,dataUrl){
+  const ps=document.getElementById('ps-'+slot);
+  const img=document.getElementById('ps-img-'+slot);
+  const empty=document.getElementById('ps-empty-'+slot);
+  if(!ps) return;
+  if(dataUrl){
+    img.src=dataUrl;
+    img.style.display='block';
+    empty.style.display='none';
+    ps.classList.add('filled');
+  } else {
+    img.src='';
+    img.style.display='none';
+    empty.style.display='flex';
+    ps.classList.remove('filled');
+    const inp=document.getElementById('pf-'+slot);
+    if(inp) inp.value='';
+  }
+}
+
+/* ════════════════════════════════ VER POSTE ═══ */
+function openViewPost(id){
+  const r=DB.postes.rows.find(x=>x.id===id);
+  if(!r) return;
+
+  document.getElementById('vm-code').textContent=r.codigo||'#'+r.id;
+  const installFmt=r.installation_date
+    ? new Date(r.installation_date+'T00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'})
+    : null;
+  document.getElementById('vm-meta').textContent=
+    [r.propietario,r.manufacturer,installFmt].filter(Boolean).join(' · ');
+
+  const condC=COND_COLOR[r.condicion]||{bg:'#F3F4F6',t:'#6B7280'};
+  document.getElementById('vm-badges').innerHTML=
+    `<span style="background:${condC.bg};color:${condC.t};font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:6px;padding:3px 10px">${r.condicion||'Sin condición'}</span>`+
+    (r.status?'<span class="badge-act" style="margin-left:2px">Activo</span>':'<span class="badge-ina" style="margin-left:2px">Inactivo</span>');
+
+  const fv=(lbl,val,span=1)=>`<div class="vm-field"${span>1?` style="grid-column:span ${span}"`:''}><div class="vm-f-lbl">${lbl}</div><div class="vm-f-val${val==null?' muted':''}">${val!=null?val:'<em>No especificado</em>'}</div></div>`;
+
+  const extOps=r.external_operators||[];
+  const extHtml=extOps.length===0
+    ?`<div style="font-size:11px;color:var(--t2);font-style:italic;padding:4px 0">Sin operadores externos registrados</div>`
+    :extOps.map(op=>`<div class="vm-extop-row">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="vm-op-lbl">${op.operator}</span>
+        <span class="vm-op-cnt">${op.cable_count} cable${op.cable_count!==1?'s':''}</span>
+      </div>`).join('');
+
+  const photos=r.photos||{};
+  const photoSlot=(slot,lbl)=>`<div>
+    <div class="vm-photo-lbl">${lbl}</div>
+    <div class="vm-photo-box">
+      ${photos[slot]
+        ?`<img src="${photos[slot]}" alt="${lbl}">`
+        :`<div class="vm-photo-empty">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--bor)" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span style="font-size:9px;color:var(--t3);font-weight:600">Sin foto</span>
+        </div>`}
+    </div>
+  </div>`;
+
+  document.getElementById('vm-body').innerHTML=`
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Identificación</div>
+      <div class="vm-grid">
+        ${fv('Propietario',r.propietario)}
+        ${fv('Código',r.codigo)}
+        ${fv('Fabricante',r.manufacturer)}
+        ${fv('Fecha de Instalación',installFmt)}
+      </div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 0 4.93 19.07 10 10 0 0 0 19.07 4.93z"/></svg>Características Técnicas</div>
+      <div class="vm-grid">
+        ${fv('Material',r.material)}
+        ${fv('Tensión',r.tension)}
+        ${fv('Tipo de Cable',r.tipocable)}
+        ${fv('Altura',r.height!=null?r.height+' m':null)}
+        ${fv('Carga Máx.',r.load!=null?r.load+' kg':null)}
+        ${fv('Profundidad',r.depth!=null?r.depth+' m':null)}
+        ${fv('Puntos de Apoyo',r.support_points!=null?r.support_points+(r.support_points===1?' punto':' puntos'):null)}
+        ${fv('Retenida',r.has_retainer!=null?(r.has_retainer?'Con retenida':'Sin retenida'):null)}
+      </div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Ubicación GPS</div>
+      <div class="vm-grid g2">
+        ${fv('Latitud',r.lat!=null?r.lat.toString():null)}
+        ${fv('Longitud',r.lng!=null?r.lng.toString():null)}
+      </div>
+      <div class="vm-map">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div style="margin-top:5px">Vista de mapa no disponible en modo mockup</div>
+        <div style="font-size:9px;font-weight:400;margin-top:3px;color:var(--t3)">${r.lat??'—'}, ${r.lng??'—'}</div>
+      </div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Inspección de Campo</div>
+      <div class="vm-grid g2">
+        <div class="vm-field" style="grid-column:1/-1">
+          <div class="vm-f-lbl">Condición</div>
+          <div style="margin-top:2px">${condBadge(r.condicion)}</div>
+        </div>
+        <div class="vm-field" style="grid-column:1/-1">
+          <div class="vm-f-lbl">Hallazgos</div>
+          <div class="vm-f-val${!r.findings?' muted':''}" style="white-space:pre-wrap">${r.findings||'<em>Sin hallazgos registrados</em>'}</div>
+        </div>
+        <div class="vm-field" style="grid-column:1/-1">
+          <div class="vm-f-lbl">Observaciones</div>
+          <div class="vm-f-val${!r.observations?' muted':''}" style="white-space:pre-wrap">${r.observations||'<em>Sin observaciones</em>'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Operadores Externos <span style="font-size:9px;font-weight:600;color:var(--t3);text-transform:none;letter-spacing:0;margin-left:4px">(${extOps.length})</span></div>
+      ${extHtml}
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Fotografías</div>
+      <div class="vm-photo-grid">
+        ${photoSlot('general','FOTO 1 — VISTA GENERAL')}
+        ${photoSlot('detalle','FOTO 2 — VISTA DETALLE')}
+      </div>
+    </div>`;
+
+  openMo('mo-view');
+}
+
+/* ════════════════════════════════ HISTORIAL POSTE ═══ */
+function generateAuditLogs(r){
+  const logs=[];
+  const yr=r.installation_date?parseInt(r.installation_date.split('-')[0]):2020;
+  const baseDate=r.installation_date?r.installation_date:`${yr}-06-15`;
+
+  logs.push({
+    event:'created',date:`${baseDate} 09:15`,
+    user:'Sistema NOS OLITEL',actor_type:'system',ip:null,ua:null,method:'POST',
+    old:null,changes:null,note:'Registro inicial del poste en el inventario NOS OLITEL'
+  });
+
+  if((r.external_operators||[]).length>0){
+    logs.push({
+      event:'updated',date:`${yr+1}-03-22 11:40`,
+      user:'Carlos López Silva',actor_type:'user',ip:'192.168.10.44',
+      ua:'Chrome 118 · Windows 10',method:'PATCH',
+      old:{external_operators:'Sin operadores'},
+      changes:{external_operators:r.external_operators.map(o=>`${o.operator} (${o.cable_count} cable${o.cable_count!==1?'s':''})`).join(', ')},
+      note:null
+    });
+  }
+
+  if(['DETERIORADO','MALO','CRÍTICO'].includes(r.condicion)){
+    logs.push({
+      event:'updated',date:`${yr+2}-08-10 14:22`,
+      user:'Juan Pérez Torres',actor_type:'user',ip:'10.0.0.88',
+      ua:'Firefox 121 · Windows 11',method:'PATCH',
+      old:{condicion:'REGULAR',hallazgos:'Sin hallazgos'},
+      changes:{condicion:r.condicion,hallazgos:r.findings||'Deterioro visible identificado en inspección'},
+      note:null
+    });
+  }
+
+  if(r.height&&r.height>=12){
+    logs.push({
+      event:'updated',date:`${yr+1}-11-05 10:08`,
+      user:'Ana Vargas Quispe',actor_type:'user',ip:'172.16.0.22',
+      ua:'Edge 117 · Windows 11',method:'PATCH',
+      old:{height:(r.height-2)+' m'},
+      changes:{height:r.height+' m'},
+      note:null
+    });
+  }
+
+  if(!r.status){
+    logs.push({
+      event:'updated',date:`${yr+3}-04-18 16:05`,
+      user:'María García Torres',actor_type:'user',ip:'192.168.1.105',
+      ua:'Chrome 120 · macOS',method:'PATCH',
+      old:{estado:'Activo'},
+      changes:{estado:'Inactivo'},
+      note:null
+    });
+  }
+
+  return logs;
+}
+
+function openHistoryPost(id){
+  const r=DB.postes.rows.find(x=>x.id===id);
+  if(!r) return;
+
+  document.getElementById('hm-title').textContent=`Historial · ${r.codigo||'#'+r.id}`;
+  document.getElementById('hm-sub').textContent=`${r.propietario||'—'} · Auditoría de cambios`;
+
+  const logs=generateAuditLogs(r);
+  const EVT_LBL={created:'CREACIÓN',updated:'ACTUALIZACIÓN',deleted:'ELIMINACIÓN'};
+  const EVT_ICO={
+    created:`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`,
+    updated:`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    deleted:`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>`
+  };
+  const personIco=`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  const ipIco=`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+  const httpIco=`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+
+  document.getElementById('hm-timeline').innerHTML=[...logs].reverse().map(log=>{
+    const ev=log.event;
+    let changeHtml='';
+    if(ev==='created'){
+      changeHtml=`<div class="hist-create-box">${log.note||'Registro creado con datos base del poste.'}</div>`;
+    } else if(log.old&&log.changes){
+      const fields=Object.keys(log.changes);
+      changeHtml=`<div class="hist-diff">
+        <div class="hist-diff-head">
+          <div class="hist-d-head">Campo</div><div class="hist-d-head">Antes</div><div class="hist-d-head">Después</div>
+        </div>
+        ${fields.map(f=>`<div class="hist-diff-row">
+          <div class="hist-d-cell hist-d-field">${f}</div>
+          <div class="hist-d-cell hist-d-old">${log.old[f]||'—'}</div>
+          <div class="hist-d-cell hist-d-new">${log.changes[f]||'—'}</div>
+        </div>`).join('')}
+      </div>`;
+    }
+    const chips=[
+      log.actor_type==='system'
+        ?`<span class="hist-chip">${personIco} Sistema automático</span>`
+        :`<span class="hist-chip">${personIco} ${log.user}</span>`,
+      log.ip?`<span class="hist-chip">${ipIco} ${log.ip}</span>`:'',
+      log.ua?`<span class="hist-chip">${log.ua}</span>`:'',
+      log.method?`<span class="hist-chip">${httpIco} ${log.method}</span>`:''
+    ].filter(Boolean).join('');
+
+    return `<div class="hist-entry">
+      <div class="hist-dot ev-${ev}">${EVT_ICO[ev]||''}</div>
+      <div><span class="hist-badge ev-${ev}">${EVT_LBL[ev]||ev}</span></div>
+      <div class="hist-ts">${log.date}</div>
+      <div class="hist-meta-row">${chips}</div>
+      ${changeHtml}
+    </div>`;
+  }).join('');
+
+  openMo('mo-hist');
+}
 
 /* ════════════════════════════════ THEME ═══ */
 function applyTheme(dark){
