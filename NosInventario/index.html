@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -10,9 +10,476 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="shared/tokens.css">
-  <link rel="stylesheet" href="shared/layout.css">
-  <link rel="stylesheet" href="shared/components.css">
+  <style>
+    *{-webkit-font-smoothing:antialiased;box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --p:#7B6EF8;--pd:#6357D6;--pb:#EDE9FE;
+      --bg:#F2F2F7;--sur:#FFFFFF;--bor:#E8E8F0;
+      --t1:#1A1A2E;--t2:#6B6B8A;--t3:#A0A0B8;
+      --sb:#1A1D2E;
+      --shadow:rgba(0,0,0,.06);
+    }
+    body.dark{
+      --bg:#0F1117;--sur:#181C27;--bor:#252B3B;
+      --t1:#F0F2F8;--t2:#8B92A8;--t3:#555E78;
+      --pb:rgba(123,110,248,.15);
+      --shadow:rgba(0,0,0,.4);
+    }
+    body.dark tbody tr:hover{background:#1E2235}
+    body.dark .badge-act{background:rgba(34,197,94,.15);color:#4ADE80}
+    body.dark .badge-act::before{background:#4ADE80}
+    body.dark .badge-ina{background:rgba(239,68,68,.15);color:#F87171}
+    body.dark .badge-ina::before{background:#F87171}
+    body.dark .srch-cnt{background:rgba(123,110,248,.2);color:#A89FFF}
+    body.dark .pg-sel{background:var(--sur);color:var(--t1)}
+    body.dark .pg-btn{background:var(--sur);color:var(--t2)}
+    body,#topbar,.card,.sc,.mo .mc,#ld-overlay .ld-card{transition:background .25s,border-color .25s,color .25s}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);display:flex;height:100vh;overflow:hidden}
+
+    /* ── SIDEBAR ── */
+    #sb{width:230px;min-width:230px;background:var(--sb);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+    #sb::-webkit-scrollbar{width:3px}
+    #sb::-webkit-scrollbar-thumb{background:#2E3450;border-radius:3px}
+    .sb-logo{display:flex;align-items:center;justify-content:space-between;padding:15px 14px;border-bottom:1px solid #252A40}
+    .sb-logo-l{display:flex;align-items:center;gap:9px}
+    .sb-n{width:32px;height:32px;border-radius:8px;background:var(--p);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}
+    .sb-nt{color:#fff;font-weight:800;font-size:13px}
+    .sb-cfg{color:#555E78;cursor:pointer;background:none;border:none;padding:2px}
+    .sb-cfg:hover{color:#A0A0B8}
+    .sb-nav{flex:1;padding:8px 0}
+    .sb-sec{padding:14px 14px 4px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7280}
+    .sbi{display:flex;align-items:center;gap:9px;padding:9px 14px;color:#fff;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+    .sbi:hover{background:#252A40}
+    .sbi.act{background:var(--p)}
+    .sbi svg{opacity:.7;flex-shrink:0}
+    .sbi.act svg{opacity:1}
+    .sbg{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;color:#fff;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+    .sbg:hover{background:#252A40}
+    .sbg-l{display:flex;align-items:center;gap:9px}
+    .sbg-l svg{opacity:.7}
+    .chev{transition:transform .2s;flex-shrink:0;opacity:.5}
+    .chev.open{transform:rotate(90deg);opacity:1}
+    .sbs{display:none}
+    .sbs.open{display:block}
+    .sbsi{display:flex;align-items:center;gap:7px;padding:7px 14px 7px 36px;color:#A0A0B8;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s,color .15s}
+    .sbsi:hover{background:#252A40;color:#fff}
+    .sbsi.act{color:var(--p);background:rgba(123,110,248,.12)}
+
+    /* ── MAIN ── */
+    #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    #topbar{background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;flex-shrink:0}
+    #tbc{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t1)}
+    #tbc span{color:var(--t3);margin:0 5px}
+    .tb-r{display:flex;align-items:center;gap:10px}
+    .ib{width:32px;height:32px;border-radius:8px;border:1px solid var(--bor);background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s}
+    .ib:hover{border-color:var(--p);color:var(--p)}
+    .tb-ul{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t1)}
+    .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p),#9B8DFF);color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;position:relative}
+    .av-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;border:2px solid #fff;position:absolute;bottom:0;right:0}
+
+    /* ── CONTENT ── */
+    #cnt{flex:1;overflow-y:auto;padding:20px 22px}
+    #cnt::-webkit-scrollbar{width:4px}
+    #cnt::-webkit-scrollbar-thumb{background:var(--bor);border-radius:4px}
+    .view{display:none}
+    .view.act{display:block}
+
+    /* ── LOADING ── */
+    .ld-wrap{display:flex;align-items:center;justify-content:center;height:320px}
+    .ld-card{background:var(--p);border-radius:14px;padding:28px 40px;text-align:center;min-width:280px}
+    .ld-txt{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:18px}
+    .ld-track{background:rgba(0,0,0,.3);border-radius:4px;height:6px;overflow:hidden}
+    @keyframes ldBar{0%{width:0}30%{width:40%}65%{width:70%}85%{width:88%}100%{width:100%}}
+    .ld-bar{height:100%;background:rgba(0,0,0,.55);border-radius:4px;animation:ldBar 1s ease forwards}
+
+    /* ── STATS ── */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+    .sc{background:var(--sur);border-radius:10px;border:1px solid var(--bor);border-left-width:4px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+    .sc-num{font-size:38px;font-weight:900;line-height:1;margin-bottom:4px}
+    .sc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t1)}
+    .sc-sub{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-top:2px}
+    .sc-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .sv .sc-num,.sv{border-left-color:var(--p)} .sv .sc-num{color:var(--p)} .sv .sc-ico{background:#EDE9FE;color:var(--p)}
+    .sg{border-left-color:#22C55E} .sg .sc-num{color:#22C55E} .sg .sc-ico{background:#DCFCE7;color:#22C55E}
+    .sr{border-left-color:#EF4444} .sr .sc-num{color:#EF4444} .sr .sc-ico{background:#FEE2E2;color:#EF4444}
+
+    /* ── CARD ── */
+    .card{background:var(--sur);border-radius:10px;border:1px solid var(--bor);border-left:4px solid var(--p);overflow:hidden;margin-bottom:14px}
+    .card-hdr{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bor)}
+    .card-hl{display:flex;align-items:center;gap:12px}
+    .cico{width:38px;height:38px;border-radius:50%;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .ctit{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--t1)}
+    .csub{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-top:1px}
+    .card-btns{display:flex;gap:8px}
+
+    /* ── BUTTONS ── */
+    .bp{display:inline-flex;align-items:center;gap:5px;background:var(--p);color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s;font-family:inherit}
+    .bp:hover{background:var(--pd)}
+    .bs{display:inline-flex;align-items:center;gap:5px;background:#fff;color:var(--t2);border:1px solid var(--bor);border-radius:7px;padding:7px 13px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,color .15s;font-family:inherit}
+    .bs:hover{border-color:var(--p);color:var(--p)}
+    .br{display:inline-flex;align-items:center;gap:5px;background:#EF4444;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s;font-family:inherit}
+    .br:hover{background:#DC2626}
+
+    /* ── SEARCH ── */
+    .srch-wrap{padding:12px 18px;border-bottom:1px solid var(--bor);display:flex;gap:10px;align-items:center}
+    .srch-inner{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--bor);border-radius:8px;padding:0 12px;height:38px;background:var(--sur);transition:border-color .15s}
+    .srch-inner:focus-within{border-color:var(--p)}
+    .srch-inner input{flex:1;border:none;outline:none;background:transparent;font-size:12px;color:var(--t1);font-family:inherit}
+    .srch-inner input::placeholder{color:var(--t3);text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+    .srch-cnt{display:inline-flex;align-items:center;gap:5px;background:#EDE9FE;color:var(--p);border-radius:7px;padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+
+    /* ── TABLE ── */
+    .tbl-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:10px 18px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);text-align:left;border-bottom:1px solid var(--bor)}
+    tbody tr{border-bottom:1px solid var(--bor);transition:background .1s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#F9F9FC}
+    tbody td{padding:11px 18px;font-size:12px;color:var(--t1);vertical-align:middle}
+    .td-id{color:var(--t2);font-size:12px}
+    .td-name{font-weight:600}
+    .badge-act{display:inline-flex;align-items:center;gap:5px;background:#DCFCE7;color:#15803D;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+    .badge-act::before{content:'';width:6px;height:6px;border-radius:50%;background:#22C55E;flex-shrink:0}
+    .badge-ina{display:inline-flex;align-items:center;gap:5px;background:#FEE2E2;color:#B91C1C;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+    .badge-ina::before{content:'';width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0}
+    .act-btn{background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;transition:background .15s,color .15s;color:var(--t3);display:inline-flex;align-items:center;justify-content:center}
+    .act-btn.ed:hover{color:var(--p);background:#EDE9FE}
+    .act-btn.dl{color:#EF4444}
+    .act-btn.dl:hover{color:#DC2626;background:#FEE2E2}
+
+    /* ── PAGINATION ── */
+    .pgn{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:11px 18px;border-top:1px solid var(--bor)}
+    .pg-lbl{font-size:11px;color:var(--t2)}
+    .pg-sel{border:1px solid var(--bor);border-radius:6px;padding:3px 6px;font-size:11px;color:var(--t1);outline:none;background:#fff;font-family:inherit}
+    .pg-inf{font-size:11px;color:var(--t2);margin:0 5px}
+    .pg-btn{width:27px;height:27px;border:1px solid var(--bor);border-radius:6px;background:#fff;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;font-size:11px}
+    .pg-btn:hover:not(:disabled){border-color:var(--p);color:var(--p)}
+    .pg-btn:disabled{opacity:.35;cursor:default}
+
+    /* ── MODAL OVERLAY ── */
+    .mo{position:fixed;inset:0;z-index:50;background:rgba(10,12,20,.5);display:none;align-items:center;justify-content:center;padding:20px}
+    .mo.open{display:flex}
+    .mc{background:var(--sur);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.18);width:100%;max-width:480px;display:flex;flex-direction:column;max-height:90vh}
+    .mc-lg{max-width:580px}
+    .mh{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--bor);flex-shrink:0}
+    .mh-l{display:flex;align-items:center;gap:14px}
+    .m-ico{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .mtit{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--t1)}
+    .msub{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-top:2px}
+    .mx{background:none;border:none;cursor:pointer;color:var(--t3);padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:color .15s}
+    .mx:hover{color:var(--t1)}
+    .mb{flex:1;overflow-y:auto;padding:22px}
+    .mf{display:flex;justify-content:flex-end;gap:8px;padding:14px 22px;border-top:1px solid var(--bor);flex-shrink:0}
+
+    /* form */
+    .fl{margin-bottom:14px}
+    .fl label{display:block;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t2);margin-bottom:5px}
+    .fl input,.fl select,.fl textarea{width:100%;border:1px solid var(--bor);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s}
+    .fl input:focus,.fl select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(123,110,248,.1)}
+    .fl input::placeholder{color:var(--t3)}
+
+    /* toggle */
+    .tw{border-radius:8px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;transition:background .2s}
+    .tw.on{background:#F0FDF4}
+    .tw.off{background:#FEF2F2}
+    .tw-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
+    .tw.on .tw-lbl{color:#15803D}
+    .tw.off .tw-lbl{color:#B91C1C}
+    .tgl{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0}
+    .tgl input{opacity:0;width:0;height:0}
+    .tgl-sl{position:absolute;cursor:pointer;inset:0;background:#CBD5E1;border-radius:26px;transition:.2s}
+    .tgl-sl:before{content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .tgl input:checked+.tgl-sl{background:#22C55E}
+    .tgl input:checked+.tgl-sl:before{transform:translateX(20px)}
+
+    /* delete modal specifics */
+    .del-rec{border:1.5px solid #FECACA;border-radius:8px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;background:#FFF5F5}
+    .del-rec-name{font-size:13px;font-weight:700;color:var(--t1)}
+    .warn-box{background:#FFF7ED;border-radius:8px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px}
+    .warn-ico{width:32px;height:32px;border-radius:50%;background:#FED7AA;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .warn-txt{font-size:11px;color:#92400E;line-height:1.5;text-transform:uppercase;letter-spacing:.03em;font-weight:600}
+
+    /* import specifics */
+    .inst-box{background:#ECFDF5;border-radius:8px;padding:14px 16px;margin-bottom:16px}
+    .inst-hdr{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#065F46;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .inst-list{font-size:11px;color:#047857;line-height:1.7;padding-left:14px}
+    .inst-list li{margin-bottom:2px}
+    .drop-zone{border:2px dashed var(--bor);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px}
+    .drop-zone:hover,.drop-zone.drag{border-color:var(--p);background:#F5F3FF}
+    .drop-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);margin-top:12px;margin-bottom:4px}
+    .drop-sub{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+    .drop-ext{background:var(--bor);color:var(--t2);font-size:10px;font-weight:700;border-radius:20px;padding:3px 10px;display:inline-block}
+    .imp-sec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:10px}
+    .opt-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+    .opt-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t1);margin-bottom:3px}
+    .opt-desc{font-size:10px;color:var(--t3);line-height:1.5}
+
+    /* toast */
+    #toast{position:fixed;top:18px;right:22px;z-index:200;border-radius:10px;padding:12px 18px 12px 14px;font-size:12px;font-weight:600;letter-spacing:.04em;box-shadow:0 8px 28px rgba(0,0,0,.18);transform:translateY(-10px);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;display:flex;align-items:center;gap:10px;min-width:240px}
+    #toast.show{transform:translateY(0);opacity:1}
+    #toast.success{background:#16A34A;color:#fff}
+    #toast.warning{background:#D97706;color:#fff}
+    #toast.danger {background:#DC2626;color:#fff}
+    .toast-icon{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+    /* loading overlay (generar) */
+    #ld-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,12,20,.45);display:none;align-items:center;justify-content:center}
+    #ld-overlay.open{display:flex}
+
+    /* ── POSTES MODAL TABS ── */
+    .mc-post{max-width:720px}
+    .mtabs{display:flex;border-bottom:1px solid var(--bor);padding:0 22px;flex-shrink:0;gap:0;overflow-x:auto}
+    .mtabs::-webkit-scrollbar{display:none}
+    .mtab{padding:13px 18px;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);cursor:pointer;border:none;border-bottom:2.5px solid transparent;background:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0}
+    .mtab:hover{color:var(--t2)}
+    .mtab.act{color:var(--p);border-bottom-color:var(--p)}
+    .mtab-num{width:18px;height:18px;border-radius:50%;background:var(--bor);display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:var(--t3);transition:background .15s,color .15s;flex-shrink:0}
+    .mtab.act .mtab-num{background:var(--p);color:#fff}
+    .mtab.done .mtab-num{background:#22C55E;color:#fff}
+    .tpnl{display:none;padding:22px}
+    .tpnl.act{display:block}
+    .tsec{margin-bottom:22px}
+    .tsec:last-child{margin-bottom:0}
+    .tsec-hdr{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px}
+    .tsec-hdr svg{opacity:.7;flex-shrink:0}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+    .fc1{grid-column:1/-1}
+    .fc2{grid-column:span 2}
+    .req{color:var(--p);font-size:11px;margin-left:1px}
+    .bool-card{border:1.5px solid var(--bor);border-radius:10px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,background .2s}
+    .bool-card.on{background:#F0FDF4;border-color:#86EFAC}
+    .bool-card.off{background:var(--sur)}
+    .bool-card-l .blbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t1)}
+    .bool-card-l .bsub{font-size:9px;color:var(--t3);margin-top:3px;letter-spacing:.04em;line-height:1.4}
+    .coord-box{border:1.5px solid var(--bor);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+    .coord-box:focus-within{border-color:var(--p);box-shadow:0 0 0 3px rgba(123,110,248,.1)}
+    .coord-row{display:flex;align-items:stretch;border-bottom:1px solid var(--bor)}
+    .coord-row:last-child{border-bottom:none}
+    .coord-tag{width:40px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:var(--p);letter-spacing:.05em;flex-shrink:0}
+    .coord-inp{flex:1;border:none;padding:12px 14px;font-size:12px;color:var(--t1);background:transparent;outline:none;font-family:inherit}
+    .coord-inp::placeholder{color:var(--t3)}
+    .map-placeholder{margin-top:14px;border:1.5px dashed var(--bor);border-radius:10px;height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--t3)}
+    .fl textarea{width:100%;border:1px solid var(--bor);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s;resize:vertical;min-height:80px}
+    .fl textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(123,110,248,.1)}
+    .fl textarea::placeholder{color:var(--t3)}
+    .char-count{font-size:9px;color:var(--t3);text-align:right;margin-top:3px;letter-spacing:.04em}
+    .mf-post{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--bor);flex-shrink:0}
+    .tab-dots{display:flex;gap:5px;align-items:center}
+    .tab-dot{width:7px;height:7px;border-radius:50%;background:var(--bor);transition:background .2s,transform .2s}
+    .tab-dot.act{background:var(--p);transform:scale(1.25)}
+    .tab-dot.done{background:#22C55E}
+    body.dark .bool-card.on{background:rgba(34,197,94,.1);border-color:#166534}
+    body.dark .mtab-num{color:var(--t3)}
+
+    /* ── EXTERNAL OPERATORS LIST ── */
+    .extop-empty{text-align:center;padding:24px 16px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);border:1.5px dashed var(--bor);border-radius:10px}
+    .extop-row{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border:1px solid var(--bor);border-radius:9px;margin-bottom:8px;background:var(--sur);transition:border-color .15s}
+    .extop-row:hover{border-color:var(--p)}
+    .extop-info{display:flex;align-items:center;gap:10px}
+    .extop-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t1)}
+    .extop-cnt{background:var(--pb);color:var(--p);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+    .extop-add-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:4px}
+    .extop-add-row .fl{margin-bottom:0;flex:1}
+
+    /* ─── Photo slots ─── */
+    .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:4px 0}
+    .photo-card{display:flex;flex-direction:column;gap:8px}
+    .photo-lbl-top{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t2)}
+    .photo-lbl-top span{color:var(--t3);font-weight:500;font-size:8px;letter-spacing:.04em;margin-left:3px}
+    .photo-slot{border:2px dashed var(--bor);border-radius:12px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;overflow:hidden;position:relative;background:var(--bg)}
+    .photo-slot:hover{border-color:var(--p);background:var(--pb)}
+    .photo-slot.filled{border-style:solid;cursor:default}
+    .photo-slot .ps-empty{display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+    .photo-slot .ps-ico{width:38px;height:38px;border-radius:50%;background:var(--pb);display:flex;align-items:center;justify-content:center;color:var(--p)}
+    .photo-slot .ps-txt{font-size:10px;font-weight:600;color:var(--t3);text-align:center;line-height:1.5}
+    .photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;gap:10px;backdrop-filter:blur(2px)}
+    .photo-slot.filled:hover .photo-overlay{display:flex}
+    .photo-ov-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px 16px;color:#fff;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;transition:background .15s}
+    .photo-ov-btn:hover{background:rgba(255,255,255,.3)}
+    .photo-ov-btn.del:hover{background:rgba(239,68,68,.6)}
+
+    /* ─── View modal ─── */
+    .mc-view{max-width:660px;max-height:92vh;display:flex;flex-direction:column}
+    .vm-hdr-row{display:flex;align-items:flex-start;gap:14px}
+    .vm-ico{width:46px;height:46px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .vm-titles{flex:1;min-width:0}
+    .vm-code{font-size:19px;font-weight:900;color:var(--t1);letter-spacing:.02em;line-height:1.2}
+    .vm-meta-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+    .vm-badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .vm-body{flex:1;overflow-y:auto}
+    .vm-sec{padding:14px 22px;border-bottom:1px solid var(--bor)}
+    .vm-sec:last-child{border-bottom:none}
+    .vm-sec-ttl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .vm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 12px}
+    .vm-grid.g2{grid-template-columns:repeat(2,1fr)}
+    .vm-field{display:flex;flex-direction:column;gap:2px}
+    .vm-f-lbl{font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+    .vm-f-val{font-size:12px;font-weight:600;color:var(--t1);line-height:1.5}
+    .vm-f-val.muted{color:var(--t2);font-weight:400;font-style:italic;font-size:11px}
+    .vm-extop-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px}
+    .vm-op-lbl{font-size:11px;font-weight:700;color:var(--t1);flex:1}
+    .vm-op-cnt{font-size:10px;font-weight:700;color:var(--p);background:var(--pb);border-radius:6px;padding:2px 9px}
+    .vm-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .vm-photo-box{aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--bg);border:1px solid var(--bor);display:flex;align-items:center;justify-content:center;position:relative}
+    .vm-photo-box img{width:100%;height:100%;object-fit:cover}
+    .vm-photo-empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--t3)}
+    .vm-photo-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:5px;color:var(--t3)}
+    .vm-map{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:24px 20px;text-align:center;color:var(--t3);margin-top:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+    /* ─── History modal ─── */
+    .mc-hist{max-width:590px;max-height:92vh;display:flex;flex-direction:column}
+    .hm-body{flex:1;overflow-y:auto;padding:20px 22px}
+    .hist-timeline{padding-left:10px}
+    .hist-entry{border-left:2px solid var(--bor);padding:0 0 24px 22px;position:relative}
+    .hist-entry:last-child{padding-bottom:0;border-left-color:transparent}
+    .hist-dot{width:20px;height:20px;border-radius:50%;position:absolute;left:-11px;top:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .hist-dot.ev-created{background:#22C55E}
+    .hist-dot.ev-updated{background:var(--p)}
+    .hist-dot.ev-deleted{background:#EF4444}
+    .hist-badge{display:inline-flex;align-items:center;gap:5px;font-size:8px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;border-radius:6px;padding:3px 10px;margin-bottom:5px}
+    .hist-badge.ev-created{background:#DCFCE7;color:#15803D}
+    .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
+    .hist-badge.ev-deleted{background:#FEE2E2;color:#B91C1C}
+    .hist-ts{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:3px}
+    .hist-meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+    .hist-chip{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--t2);background:var(--bg);border:1px solid var(--bor);border-radius:6px;padding:2px 8px;font-weight:600}
+    .hist-diff{border:1px solid var(--bor);border-radius:8px;overflow:hidden}
+    .hist-diff-head{display:grid;grid-template-columns:120px 1fr 1fr}
+    .hist-diff-row{display:grid;grid-template-columns:120px 1fr 1fr;border-top:1px solid var(--bor)}
+    .hist-d-head{background:var(--bg);color:var(--t3);font-size:8px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;padding:5px 10px}
+    .hist-d-cell{padding:7px 10px;font-size:10px;font-weight:600}
+    .hist-d-field{color:var(--t2);font-size:9px;letter-spacing:.05em;text-transform:uppercase}
+    .hist-d-old{background:#FFF5F5;color:#B91C1C}
+    .hist-d-new{background:#F0FDF4;color:#16A34A}
+    .hist-create-box{background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--t2)}
+    body.dark .hist-d-old{background:rgba(239,68,68,.12);color:#FCA5A5}
+    body.dark .hist-d-new{background:rgba(34,197,94,.1);color:#86EFAC}
+    body.dark .hist-badge.ev-created{background:rgba(34,197,94,.15);color:#4ADE80}
+    body.dark .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
+    body.dark .hist-badge.ev-deleted{background:rgba(239,68,68,.15);color:#F87171}
+
+    /* ─── NAP Searchable Select ─── */
+    .nap-sel-wrap{position:relative}
+    .nap-sel-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sur);border:1px solid var(--bor);border-radius:8px;cursor:pointer;font-size:12px;color:var(--t1);gap:8px;transition:border-color .15s;user-select:none}
+    .nap-sel-btn:hover,.nap-sel-btn.open{border-color:var(--p)}
+    .nap-sel-btn .nsb-val{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .nap-sel-btn .nsb-val.ph{color:var(--t3)}
+    .nap-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sur);border:1px solid var(--bor);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.14);z-index:300;overflow:hidden;display:none}
+    .nap-dropdown.open{display:block}
+    .nap-search-wrap{padding:8px;border-bottom:1px solid var(--bor)}
+    .nap-search-inp{width:100%;padding:7px 10px;border:1px solid var(--bor);border-radius:7px;font-size:11px;background:var(--bg);color:var(--t1);outline:none;transition:border-color .15s}
+    .nap-search-inp:focus{border-color:var(--p)}
+    .nap-list{max-height:190px;overflow-y:auto}
+    .nap-item{padding:8px 12px;cursor:pointer;font-size:11px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bor);transition:background .12s}
+    .nap-item:last-child{border-bottom:none}
+    .nap-item:hover,.nap-item.selected{background:var(--pb)}
+    .nap-item.selected .nap-code{background:var(--p);color:#fff}
+    .nap-item.no-res,.nap-item.clear-opt{cursor:default;color:var(--t3);font-style:italic;font-weight:400}
+    .nap-item.clear-opt{cursor:pointer;border-top:1px solid var(--bor);color:var(--t2);font-style:normal}
+    .nap-code{background:var(--pb);color:var(--p);border-radius:5px;padding:2px 7px;font-size:9px;font-weight:800;letter-spacing:.04em;white-space:nowrap;flex-shrink:0}
+    .nap-detail-card{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:14px 16px;margin-top:12px}
+    .nap-detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+
+    /* ─── Mapa Leaflet ─── */
+    #clt-map{width:100%;height:210px;border-radius:10px;border:1px solid var(--bor);overflow:hidden}
+    .clt-coord-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .clt-map-hint{font-size:9px;color:var(--t3);margin-top:7px;display:flex;align-items:center;gap:5px;font-weight:600}
+    .leaflet-container{font-family:inherit}
+
+    /* ─── Asignaciones: Filter Chips ─── */
+    .fchip-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .fchip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:1.5px solid var(--bor);background:var(--sur);color:var(--t2);transition:all .15s;user-select:none}
+    .fchip:hover{border-color:var(--p);color:var(--p)}
+    .fchip.act{background:var(--p);border-color:var(--p);color:#fff}
+    .fc-cnt{background:var(--bor);color:var(--t2);border-radius:20px;padding:1px 7px;font-size:9px;font-weight:900;min-width:18px;text-align:center;transition:background .15s,color .15s}
+    .fchip.act .fc-cnt{background:rgba(255,255,255,.25);color:#fff}
+    /* Assignment status badges */
+    .asign-stat{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+    .asign-stat::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .as-libre{background:#F3F4F6;color:#6B7280}.as-libre::before{background:#9CA3AF}
+    .as-pend{background:#EFF6FF;color:#1D4ED8}.as-pend::before{background:#3B82F6}
+    .as-prog{background:#FFF7ED;color:#C2410C}.as-prog::before{background:#F97316}
+    .as-done{background:#DCFCE7;color:#15803D}.as-done::before{background:#22C55E}
+    .as-fail{background:#FEE2E2;color:#B91C1C}.as-fail::before{background:#EF4444}
+    .as-canc{background:#F9F9F9;color:#9CA3AF}.as-canc::before{background:#D1D5DB}
+    body.dark .as-libre{background:rgba(107,114,128,.15);color:#9CA3AF}
+    body.dark .as-pend{background:rgba(29,78,216,.15);color:#93C5FD}
+    body.dark .as-prog{background:rgba(194,65,12,.15);color:#FDB077}
+    body.dark .as-done{background:rgba(21,128,61,.15);color:#86EFAC}
+    body.dark .as-fail{background:rgba(185,28,28,.15);color:#FCA5A5}
+    body.dark .as-canc{background:rgba(107,114,128,.12);color:#6B7280}
+    /* ─── Dispatch Modal ─── */
+    .mc-dispatch{max-width:720px;max-height:88vh;display:flex;flex-direction:column}
+    .dp-body{overflow-y:auto;flex:1;min-height:0}
+    .dp-body::-webkit-scrollbar{width:4px}
+    .dp-body::-webkit-scrollbar-thumb{background:var(--bor);border-radius:4px}
+    .dp-sec{padding:16px 20px;border-bottom:1px solid var(--bor)}
+    .dp-sec-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+    .dp-tec-wrap{position:relative}
+    .dp-tec-input-row{display:flex;align-items:center;gap:8px;border:1.5px solid var(--bor);border-radius:10px;padding:9px 12px;transition:border-color .15s;background:var(--sur)}
+    .dp-tec-input-row:focus-within{border-color:var(--p)}
+    .dp-tec-input-row input{flex:1;border:none;outline:none;background:transparent;font-size:12px;color:var(--t1);font-family:inherit}
+    .dp-tec-input-row input::placeholder{color:var(--t3)}
+    .dp-tec-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sur);border:1.5px solid var(--p);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.13);z-index:50;overflow:hidden;max-height:220px;overflow-y:auto}
+    .dp-tec-dropdown::-webkit-scrollbar{width:3px}
+    .dp-tec-dropdown::-webkit-scrollbar-thumb{background:var(--bor);border-radius:3px}
+    .dp-tec-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--bor)}
+    .dp-tec-opt:last-child{border-bottom:none}
+    .dp-tec-opt:hover{background:var(--bg)}
+    .dp-tec-opt.sel{background:var(--pb)}
+    .dp-tec-sel{display:flex;align-items:center;gap:10px;background:var(--pb);border:1.5px solid var(--p);border-radius:10px;padding:10px 14px;margin-top:8px}
+    .dp-tec-av{width:34px;height:34px;border-radius:50%;background:var(--bor);color:var(--t2);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s}
+    .dp-tec-av.sel,.dp-tec-opt.sel .dp-tec-av{background:var(--p);color:#fff}
+    .dp-tec-name{font-size:11px;font-weight:700;color:var(--t1);line-height:1.3}
+    .dp-tec-code{font-size:9px;font-weight:700;color:var(--p);letter-spacing:.04em;margin-right:6px}
+    .dp-tec-zone{font-size:9px;color:var(--t3);letter-spacing:.03em}
+    .dp-geo-sel{border:1px solid var(--bor);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s;width:100%}
+    .dp-geo-sel:focus{border-color:var(--p)}
+    .dp-geo-sel:disabled{opacity:.45;cursor:not-allowed}
+    .dp-clt-tbl-wrap{border:1px solid var(--bor);border-radius:9px;overflow:hidden;max-height:270px;overflow-y:auto}
+    .dp-clt-tbl-wrap::-webkit-scrollbar{width:3px}
+    .dp-clt-tbl-wrap::-webkit-scrollbar-thumb{background:var(--bor);border-radius:3px}
+    .dp-row-sel td{background:rgba(123,110,248,.05)!important}
+    body.dark .dp-row-sel td{background:rgba(123,110,248,.1)!important}
+    .dp-chk{width:15px;height:15px;accent-color:var(--p);cursor:pointer;flex-shrink:0}
+    .dp-code{background:var(--pb);color:var(--p);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+    .dp-chip{display:inline-flex;align-items:center;gap:4px;background:var(--pb);color:var(--p);border-radius:7px;padding:4px 6px 4px 10px;font-size:10px;font-weight:700;letter-spacing:.03em}
+    .dp-chip-x{background:none;border:none;color:var(--p);cursor:pointer;padding:1px 2px;font-size:14px;line-height:1;display:flex;align-items:center;opacity:.6;transition:opacity .15s;font-family:inherit}
+    .dp-chip-x:hover{opacity:1}
+    .dp-empty{font-size:10px;color:var(--t3);font-style:italic;padding:2px 0;letter-spacing:.04em}
+    .dp-footer{display:flex;align-items:center;justify-content:space-between;padding:13px 22px;border-top:1px solid var(--bor);flex-shrink:0;gap:12px;flex-wrap:wrap}
+    .dp-footer-info{font-size:11px;color:var(--t2)}
+    .dp-footer-info strong{color:var(--t1);font-weight:700}
+    /* Main table asign filters */
+    .af-panel{padding:12px 18px 14px;border-bottom:1px solid var(--bor);display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+    .af-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+    .af-sel{border:1px solid var(--bor);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s;min-width:110px}
+    .af-sel:focus{border-color:var(--p)}
+    .af-sel:disabled{opacity:.45;cursor:not-allowed}
+    @media(max-width:640px){
+      .mc-dispatch{max-width:100%;max-height:96vh}
+      .dp-sec{padding:12px 14px}
+      .af-panel{gap:6px}
+      .af-sel,.dp-geo-sel{min-width:calc(50% - 4px)}
+    }
+    /* Pending actions modal cards */
+    .pa-opt-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--bor);border-radius:12px;padding:20px 16px;cursor:pointer;transition:all .15s;background:var(--sur);text-align:center;width:100%}
+    .pa-opt-card:hover{border-color:var(--p);background:var(--pb)}
+    .pa-opt-card .pa-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+    .pa-opt-card .pa-lbl{font-size:12px;font-weight:700;color:var(--t1)}
+    .pa-opt-card .pa-sub{font-size:10px;color:var(--t3);letter-spacing:.03em}
+    .pa-opt-card:hover .pa-lbl{color:var(--p)}
+    .pa-opt-card.danger:hover{border-color:#EF4444;background:#FEF2F2}
+    .pa-opt-card.danger:hover .pa-lbl{color:#EF4444}
+    .pa-opt-card.danger:hover .pa-ico{background:#FEE2E2}
+    /* Confirm dispatch modal */
+    .mac-summary{background:var(--bg);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+    .mac-row{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+    .mac-row .lbl{color:var(--t3);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    .mac-row .val{font-weight:600;color:var(--t1)}
+  </style>
 </head>
 <body>
 
@@ -81,8 +548,9 @@
       <svg class="chev" id="chev-postes-grp" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="sbs" id="sub-postes-grp">
-      <div class="sbsi" id="nav-postes"   onclick="navTo('postes')"><span>+</span> Postes</div>
-      <div class="sbsi" id="nav-clientes" onclick="navTo('clientes')"><span>+</span> Clientes</div>
+      <div class="sbsi" id="nav-postes"      onclick="navTo('postes')"><span>+</span> Postes</div>
+      <div class="sbsi" id="nav-clientes"   onclick="navTo('clientes')"><span>+</span> Clientes</div>
+      <div class="sbsi" id="nav-asignaciones" onclick="navTo('asignaciones')"><span>+</span> Asignaciones</div>
     </div>
 
     <!-- Tablas Generales -->
@@ -147,6 +615,222 @@
       </div>
     </div>
     <!-- views dinámicos aquí -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: ASIGNAR TÉCNICO ══ -->
+<div class="mo" id="mo-dispatch">
+  <div class="mc mc-dispatch">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#EDE9FE">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </div>
+        <div>
+          <div class="mtit">Nueva Asignacion</div>
+          <div class="msub">Asigna un tecnico a uno o mas clientes</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-dispatch')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="dp-body">
+      <!-- Seccion 1: Tecnico -->
+      <div class="dp-sec">
+        <div class="dp-sec-lbl">Tecnico <span style="color:#EF4444">*</span></div>
+        <div class="dp-tec-wrap" id="dp-tec-wrap">
+          <div class="dp-tec-input-row">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <input id="dp-tec-q" type="text" placeholder="Buscar tecnico por nombre o codigo..." autocomplete="off"
+              oninput="dpSearchTec(this.value)" onfocus="dpOpenTecDD()" onblur="dpBlurTecDD()">
+            <button id="dp-tec-clear" onclick="dpClearTec()" style="display:none;background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;line-height:1;padding:0 2px;font-family:inherit">×</button>
+          </div>
+          <div id="dp-tec-dropdown" class="dp-tec-dropdown" style="display:none"></div>
+          <div id="dp-tec-sel-info" style="display:none"></div>
+        </div>
+      </div>
+      <!-- Seccion 2: Filtros de clientes -->
+      <div class="dp-sec">
+        <div class="dp-sec-lbl">Filtros de clientes</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div style="flex:1;position:relative">
+            <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="dp-clt-q-input" type="text" placeholder="Codigo, direccion, NAP, distrito..."
+              style="width:100%;border:1px solid var(--bor);border-radius:8px;padding:8px 12px 8px 32px;font-size:11px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s;box-sizing:border-box"
+              onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--bor)'"
+              onkeydown="if(event.key==='Enter')dpApplySearch()">
+          </div>
+          <button class="bp" onclick="dpApplySearch()" style="padding:8px 16px;white-space:nowrap;font-size:11px;flex-shrink:0">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Buscar
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+          <div style="flex:1;min-width:120px">
+            <div class="dp-sec-lbl" style="margin-bottom:4px">Departamento</div>
+            <select id="dp-f-dept" class="dp-geo-sel" onchange="dpSetDept(this.value)"><option value="">Todos</option></select>
+          </div>
+          <div style="flex:1;min-width:120px">
+            <div class="dp-sec-lbl" style="margin-bottom:4px">Provincia</div>
+            <select id="dp-f-prov" class="dp-geo-sel" onchange="dpSetProv(this.value)" disabled><option value="">Todas</option></select>
+          </div>
+          <div style="flex:1;min-width:120px">
+            <div class="dp-sec-lbl" style="margin-bottom:4px">Distrito</div>
+            <select id="dp-f-dist" class="dp-geo-sel" onchange="dpSetDist(this.value)" disabled><option value="">Todos</option></select>
+          </div>
+          <button class="bs" onclick="dpClearFilters()" style="font-size:11px;padding:8px 14px;white-space:nowrap;flex-shrink:0;align-self:flex-end">
+            × Limpiar
+          </button>
+        </div>
+      </div>
+      <!-- Seccion 3: Tabla de clientes -->
+      <div class="dp-sec" style="border-bottom:none;padding-top:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="dp-sec-lbl" style="margin-bottom:0">Clientes disponibles</div>
+          <span id="dp-sel-badge" style="font-size:11px;color:var(--p);font-weight:700;letter-spacing:.02em"></span>
+        </div>
+        <div class="dp-clt-tbl-wrap">
+          <div id="dp-clt-table"></div>
+        </div>
+        <div id="dp-clt-pgn" style="display:flex;align-items:center;gap:8px;padding:9px 2px 0;font-size:11px;color:var(--t2)"></div>
+      </div>
+    </div>
+    <div class="dp-footer">
+      <div id="dp-footer-info" class="dp-footer-info">Selecciona un tecnico y marca clientes para continuar</div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="bs" onclick="closeMo('mo-dispatch')">× Cancelar</button>
+        <button class="bp" id="dp-confirm-btn" onclick="confirmDispatch()" disabled style="opacity:.45;cursor:not-allowed">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Crear Asignacion
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: CONFIRMAR ASIGNACION ══ -->
+<div class="mo" id="mo-asign-confirm">
+  <div class="mc" style="max-width:440px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#DCFCE7">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#16A34A" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Confirmar Asignacion</div>
+          <div class="msub" id="mac-sub">Revisa los datos antes de confirmar</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-asign-confirm')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb">
+      <div class="mac-summary" id="mac-body"></div>
+    </div>
+    <div class="mf">
+      <button class="bs" onclick="closeMo('mo-asign-confirm')">× Cancelar</button>
+      <button class="bp" onclick="doConfirmDispatch()" style="background:#16A34A;border-color:#16A34A">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar y Asignar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: REASIGNAR / LIBERAR ══ -->
+<div class="mo" id="mo-reassign">
+  <div class="mc" style="max-width:460px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#FFF7ED">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#C2410C" stroke-width="1.8"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Asignacion En Progreso</div>
+          <div class="msub" id="mra-sub">Opciones del cliente</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-reassign')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:0;padding:0">
+      <!-- Client info -->
+      <div id="mra-client-info" style="padding:16px 20px;border-bottom:1px solid var(--bor)"></div>
+      <!-- Reasignar section -->
+      <div style="padding:16px 20px;border-bottom:1px solid var(--bor)">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Reasignar a otro tecnico</div>
+        <div class="dp-tec-wrap" id="mra-tec-wrap">
+          <div class="dp-tec-input-row">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <input id="mra-tec-q" type="text" placeholder="Buscar tecnico..." autocomplete="off"
+              oninput="mraSearchTec(this.value)" onfocus="mraOpenDD()" onblur="mraBlurDD()">
+            <button id="mra-tec-clear" onclick="mraClearTec()" style="display:none;background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;line-height:1;padding:0 2px;font-family:inherit">×</button>
+          </div>
+          <div id="mra-tec-dropdown" class="dp-tec-dropdown" style="display:none"></div>
+          <div id="mra-tec-sel" style="display:none;margin-top:8px"></div>
+        </div>
+        <button class="bp" id="mra-confirm-btn" onclick="doReassign()" disabled style="margin-top:12px;width:100%;justify-content:center;opacity:.45;cursor:not-allowed">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirmar Reasignacion
+        </button>
+      </div>
+      <!-- Liberar section -->
+      <div style="padding:16px 20px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Liberar asignacion</div>
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:11px 14px;font-size:11px;color:#991B1B;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px">
+          <svg style="flex-shrink:0;margin-top:1px" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Esta accion eliminara la asignacion y el cliente quedara libre para ser asignado nuevamente.</span>
+        </div>
+        <button class="br" onclick="confirmLiberar()" style="width:100%;justify-content:center">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Confirmar Liberacion
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: CANCELAR ASIGNACION ══ -->
+<div class="mo" id="mo-cancel-asign">
+  <div class="mc" style="max-width:420px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#FEF2F2">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#DC2626" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Cancelar Asignacion</div>
+          <div class="msub">Esta accion no se puede deshacer</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-cancel-asign')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:14px">
+      <!-- Client info -->
+      <div id="mca-client-info" style="background:var(--bg);border-radius:10px;padding:14px 16px"></div>
+      <!-- Warning -->
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:11px 14px;font-size:11px;color:#991B1B;display:flex;align-items:flex-start;gap:8px">
+        <svg style="flex-shrink:0;margin-top:1px" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>La asignacion pasara al estado <strong>cancelado</strong>. El cliente podra ser reasignado posteriormente.</span>
+      </div>
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="bs" onclick="closeMo('mo-cancel-asign')">Volver</button>
+        <button class="br" onclick="doCancelAsign()" style="gap:6px">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Confirmar Cancelacion
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -972,7 +1656,6 @@
 
 <div id="toast"></div>
 
-<script src="shared/ui.js"></script>
 <script>
 /* ════════════════════════════════ DATA ═══ */
 const DB = {
@@ -1188,11 +1871,66 @@ DB.clientes={
     {id:10,object_id:'CLT-000010',address:'Calle Los Álamos 321',                  country:'PERÚ',department:'LIMA',province:'LIMA',district:'LA MOLINA',      lat_ref:-12.0862,lng_ref:-76.9524, nap_id:null,             photos:{general:'https://picsum.photos/seed/building10/600/400'}, status:false},
     {id:11,object_id:'CLT-000011',address:'Av. Túpac Amaru 2890, Dpto. 3A',       country:'PERÚ',department:'LIMA',province:'LIMA',district:'COMAS',          lat_ref:-11.9430,lng_ref:-77.0462, nap_id:'WN-20A-2208089', photos:{general:'https://picsum.photos/seed/building11/600/400'}, status:true},
     {id:12,object_id:'CLT-000012',address:'Jr. Huáscar 440',                       country:'PERÚ',department:'LIMA',province:'LIMA',district:'BREÑA',          lat_ref:-12.0618,lng_ref:-77.0556, nap_id:'WN-230-1303495', photos:{general:'https://picsum.photos/seed/building12/600/400'}, status:true},
+    {id:13,object_id:'CLT-000013',address:'Av. Arequipa 4250, Dpto. 301',          country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',          lat_ref:-12.1062,lng_ref:-77.0355, nap_id:'WN-230-2247122', photos:{general:'https://picsum.photos/seed/b13/600/400'},  status:true},
+    {id:14,object_id:'CLT-000014',address:'Jr. Camaná 850, Of. 12',                country:'PERÚ',department:'LIMA',province:'LIMA',district:'LIMA',                lat_ref:-12.0551,lng_ref:-77.0335, nap_id:null,             photos:{general:null},                                         status:true},
+    {id:15,object_id:'CLT-000015',address:'Av. Colonial 1800, Int. 5',             country:'PERÚ',department:'LIMA',province:'LIMA',district:'LIMA',                lat_ref:-12.0573,lng_ref:-77.0768, nap_id:'WN-230-1303501', photos:{general:'https://picsum.photos/seed/b15/600/400'},  status:true},
+    {id:16,object_id:'CLT-000016',address:'Calle Schell 380, Piso 4',              country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',          lat_ref:-12.1172,lng_ref:-77.0308, nap_id:null,             photos:{general:'https://picsum.photos/seed/b16/600/400'},  status:true},
+    {id:17,object_id:'CLT-000017',address:'Av. Primavera 1200, Dpto. 201',         country:'PERÚ',department:'LIMA',province:'LIMA',district:'SANTIAGO DE SURCO',   lat_ref:-12.1100,lng_ref:-76.9960, nap_id:'WN-230-1624766', photos:{general:'https://picsum.photos/seed/b17/600/400'},  status:true},
+    {id:18,object_id:'CLT-000018',address:'Jr. Amazonas 225, Int. 3',              country:'PERÚ',department:'LIMA',province:'LIMA',district:'RÍMAC',               lat_ref:-12.0388,lng_ref:-77.0295, nap_id:null,             photos:{general:null},                                         status:true},
+    {id:19,object_id:'CLT-000019',address:'Av. Túpac Yupanqui 3680',               country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN MARTÍN DE PORRES',lat_ref:-11.9985,lng_ref:-77.0649, nap_id:'WN-20A-2208090', photos:{general:'https://picsum.photos/seed/b19/600/400'},  status:true},
+    {id:20,object_id:'CLT-000020',address:'Calle Los Robles 140, Dpto. 8B',        country:'PERÚ',department:'LIMA',province:'LIMA',district:'SURQUILLO',           lat_ref:-12.1100,lng_ref:-77.0044, nap_id:null,             photos:{general:'https://picsum.photos/seed/b20/600/400'},  status:true},
+    {id:21,object_id:'CLT-000021',address:'Av. Iquitos 1575, Dpto. 401',           country:'PERÚ',department:'LIMA',province:'LIMA',district:'LA VICTORIA',         lat_ref:-12.0624,lng_ref:-77.0238, nap_id:'WN-230-1303502', photos:{general:'https://picsum.photos/seed/b21/600/400'},  status:true},
+    {id:22,object_id:'CLT-000022',address:'Calle General Córdova 340',             country:'PERÚ',department:'LIMA',province:'LIMA',district:'BARRANCO',            lat_ref:-12.1518,lng_ref:-77.0198, nap_id:null,             photos:{general:'https://picsum.photos/seed/b22/600/400'},  status:true},
+    {id:23,object_id:'CLT-000023',address:'Av. La Fontana 1550, Dpto. 505',        country:'PERÚ',department:'LIMA',province:'LIMA',district:'LA MOLINA',           lat_ref:-12.0842,lng_ref:-76.9540, nap_id:'WN-230-2049379', photos:{general:'https://picsum.photos/seed/b23/600/400'},  status:true},
+    {id:24,object_id:'CLT-000024',address:'Jr. Loreto 1490',                       country:'PERÚ',department:'LIMA',province:'LIMA',district:'LIMA',                lat_ref:-12.0528,lng_ref:-77.0341, nap_id:null,             photos:{general:null},                                         status:true},
+    {id:25,object_id:'CLT-000025',address:'Av. El Polo 701, Of. 305',              country:'PERÚ',department:'LIMA',province:'LIMA',district:'SANTIAGO DE SURCO',   lat_ref:-12.1190,lng_ref:-76.9820, nap_id:'WN-230-1303503', photos:{general:'https://picsum.photos/seed/b25/600/400'},  status:true},
+    {id:26,object_id:'CLT-000026',address:'Calle Tarata 280, Piso 2',              country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',          lat_ref:-12.1196,lng_ref:-77.0296, nap_id:null,             photos:{general:'https://picsum.photos/seed/b26/600/400'},  status:true},
+    {id:27,object_id:'CLT-000027',address:'Av. Palmeras 1890',                     country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN JUAN DE LURIGANCHO',lat_ref:-12.0014,lng_ref:-77.0062, nap_id:'WN-20A-2208091', photos:{general:'https://picsum.photos/seed/b27/600/400'},status:true},
+    {id:28,object_id:'CLT-000028',address:'Jr. Junín 880, Int. 2B',                country:'PERÚ',department:'LIMA',province:'LIMA',district:'CHORRILLOS',          lat_ref:-12.1614,lng_ref:-77.0207, nap_id:null,             photos:{general:null},                                         status:true},
+    {id:29,object_id:'CLT-000029',address:'Av. Próceres de la Independencia 2350', country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN JUAN DE LURIGANCHO',lat_ref:-12.0124,lng_ref:-77.0008, nap_id:'WN-230-1624767', photos:{general:'https://picsum.photos/seed/b29/600/400'},status:true},
+    {id:30,object_id:'CLT-000030',address:'Calle Manuel Villaverde 145',           country:'PERÚ',department:'LIMA',province:'LIMA',district:'PUEBLO LIBRE',        lat_ref:-12.0777,lng_ref:-77.0631, nap_id:null,             photos:{general:'https://picsum.photos/seed/b30/600/400'},  status:true},
+    {id:31,object_id:'CLT-000031',address:'Av. Angamos Oeste 890, Dpto. 602',      country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',          lat_ref:-12.1135,lng_ref:-77.0161, nap_id:'WN-230-2247123', photos:{general:'https://picsum.photos/seed/b31/600/400'},  status:true},
+    {id:32,object_id:'CLT-000032',address:'Jr. Andahuaylas 1120',                  country:'PERÚ',department:'LIMA',province:'LIMA',district:'LA VICTORIA',         lat_ref:-12.0615,lng_ref:-77.0194, nap_id:null,             photos:{general:null},                                         status:true},
+    {id:33,object_id:'CLT-000033',address:'Av. Separadora Industrial 2450',        country:'PERÚ',department:'LIMA',province:'LIMA',district:'ATE',                 lat_ref:-12.0488,lng_ref:-76.9874, nap_id:'WN-230-1303504', photos:{general:'https://picsum.photos/seed/b33/600/400'},  status:true},
+    {id:34,object_id:'CLT-000034',address:'Calle Los Faisanes 350',                country:'PERÚ',department:'LIMA',province:'LIMA',district:'VILLA EL SALVADOR',   lat_ref:-12.2102,lng_ref:-76.9488, nap_id:null,             photos:{general:'https://picsum.photos/seed/b34/600/400'},  status:true},
+    {id:35,object_id:'CLT-000035',address:'Av. San Martín 1800, Dpto. 4A',         country:'PERÚ',department:'LIMA',province:'LIMA',district:'PUENTE PIEDRA',       lat_ref:-11.8650,lng_ref:-77.0822, nap_id:'WN-20A-2208092', photos:{general:'https://picsum.photos/seed/b35/600/400'},  status:true},
   ]
+};
+
+/* ════════════════════════════════ DB: TÉCNICOS & ASIGNACIONES ═══ */
+const TECHNICIANS=[
+  {id:1,name:'Carlos López Silva',  code:'TEC-001',zone:'SAN ISIDRO / MIRAFLORES'},
+  {id:2,name:'Juan Pérez Torres',   code:'TEC-002',zone:'SAN BORJA / LA MOLINA'},
+  {id:3,name:'Ana Vargas Quispe',   code:'TEC-003',zone:'LOS OLIVOS / COMAS'},
+  {id:4,name:'María García Torres', code:'TEC-004',zone:'BARRANCO / MIRAFLORES'},
+  {id:5,name:'Roberto Huanca Lima', code:'TEC-005',zone:'SAN MIGUEL / JESÚS MARÍA'},
+];
+// client_id → {technician_id, status, assigned_at}
+const ASSIGNMENTS={
+  1: {technician_id:1, status:'completado',  assigned_at:'2025-01-10'},
+  2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15'},
+  5: {technician_id:4, status:'pendiente',   assigned_at:'2025-04-02'},
+  6: {technician_id:4, status:'completado',  assigned_at:'2025-02-28'},
+  7: {technician_id:3, status:'pendiente',   assigned_at:'2025-04-10'},
+  9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18'},
+  11:{technician_id:3, status:'completado',  assigned_at:'2025-01-22'},
+  12:{technician_id:5, status:'fallido',     assigned_at:'2025-03-05'},
+  15:{technician_id:2, status:'completado',  assigned_at:'2025-02-10'},
+  18:{technician_id:3, status:'fallido',     assigned_at:'2025-03-20'},
+  20:{technician_id:1, status:'en_progreso', assigned_at:'2025-04-25'},
+  22:{technician_id:4, status:'completado',  assigned_at:'2025-01-30'},
+  25:{technician_id:5, status:'pendiente',   assigned_at:'2025-04-12'},
+  27:{technician_id:2, status:'en_progreso', assigned_at:'2025-04-20'},
+  30:{technician_id:1, status:'completado',  assigned_at:'2025-02-05'},
+  33:{technician_id:3, status:'fallido',     assigned_at:'2025-03-28'},
+  34:{technician_id:5, status:'cancelado',   assigned_at:'2025-04-01'},
 };
 
 /* ════════════════════════════════ STATE ═══ */
 let CV='inicio', CT=null, editId=null, delId=null, SQ='', CP=1, PS=15;
+let asignFilt='all';
+let afDept='',afProv='',afDist='',afTec='';
+const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
 
 /* ════════════════════════════════ NAV ═══ */
 function navTo(v){
@@ -1204,6 +1942,17 @@ function navTo(v){
     document.getElementById('nav-inicio').classList.add('act');
     setBC(['Nos Inventario']);
     showView('inicio'); CV='inicio'; return;
+  }
+  if(v==='asignaciones'){
+    CV='asignaciones'; SQ=''; CP=1; asignFilt='all';
+    setBC(['Postes','Asignaciones']);
+    let vEl=document.getElementById('view-asignaciones');
+    if(!vEl){vEl=document.createElement('div');vEl.id='view-asignaciones';vEl.className='view';document.getElementById('cnt').appendChild(vEl);}
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
+    vEl.classList.add('act');
+    vEl.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt">Obteniendo información...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
+    setTimeout(()=>renderAsignaciones(),950);
+    return;
   }
   if(!DB[v]) return;
   CT=v; CV=v; SQ=''; CP=1;
@@ -1760,6 +2509,625 @@ function renderPostes(){
   </div>`;
 }
 
+/* ════════════════════════════════ ASIGNACIONES: RENDER ═══ */
+function asignBadge(status){
+  const map={
+    libre:      {cls:'as-libre',lbl:'Sin Asignar'},
+    pendiente:  {cls:'as-pend', lbl:'Pendiente'},
+    en_progreso:{cls:'as-prog', lbl:'En Progreso'},
+    completado: {cls:'as-done', lbl:'Completado'},
+    fallido:    {cls:'as-fail', lbl:'Fallido'},
+    cancelado:  {cls:'as-canc', lbl:'Cancelado'},
+  };
+  const s=map[status]||map.libre;
+  return `<span class="asign-stat ${s.cls}">${s.lbl}</span>`;
+}
+function getAsign(c){return ASSIGNMENTS[c.id]||null;}
+function getStatus(c){const a=getAsign(c);return a?a.status:'libre';}
+function isDispatchable(c){const a=ASSIGNMENTS[c.id];return !a||a.status==='completado'||a.status==='fallido';}
+
+function renderAsignaciones(){
+  const all=DB.clientes.rows;
+  const sorted=[...all].sort((a,b)=>a.id-b.id);
+  const q=SQ.toLowerCase();
+  let rows=sorted;
+  if(asignFilt==='libre')         rows=sorted.filter(c=>!ASSIGNMENTS[c.id]);
+  else if(asignFilt!=='all')      rows=sorted.filter(c=>getStatus(c)===asignFilt);
+  if(q) rows=rows.filter(c=>
+    c.object_id.toLowerCase().includes(q)||
+    (c.address||'').toLowerCase().includes(q)||
+    (c.district||'').toLowerCase().includes(q)||
+    (c.nap_id||'').toLowerCase().includes(q)
+  );
+  if(afDept) rows=rows.filter(c=>(c.department||'')===afDept);
+  if(afProv)  rows=rows.filter(c=>(c.province||'')===afProv);
+  if(afDist)  rows=rows.filter(c=>(c.district||'')===afDist);
+  if(afTec)   rows=rows.filter(c=>{const a=getAsign(c);return a&&a.technician_id===parseInt(afTec);});
+  const total=rows.length;
+  const pages=Math.max(1,Math.ceil(total/PS));
+  if(CP>pages) CP=pages;
+  const slice=rows.slice((CP-1)*PS,CP*PS);
+  const sinAsignar=all.filter(c=>!ASSIGNMENTS[c.id]).length;
+  const asignados=all.filter(c=>!!ASSIGNMENTS[c.id]).length;
+  const chips=[
+    {key:'all',        lbl:'Todos',       cnt:all.length},
+    {key:'libre',      lbl:'Sin Asignar', cnt:sinAsignar},
+    {key:'pendiente',  lbl:'Pendiente',   cnt:all.filter(c=>getStatus(c)==='pendiente').length},
+    {key:'en_progreso',lbl:'En Progreso', cnt:all.filter(c=>getStatus(c)==='en_progreso').length},
+    {key:'completado', lbl:'Completado',  cnt:all.filter(c=>getStatus(c)==='completado').length},
+    {key:'fallido',    lbl:'Fallido',     cnt:all.filter(c=>getStatus(c)==='fallido').length},
+    {key:'cancelado',  lbl:'Cancelado',   cnt:all.filter(c=>getStatus(c)==='cancelado').length},
+  ];
+  const depts=[...new Set(all.map(c=>c.department).filter(Boolean))].sort();
+  const provs=afDept?[...new Set(all.filter(c=>c.department===afDept).map(c=>c.province).filter(Boolean))].sort():[];
+  const dists=afProv?[...new Set(all.filter(c=>c.province===afProv).map(c=>c.district).filter(Boolean))].sort():[];
+  const hasAF=afDept||afProv||afDist||afTec;
+  document.getElementById('view-asignaciones').innerHTML=`
+  <div class="stats">
+    <div class="sc sv">
+      <div><div class="sc-num">${all.length}</div><div class="sc-lbl">Total Clientes</div><div class="sc-sub">Registrados en el sistema</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    </div>
+    <div class="sc sr">
+      <div><div class="sc-num">${sinAsignar}</div><div class="sc-lbl">Sin Asignar</div><div class="sc-sub">Sin tecnico asignado</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    </div>
+    <div class="sc sg">
+      <div><div class="sc-num">${asignados}</div><div class="sc-lbl">Con Tecnico</div><div class="sc-sub">Con tecnico asignado</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
+        <div><div class="ctit">Asignaciones de Clientes</div><div class="csub">Gestiona el despacho de clientes a tecnicos</div></div>
+      </div>
+      <div class="card-btns">
+        <button class="bp" onclick="openDispatch()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Nueva Asignacion
+        </button>
+        <button class="bs" onclick="openMo('mo-imp')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importar
+        </button>
+      </div>
+    </div>
+    <div style="padding:12px 18px 14px;border-bottom:1px solid var(--bor)">
+      <div class="fchip-row">
+        ${chips.map(f=>`<div class="fchip${asignFilt===f.key?' act':''}" onclick="setAsignFilt('${f.key}')">${f.lbl}<span class="fc-cnt">${f.cnt}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="af-panel">
+      <div>
+        <div class="af-lbl">Departamento</div>
+        <select class="af-sel" onchange="afSetDept(this.value)">
+          <option value="">Todos</option>
+          ${depts.map(d=>`<option value="${d}"${afDept===d?' selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="af-lbl">Provincia</div>
+        <select class="af-sel" onchange="afSetProv(this.value)"${!afDept?' disabled':''}>
+          <option value="">Todas</option>
+          ${provs.map(p=>`<option value="${p}"${afProv===p?' selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="af-lbl">Distrito</div>
+        <select class="af-sel" onchange="afSetDist(this.value)"${!afProv?' disabled':''}>
+          <option value="">Todos</option>
+          ${dists.map(d=>`<option value="${d}"${afDist===d?' selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="af-lbl">Tecnico</div>
+        <select class="af-sel" onchange="afSetTec(this.value)">
+          <option value="">Todos</option>
+          ${TECHNICIANS.map(t=>`<option value="${t.id}"${afTec===String(t.id)?' selected':''}>${t.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="align-self:flex-end">
+        <button class="bs" onclick="afClear()" style="font-size:10px;padding:7px 14px;white-space:nowrap${hasAF?';border-color:var(--p);color:var(--p)':''}">
+          ${hasAF?'<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ':''}Limpiar
+        </button>
+      </div>
+    </div>
+    <div class="srch-wrap">
+      <div class="srch-inner">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar por codigo, direccion, distrito, NAP ..." value="${SQ}" oninput="onSearch(this.value)">
+      </div>
+      <div class="srch-cnt">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        ${total} resultado${total!==1?'s':''}
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" style="border-bottom:1px solid var(--bor)">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div class="ctit">Listado de Clientes</div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      ${slice.length===0
+        ?`<div style="text-align:center;padding:40px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">No se encontraron clientes</div>`
+        :`<table>
+        <thead><tr>
+          <th style="width:120px">Codigo</th>
+          <th>Direccion</th>
+          <th style="width:130px">Distrito</th>
+          <th style="width:140px">NAP</th>
+          <th style="width:140px">Estado</th>
+          <th style="width:180px">Tecnico Asignado</th>
+          <th style="width:90px">Acciones</th>
+        </tr></thead>
+        <tbody>
+          ${slice.map(r=>{
+            const a=getAsign(r);
+            const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
+            return `<tr>
+              <td><span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r.object_id}</span></td>
+              <td class="td-name" style="font-size:11px">${r.address}</td>
+              <td style="font-size:11px;color:var(--t2)">${r.district||'—'}</td>
+              <td>${r.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:7px;padding:2px 9px;font-size:9px;font-weight:800;letter-spacing:.04em">${r.nap_id}</span>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Sin NAP</span>'}</td>
+              <td>${asignBadge(getStatus(r))}</td>
+              <td>${tec
+                ?`<div style="display:flex;align-items:center;gap:7px"><div style="width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${tec.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--t1);font-size:11px">${tec.name}</div><div style="font-size:9px;color:var(--p);letter-spacing:.04em;font-weight:700">${tec.code}</div></div></div>`
+                :'<span style="font-style:italic;font-size:10px;color:var(--t3)">Sin tecnico</span>'}</td>
+              <td style="white-space:nowrap">${[
+                  getStatus(r)==='pendiente'
+                    ?`<button class="act-btn" title="Reasignar / Liberar" onclick="openReassignModal(${r.id})" style="color:#C2410C"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>`
+                    :'',
+                  ['pendiente','en_progreso'].includes(getStatus(r))
+                    ?`<button class="act-btn" title="Cancelar asignacion" onclick="openCancelAsign(${r.id})" style="color:#DC2626"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>`
+                    :'',
+                ].join('')}</td>
+            </tr>`;}).join('')}
+        </tbody></table>`}
+    </div>
+    <div class="pgn">
+      <span class="pg-lbl">Elementos por pagina:</span>
+      <select class="pg-sel" onchange="changePS(this.value)">
+        <option value="10" ${PS===10?'selected':''}>10</option>
+        <option value="15" ${PS===15?'selected':''}>15</option>
+        <option value="25" ${PS===25?'selected':''}>25</option>
+      </select>
+      <span class="pg-inf">${total===0?'0':(CP-1)*PS+1}–${Math.min(CP*PS,total)} de ${total}</span>
+      <button class="pg-btn" onclick="goP(1)"        ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+      <button class="pg-btn" onclick="goP(${CP-1})"  ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="pg-btn" onclick="goP(${CP+1})"  ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="pg-btn" onclick="goP(${pages})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+    </div>
+  </div>`;
+}
+
+/* ─── Filtros tabla principal ─── */
+function setAsignFilt(f){asignFilt=f;CP=1;renderAsignaciones();}
+function afSetDept(v){afDept=v;afProv='';afDist='';CP=1;renderAsignaciones();}
+function afSetProv(v){afProv=v;afDist='';CP=1;renderAsignaciones();}
+function afSetDist(v){afDist=v;CP=1;renderAsignaciones();}
+function afSetTec(v){afTec=v;CP=1;renderAsignaciones();}
+function afClear(){afDept='';afProv='';afDist='';afTec='';SQ='';CP=1;renderAsignaciones();}
+
+/* ════════════════════════════════ DISPATCH MODAL ═══ */
+function openDispatch(preClientId){
+  _dp.tecId=null; _dp.clients=new Set(); _dp.cltQApplied='';
+  _dp.cltDept=''; _dp.cltProv=''; _dp.cltDist=''; _dp.cltPage=1;
+  if(preClientId!=null) _dp.clients.add(preClientId);
+  dpRenderGeoSelects();
+  renderDpCltTable();
+  dpUpdateFooter();
+  openMo('mo-dispatch');
+  const qi=document.getElementById('dp-tec-q');
+  if(qi) qi.value='';
+  const dd=document.getElementById('dp-tec-dropdown');
+  if(dd) dd.style.display='none';
+  const si=document.getElementById('dp-tec-sel-info');
+  if(si) si.style.display='none';
+  const cl=document.getElementById('dp-tec-clear');
+  if(cl) cl.style.display='none';
+  const qi2=document.getElementById('dp-clt-q-input');
+  if(qi2) qi2.value='';
+}
+
+function dpInitials(name){
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+function dpSearchTec(q){
+  const dd=document.getElementById('dp-tec-dropdown');
+  if(!dd) return;
+  const list=TECHNICIANS.filter(t=>!q||
+    t.name.toLowerCase().includes(q.toLowerCase())||
+    t.code.toLowerCase().includes(q.toLowerCase())||
+    t.zone.toLowerCase().includes(q.toLowerCase())
+  );
+  dd.style.display='block';
+  dd.innerHTML=list.length===0
+    ?`<div style="padding:14px;font-size:11px;color:var(--t3);text-align:center;font-style:italic">Sin resultados</div>`
+    :list.map(t=>`<div class="dp-tec-opt${_dp.tecId===t.id?' sel':''}" onmousedown="dpSelectTec(${t.id})">
+      <div class="dp-tec-av${_dp.tecId===t.id?' sel':''}">${dpInitials(t.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="dp-tec-name">${t.name}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+          <span class="dp-tec-code">${t.code}</span>
+          <span class="dp-tec-zone">${t.zone}</span>
+        </div>
+      </div>
+      ${_dp.tecId===t.id?'<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`).join('');
+}
+
+function dpOpenTecDD(){
+  dpSearchTec(document.getElementById('dp-tec-q').value||'');
+}
+
+function dpBlurTecDD(){
+  setTimeout(()=>{const dd=document.getElementById('dp-tec-dropdown');if(dd)dd.style.display='none';},200);
+}
+
+function dpSelectTec(id){
+  _dp.tecId=id;
+  const qi=document.getElementById('dp-tec-q');
+  if(qi) qi.value='';
+  const dd=document.getElementById('dp-tec-dropdown');
+  if(dd) dd.style.display='none';
+  const cl=document.getElementById('dp-tec-clear');
+  if(cl) cl.style.display='inline-flex';
+  renderDpTecSelInfo();
+  dpUpdateFooter();
+}
+
+function renderDpTecSelInfo(){
+  const el=document.getElementById('dp-tec-sel-info');
+  if(!el) return;
+  if(!_dp.tecId){el.style.display='none';return;}
+  const tec=TECHNICIANS.find(t=>t.id===_dp.tecId);
+  el.className='dp-tec-sel';
+  el.style.display='flex';
+  el.innerHTML=`
+    <div class="dp-tec-av sel">${dpInitials(tec.name)}</div>
+    <div style="flex:1;min-width:0">
+      <div class="dp-tec-name">${tec.name}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+        <span class="dp-tec-code">${tec.code}</span>
+        <span class="dp-tec-zone">${tec.zone}</span>
+      </div>
+    </div>
+    <button onclick="dpClearTec()" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;line-height:1;padding:0 4px;font-family:inherit">x</button>`;
+}
+
+function dpClearTec(){
+  _dp.tecId=null;
+  const qi=document.getElementById('dp-tec-q');
+  if(qi){qi.value='';qi.focus();}
+  const cl=document.getElementById('dp-tec-clear');
+  if(cl) cl.style.display='none';
+  const si=document.getElementById('dp-tec-sel-info');
+  if(si) si.style.display='none';
+  dpUpdateFooter();
+}
+
+function dpRenderGeoSelects(){
+  const avail=DB.clientes.rows.filter(c=>isDispatchable(c));
+  const depts=[...new Set(avail.map(c=>c.department).filter(Boolean))].sort();
+  const provs=_dp.cltDept?[...new Set(avail.filter(c=>c.department===_dp.cltDept).map(c=>c.province).filter(Boolean))].sort():[];
+  const dists=_dp.cltProv?[...new Set(avail.filter(c=>c.province===_dp.cltProv).map(c=>c.district).filter(Boolean))].sort():[];
+  const dEl=document.getElementById('dp-f-dept');
+  const pEl=document.getElementById('dp-f-prov');
+  const rEl=document.getElementById('dp-f-dist');
+  if(dEl) dEl.innerHTML='<option value="">Todos</option>'+depts.map(d=>`<option value="${d}"${_dp.cltDept===d?' selected':''}>${d}</option>`).join('');
+  if(pEl){pEl.innerHTML='<option value="">Todas</option>'+provs.map(p=>`<option value="${p}"${_dp.cltProv===p?' selected':''}>${p}</option>`).join('');pEl.disabled=!_dp.cltDept;}
+  if(rEl){rEl.innerHTML='<option value="">Todos</option>'+dists.map(d=>`<option value="${d}"${_dp.cltDist===d?' selected':''}>${d}</option>`).join('');rEl.disabled=!_dp.cltProv;}
+}
+
+function dpSetDept(v){_dp.cltDept=v;_dp.cltProv='';_dp.cltDist='';_dp.cltPage=1;dpRenderGeoSelects();renderDpCltTable();}
+function dpSetProv(v){_dp.cltProv=v;_dp.cltDist='';_dp.cltPage=1;dpRenderGeoSelects();renderDpCltTable();}
+function dpSetDist(v){_dp.cltDist=v;_dp.cltPage=1;renderDpCltTable();}
+
+function dpApplySearch(){
+  _dp.cltQApplied=(document.getElementById('dp-clt-q-input')||{value:''}).value||'';
+  _dp.cltPage=1;
+  renderDpCltTable();
+}
+
+function dpClearFilters(){
+  _dp.cltQApplied='';_dp.cltDept='';_dp.cltProv='';_dp.cltDist='';_dp.cltPage=1;
+  const qi=document.getElementById('dp-clt-q-input');
+  if(qi) qi.value='';
+  dpRenderGeoSelects();
+  renderDpCltTable();
+}
+
+function renderDpCltTable(){
+  const DP_SCALE=1500;
+  const q=_dp.cltQApplied.toLowerCase();
+  let base=DB.clientes.rows.filter(c=>isDispatchable(c));
+  if(q) base=base.filter(c=>c.object_id.toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)||(c.nap_id||'').toLowerCase().includes(q)||(c.district||'').toLowerCase().includes(q));
+  if(_dp.cltDept) base=base.filter(c=>(c.department||'')===_dp.cltDept);
+  if(_dp.cltProv)  base=base.filter(c=>(c.province||'')===_dp.cltProv);
+  if(_dp.cltDist)  base=base.filter(c=>(c.district||'')===_dp.cltDist);
+  // Cycle real rows to simulate 1500-scale for pagination demo
+  const realCount=base.length;
+  const rows_virtual=realCount===0?[]:Array.from({length:DP_SCALE},(_,i)=>({
+    ...base[i%realCount],
+    _vid:i,
+    object_id:'CLT-'+String(i+1).padStart(6,'0'),
+  }));
+  const total=rows_virtual.length;
+  const pages=Math.max(1,Math.ceil(total/_dp.cltPS));
+  if(_dp.cltPage>pages) _dp.cltPage=pages;
+  const slice=rows_virtual.slice((_dp.cltPage-1)*_dp.cltPS,_dp.cltPage*_dp.cltPS);
+  const tbl=document.getElementById('dp-clt-table');
+  const pgn=document.getElementById('dp-clt-pgn');
+  if(!tbl) return;
+  if(total===0){
+    tbl.innerHTML=`<div style="text-align:center;padding:28px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">No hay clientes disponibles con estos filtros</div>`;
+    if(pgn) pgn.innerHTML='';
+  } else {
+    const pageIds=slice.map(c=>c._vid!=null?c._vid:c.id);
+    const allSel=pageIds.length>0&&pageIds.every(vid=>_dp.clients.has(vid));
+    const someSel=pageIds.some(vid=>_dp.clients.has(vid));
+    tbl.innerHTML=`<table>
+      <thead><tr>
+        <th style="width:36px;text-align:center"><input type="checkbox" class="dp-chk" id="dp-chk-all" ${allSel?'checked':''} onchange="dpToggleAll(this.checked,[${pageIds.join(',')}])"></th>
+        <th style="width:110px">Codigo</th>
+        <th>Direccion</th>
+        <th style="width:130px">Distrito</th>
+      </tr></thead>
+      <tbody>
+        ${slice.map(c=>{const vid=c._vid!=null?c._vid:c.id;return `<tr class="${_dp.clients.has(vid)?'dp-row-sel':''}" onclick="dpToggleClientRow(${vid})" style="cursor:pointer">
+          <td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="dp-chk" ${_dp.clients.has(vid)?'checked':''} onchange="dpToggleClientRow(${vid})"></td>
+          <td><span class="dp-code">${c.object_id}</span></td>
+          <td style="font-size:11px">${c.address}</td>
+          <td style="font-size:11px;color:var(--t2)">${c.district||'—'}</td>
+        </tr>`;}).join('')}
+      </tbody></table>`;
+    const allChkEl=document.getElementById('dp-chk-all');
+    if(allChkEl) allChkEl.indeterminate=!allSel&&someSel;
+    if(pgn) pgn.innerHTML=`
+      <span>${(_dp.cltPage-1)*_dp.cltPS+1}–${Math.min(_dp.cltPage*_dp.cltPS,total)} de ${total.toLocaleString()} clientes disponibles</span>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="pg-btn" onclick="dpGoPage(${_dp.cltPage-1})" ${_dp.cltPage===1?'disabled':''}>
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="pg-btn" onclick="dpGoPage(${_dp.cltPage+1})" ${_dp.cltPage===pages?'disabled':''}>
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <span style="color:var(--t3)">Pag. ${_dp.cltPage}/${pages}</span>`;
+  }
+  const badge=document.getElementById('dp-sel-badge');
+  if(badge) badge.textContent=_dp.clients.size>0?`${_dp.clients.size} seleccionado${_dp.clients.size!==1?'s':''}` :'';
+}
+
+function dpGoPage(p){_dp.cltPage=p;renderDpCltTable();}
+
+function dpToggleClientRow(id){
+  _dp.clients.has(id)?_dp.clients.delete(id):_dp.clients.add(id);
+  renderDpCltTable();
+  dpUpdateFooter();
+}
+
+function dpToggleAll(checked,ids){
+  ids.forEach(id=>checked?_dp.clients.add(id):_dp.clients.delete(id));
+  renderDpCltTable();
+  dpUpdateFooter();
+}
+
+function dpUpdateFooter(){
+  const btn=document.getElementById('dp-confirm-btn');
+  if(!btn) return;
+  const n=_dp.clients.size;
+  const hasTec=!!_dp.tecId;
+  const ready=hasTec&&n>0;
+  btn.disabled=!ready;
+  btn.style.opacity=ready?'1':'.45';
+  btn.style.cursor=ready?'pointer':'not-allowed';
+  btn.innerHTML=`<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${ready?`Asignar (${n} cliente${n!==1?'s':''})`: 'Crear Asignacion'}`;
+  const info=document.getElementById('dp-footer-info');
+  if(!info) return;
+  const tec=_dp.tecId?TECHNICIANS.find(t=>t.id===_dp.tecId):null;
+  info.innerHTML=hasTec&&n>0
+    ?`Tecnico: <strong>${tec.name}</strong> &nbsp;·&nbsp; <strong>${n}</strong> cliente${n!==1?'s':''} seleccionado${n!==1?'s':''}`
+    :hasTec?`Tecnico: <strong>${tec.name}</strong> &nbsp;·&nbsp; Selecciona clientes para continuar`
+    :`Selecciona un tecnico y marca clientes para continuar`;
+}
+
+/* ─── Despacho: confirmacion en dos pasos ─── */
+let _dispatchPending=null;
+
+function confirmDispatch(){
+  if(!_dp.tecId){showToast('Selecciona un tecnico','warning');return;}
+  if(_dp.clients.size===0){showToast('Selecciona al menos un cliente','warning');return;}
+  const base=DB.clientes.rows.filter(c=>isDispatchable(c));
+  const realIds=[...new Set([..._dp.clients].map(vid=>{
+    if(base.length===0)return null;
+    return base[vid%base.length].id;
+  }).filter(Boolean))];
+  if(realIds.length===0){showToast('No hay clientes validos para asignar','warning');return;}
+  const tec=TECHNICIANS.find(t=>t.id===_dp.tecId);
+  _dispatchPending={tecId:_dp.tecId,realIds,tecName:tec.name};
+  // Populate confirm modal
+  document.getElementById('mac-sub').textContent=`${realIds.length} cliente${realIds.length!==1?'s':''} a ${tec.name}`;
+  document.getElementById('mac-body').innerHTML=`
+    <div class="mac-row"><span class="lbl">Tecnico</span><span class="val">${tec.name} <span style="color:var(--p);font-size:10px">${tec.code}</span></span></div>
+    <div class="mac-row" style="padding-top:8px;border-top:1px solid var(--bor);margin-top:8px"><span class="lbl">Zona</span><span class="val" style="font-size:11px">${tec.zone}</span></div>
+    <div class="mac-row" style="padding-top:8px;border-top:1px solid var(--bor);margin-top:8px"><span class="lbl">Clientes a asignar</span><span class="val">${realIds.length}</span></div>
+    <div class="mac-row" style="padding-top:8px;border-top:1px solid var(--bor);margin-top:8px"><span class="lbl">Estado resultante</span><span class="asign-stat as-pend" style="font-size:10px">Pendiente</span></div>
+    <div style="margin-top:12px;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:9px 12px;font-size:11px;color:#92400E">
+      <svg style="vertical-align:middle;margin-right:5px" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Esta accion creara las asignaciones y no se puede deshacer automaticamente.
+    </div>`;
+  closeMo('mo-dispatch');
+  openMo('mo-asign-confirm');
+}
+
+function doConfirmDispatch(){
+  if(!_dispatchPending) return;
+  const {tecId,realIds,tecName}=_dispatchPending;
+  _dispatchPending=null;
+  closeMo('mo-asign-confirm');
+  const today=new Date().toISOString().split('T')[0];
+  realIds.forEach(id=>{ASSIGNMENTS[id]={technician_id:tecId,status:'pendiente',assigned_at:today};});
+  showAsignLoading(()=>{
+    renderAsignaciones();
+    showToast(`✓ ${realIds.length} cliente${realIds.length!==1?'s':''} asignado${realIds.length!==1?'s':''} a ${tecName}`,'success');
+  });
+}
+
+function showAsignLoading(cb,ms=800){
+  const v=document.getElementById('view-asignaciones');
+  if(!v){cb();return;}
+  v.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt">Actualizando asignaciones...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
+  setTimeout(cb,ms);
+}
+
+/* ─── Reasignar / Liberar (en_progreso) ─── */
+let _raClientId=null, _raTecId=null;
+
+function openReassignModal(clientId){
+  _raClientId=clientId; _raTecId=null;
+  const c=DB.clientes.rows.find(r=>r.id===clientId);
+  const a=ASSIGNMENTS[clientId];
+  const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
+  document.getElementById('mra-sub').textContent=c.object_id;
+  document.getElementById('mra-client-info').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="background:var(--pb);color:var(--p);border-radius:8px;padding:3px 10px;font-size:10px;font-weight:800;letter-spacing:.04em">${c.object_id}</span>
+        ${asignBadge('en_progreso')}
+      </div>
+      <div style="font-size:11px;color:var(--t1);font-weight:500">${c.address}</div>
+      <div style="font-size:10px;color:var(--t2)">${c.district||''}</div>
+      ${tec?`<div style="display:flex;align-items:center;gap:7px;margin-top:2px">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${tec.name.charAt(0)}</div>
+        <span style="font-size:11px;color:var(--t2)">Tecnico actual: <strong style="color:var(--t1)">${tec.name}</strong></span>
+      </div>`:''}
+    </div>`;
+  // Reset tec selector
+  const qi=document.getElementById('mra-tec-q'); if(qi) qi.value='';
+  const dd=document.getElementById('mra-tec-dropdown'); if(dd) dd.style.display='none';
+  const si=document.getElementById('mra-tec-sel'); if(si) si.style.display='none';
+  const cl=document.getElementById('mra-tec-clear'); if(cl) cl.style.display='none';
+  const btn=document.getElementById('mra-confirm-btn');
+  if(btn){btn.disabled=true;btn.style.opacity='.45';btn.style.cursor='not-allowed';}
+  openMo('mo-reassign');
+}
+
+function mraSearchTec(q){
+  const dd=document.getElementById('mra-tec-dropdown');
+  if(!dd) return;
+  const list=TECHNICIANS.filter(t=>!q||t.name.toLowerCase().includes(q.toLowerCase())||t.code.toLowerCase().includes(q.toLowerCase()));
+  dd.style.display='block';
+  dd.innerHTML=list.length===0
+    ?`<div style="padding:14px;font-size:11px;color:var(--t3);text-align:center;font-style:italic">Sin resultados</div>`
+    :list.map(t=>`<div class="dp-tec-opt${_raTecId===t.id?' sel':''}" onmousedown="mraSelectTec(${t.id})">
+      <div class="dp-tec-av${_raTecId===t.id?' sel':''}">${dpInitials(t.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="dp-tec-name">${t.name}</div>
+        <div style="display:flex;gap:6px;margin-top:2px"><span class="dp-tec-code">${t.code}</span><span class="dp-tec-zone">${t.zone}</span></div>
+      </div>
+      ${_raTecId===t.id?'<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>`).join('');
+}
+
+function mraOpenDD(){mraSearchTec(document.getElementById('mra-tec-q').value||'');}
+function mraBlurDD(){setTimeout(()=>{const d=document.getElementById('mra-tec-dropdown');if(d)d.style.display='none';},200);}
+
+function mraSelectTec(id){
+  _raTecId=id;
+  const tec=TECHNICIANS.find(t=>t.id===id);
+  const qi=document.getElementById('mra-tec-q'); if(qi) qi.value='';
+  const dd=document.getElementById('mra-tec-dropdown'); if(dd) dd.style.display='none';
+  const cl=document.getElementById('mra-tec-clear'); if(cl) cl.style.display='inline-flex';
+  const si=document.getElementById('mra-tec-sel');
+  if(si){
+    si.style.display='flex';
+    si.className='dp-tec-sel';
+    si.innerHTML=`<div class="dp-tec-av sel">${dpInitials(tec.name)}</div>
+      <div style="flex:1;min-width:0"><div class="dp-tec-name">${tec.name}</div>
+      <div style="display:flex;gap:6px;margin-top:2px"><span class="dp-tec-code">${tec.code}</span><span class="dp-tec-zone">${tec.zone}</span></div></div>
+      <button onclick="mraClearTec()" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:20px;line-height:1;padding:0 4px;font-family:inherit">x</button>`;
+  }
+  const btn=document.getElementById('mra-confirm-btn');
+  if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}
+}
+
+function mraClearTec(){
+  _raTecId=null;
+  const qi=document.getElementById('mra-tec-q'); if(qi){qi.value='';qi.focus();}
+  const cl=document.getElementById('mra-tec-clear'); if(cl) cl.style.display='none';
+  const si=document.getElementById('mra-tec-sel'); if(si) si.style.display='none';
+  const btn=document.getElementById('mra-confirm-btn');
+  if(btn){btn.disabled=true;btn.style.opacity='.45';btn.style.cursor='not-allowed';}
+}
+
+function doReassign(){
+  if(!_raTecId||!_raClientId) return;
+  const a=ASSIGNMENTS[_raClientId];
+  ASSIGNMENTS[_raClientId]={...a,technician_id:_raTecId};
+  const tec=TECHNICIANS.find(t=>t.id===_raTecId);
+  closeMo('mo-reassign');
+  showAsignLoading(()=>{
+    renderAsignaciones();
+    showToast(`Reasignado a ${tec.name}`,'success');
+  });
+  _raClientId=null; _raTecId=null;
+}
+
+function confirmLiberar(){
+  if(!_raClientId) return;
+  const id=_raClientId;
+  _raClientId=null; _raTecId=null;
+  delete ASSIGNMENTS[id];
+  closeMo('mo-reassign');
+  showAsignLoading(()=>{
+    renderAsignaciones();
+    showToast('Asignacion liberada correctamente','success');
+  });
+}
+
+/* ════════════════════════════════ CANCELAR ASIGNACION ═══════ */
+let _cancelAsignId=null;
+function openCancelAsign(clientId){
+  _cancelAsignId=clientId;
+  const c=DB.clientes.rows.find(x=>x.id===clientId);
+  const a=ASSIGNMENTS[clientId];
+  const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
+  const info=document.getElementById('mca-client-info');
+  if(info&&c&&a){
+    info.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700;font-size:13px;color:var(--t1)">${c.nombre||c.name||'Cliente #'+clientId}</div>
+          ${asignBadge(a.status)}
+        </div>
+        <div style="font-size:10px;color:var(--t2)">${c.object_id||''}</div>
+        ${tec?`<div style="font-size:10px;color:var(--t2);display:flex;align-items:center;gap:5px">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          ${tec.name} <span style="color:var(--p);font-weight:700">${tec.code}</span>
+        </div>`:''}
+      </div>`;
+  }
+  openMo('mo-cancel-asign');
+}
+function doCancelAsign(){
+  if(!_cancelAsignId)return;
+  const id=_cancelAsignId;
+  _cancelAsignId=null;
+  ASSIGNMENTS[id].status='cancelado';
+  closeMo('mo-cancel-asign');
+  showAsignLoading(()=>{
+    renderAsignaciones();
+    showToast('Asignacion cancelada','warning');
+  });
+}
+
 /* ════════════════════════════════ POSTES: MODAL UNIFICADO ═══ */
 let postMode='new', postTabIdx=0, currentExtOps=[];
 const POST_TABS=4;
@@ -1992,7 +3360,7 @@ function confirmDelPost(){
   showToast('✓ Poste eliminado','danger');
 }
 
-function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else renderView(CV);}
+function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else if(CV==='asignaciones')renderAsignaciones();else renderView(CV);}
 function onSearch(v){SQ=v;CP=1;_refresh();}
 function goP(p){CP=p;_refresh();}
 function changePS(v){PS=parseInt(v);CP=1;_refresh();}
