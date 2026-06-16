@@ -223,6 +223,62 @@
     /* loading overlay (generar) */
     #ld-overlay{position:fixed;inset:0;z-index:100;background:rgba(10,12,20,.45);display:none;align-items:center;justify-content:center}
     #ld-overlay.open{display:flex}
+
+    /* ── POSTES MODAL TABS ── */
+    .mc-post{max-width:720px}
+    .mtabs{display:flex;border-bottom:1px solid var(--bor);padding:0 22px;flex-shrink:0;gap:0;overflow-x:auto}
+    .mtabs::-webkit-scrollbar{display:none}
+    .mtab{padding:13px 18px;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);cursor:pointer;border:none;border-bottom:2.5px solid transparent;background:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0}
+    .mtab:hover{color:var(--t2)}
+    .mtab.act{color:var(--p);border-bottom-color:var(--p)}
+    .mtab-num{width:18px;height:18px;border-radius:50%;background:var(--bor);display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:var(--t3);transition:background .15s,color .15s;flex-shrink:0}
+    .mtab.act .mtab-num{background:var(--p);color:#fff}
+    .mtab.done .mtab-num{background:#22C55E;color:#fff}
+    .tpnl{display:none;padding:22px}
+    .tpnl.act{display:block}
+    .tsec{margin-bottom:22px}
+    .tsec:last-child{margin-bottom:0}
+    .tsec-hdr{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px}
+    .tsec-hdr svg{opacity:.7;flex-shrink:0}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+    .fc1{grid-column:1/-1}
+    .fc2{grid-column:span 2}
+    .req{color:var(--p);font-size:11px;margin-left:1px}
+    .bool-card{border:1.5px solid var(--bor);border-radius:10px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,background .2s}
+    .bool-card.on{background:#F0FDF4;border-color:#86EFAC}
+    .bool-card.off{background:var(--sur)}
+    .bool-card-l .blbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t1)}
+    .bool-card-l .bsub{font-size:9px;color:var(--t3);margin-top:3px;letter-spacing:.04em;line-height:1.4}
+    .coord-box{border:1.5px solid var(--bor);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+    .coord-box:focus-within{border-color:var(--p);box-shadow:0 0 0 3px rgba(123,110,248,.1)}
+    .coord-row{display:flex;align-items:stretch;border-bottom:1px solid var(--bor)}
+    .coord-row:last-child{border-bottom:none}
+    .coord-tag{width:40px;background:var(--pb);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:var(--p);letter-spacing:.05em;flex-shrink:0}
+    .coord-inp{flex:1;border:none;padding:12px 14px;font-size:12px;color:var(--t1);background:transparent;outline:none;font-family:inherit}
+    .coord-inp::placeholder{color:var(--t3)}
+    .map-placeholder{margin-top:14px;border:1.5px dashed var(--bor);border-radius:10px;height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--t3)}
+    .fl textarea{width:100%;border:1px solid var(--bor);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--t1);background:var(--sur);outline:none;font-family:inherit;transition:border-color .15s;resize:vertical;min-height:80px}
+    .fl textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(123,110,248,.1)}
+    .fl textarea::placeholder{color:var(--t3)}
+    .char-count{font-size:9px;color:var(--t3);text-align:right;margin-top:3px;letter-spacing:.04em}
+    .mf-post{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid var(--bor);flex-shrink:0}
+    .tab-dots{display:flex;gap:5px;align-items:center}
+    .tab-dot{width:7px;height:7px;border-radius:50%;background:var(--bor);transition:background .2s,transform .2s}
+    .tab-dot.act{background:var(--p);transform:scale(1.25)}
+    .tab-dot.done{background:#22C55E}
+    body.dark .bool-card.on{background:rgba(34,197,94,.1);border-color:#166534}
+    body.dark .mtab-num{color:var(--t3)}
+
+    /* ── EXTERNAL OPERATORS LIST ── */
+    .extop-empty{text-align:center;padding:24px 16px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);border:1.5px dashed var(--bor);border-radius:10px}
+    .extop-row{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border:1px solid var(--bor);border-radius:9px;margin-bottom:8px;background:var(--sur);transition:border-color .15s}
+    .extop-row:hover{border-color:var(--p)}
+    .extop-info{display:flex;align-items:center;gap:10px}
+    .extop-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t1)}
+    .extop-cnt{background:var(--pb);color:var(--p);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+    .extop-add-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:4px}
+    .extop-add-row .fl{margin-bottom:0;flex:1}
   </style>
 </head>
 <body>
@@ -281,6 +337,20 @@
       <div class="sbsi"><span>+</span> Por zona</div>
     </div>
 
+    <!-- Postes -->
+    <div class="sbg" onclick="toggleG('postes-grp')">
+      <div class="sbg-l">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <path d="M5 6h14M7 10h10M9 14h6"/>
+        </svg>Postes
+      </div>
+      <svg class="chev" id="chev-postes-grp" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="sbs" id="sub-postes-grp">
+      <div class="sbsi" id="nav-postes" onclick="navTo('postes')"><span>+</span> Postes</div>
+    </div>
+
     <!-- Tablas Generales -->
     <div class="sbg" onclick="toggleG('tablas')">
       <div class="sbg-l">
@@ -297,6 +367,7 @@
       <div class="sbsi" id="nav-tension"     onclick="navTo('tension')"    ><span>+</span> Tensión Poste</div>
       <div class="sbsi" id="nav-tipocable"   onclick="navTo('tipocable')"  ><span>+</span> Tipo Cables</div>
       <div class="sbsi" id="nav-condicion"   onclick="navTo('condicion')"  ><span>+</span> Condición Poste</div>
+      <div class="sbsi" id="nav-fabricante"  onclick="navTo('fabricante')" ><span>+</span> Fabricante Poste</div>
     </div>
   </nav>
 </aside>
@@ -468,7 +539,7 @@
     </div>
     <div class="mf">
       <button class="bs" onclick="closeMo('mo-del')">× Cancelar</button>
-      <button class="br" onclick="confirmDel()">
+      <button class="br" onclick="CV==='postes'?confirmDelPost():confirmDel()">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
@@ -476,6 +547,272 @@
         Eliminar
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: POSTE (tabs) ══ -->
+<div class="mo" id="mo-post">
+  <div class="mc mc-post">
+
+    <!-- Header -->
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" id="pm-ico" style="background:#EDE9FE">
+          <svg id="pm-ico-svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="2">
+            <line x1="12" y1="2" x2="12" y2="22"/>
+            <path d="M5 6h14M7 10h10M9 14h6"/>
+          </svg>
+        </div>
+        <div>
+          <div class="mtit" id="pm-title">Nuevo Poste</div>
+          <div class="msub" id="pm-sub">Registra un nuevo poste en el inventario</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-post')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Tab strip -->
+    <div class="mtabs" id="pm-tabs">
+      <button class="mtab act" onclick="switchPostTab(0)">
+        <span class="mtab-num" id="pm-tnum-0">1</span>DATOS DEL POSTE
+      </button>
+      <button class="mtab" onclick="switchPostTab(1)">
+        <span class="mtab-num" id="pm-tnum-1">2</span>UBICACIÓN Y CAMPO
+      </button>
+      <button class="mtab" onclick="switchPostTab(2)">
+        <span class="mtab-num" id="pm-tnum-2">3</span>OPERADORES EXTERNOS
+      </button>
+    </div>
+
+    <!-- Scroll area -->
+    <div style="flex:1;overflow-y:auto">
+
+      <!-- ─── TAB 1: DATOS DEL POSTE ─── -->
+      <div class="tpnl act" id="pm-pnl-0">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Identificación
+          </div>
+          <div class="fg2">
+            <div class="fl">
+              <label>Propietario <span class="req">*</span></label>
+              <select id="pm-prop"></select>
+            </div>
+            <div class="fl">
+              <label>Código del Poste</label>
+              <input type="text" id="pm-codigo" placeholder="EJ. POL-0050" maxlength="20">
+            </div>
+            <div class="fl">
+              <label>Fabricante</label>
+              <select id="pm-manufacturer"></select>
+            </div>
+            <div class="fl">
+              <label>Fecha de Instalación</label>
+              <input type="date" id="pm-install-date">
+            </div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Características Técnicas
+          </div>
+          <div class="fg2">
+            <div class="fl">
+              <label>Material</label>
+              <select id="pm-material"></select>
+            </div>
+            <div class="fl">
+              <label>Tensión</label>
+              <select id="pm-tension"></select>
+            </div>
+            <div class="fl fc1">
+              <label>Tipo de Cable</label>
+              <select id="pm-cable"></select>
+            </div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Dimensiones y Estructura
+          </div>
+          <div class="fg3">
+            <div class="fl">
+              <label>Altura (m)</label>
+              <input type="number" id="pm-height" placeholder="9.00" step="0.50" min="1" max="30">
+            </div>
+            <div class="fl">
+              <label>Carga (kg)</label>
+              <input type="number" id="pm-load" placeholder="500" step="1" min="0">
+            </div>
+            <div class="fl">
+              <label>Profundidad (m)</label>
+              <input type="number" id="pm-depth" placeholder="1.50" step="0.10" min="0">
+            </div>
+            <div class="fl">
+              <label>Puntos de Apoyo</label>
+              <input type="number" id="pm-support" placeholder="0" step="1" min="0" max="20">
+            </div>
+            <div class="bool-card off fc2" id="pm-ret-card" onclick="toggleBoolCard('pm-retainer','pm-ret-card')">
+              <div class="bool-card-l">
+                <div class="blbl">Retenida instalada</div>
+                <div class="bsub">¿El poste tiene cable de retenida?</div>
+              </div>
+              <label class="tgl" onclick="event.stopPropagation()">
+                <input type="checkbox" id="pm-retainer" onchange="syncBoolCard('pm-retainer','pm-ret-card')">
+                <span class="tgl-sl"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Estado del Registro
+          </div>
+          <div class="tw on" id="pm-tw" style="margin-bottom:0">
+            <span class="tw-lbl">Estado del poste</span>
+            <label class="tgl">
+              <input type="checkbox" id="pm-status" checked onchange="updateToggle('pm-tw','pm-status')">
+              <span class="tgl-sl"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── TAB 2: UBICACIÓN Y CAMPO ─── -->
+      <div class="tpnl" id="pm-pnl-1">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 1 8 8c0 5.25-8 13-8 13S4 15.25 4 10a8 8 0 0 1 8-8z"/></svg>
+            Coordenadas GPS <span class="req">*</span>
+          </div>
+          <div class="fl">
+            <label>Latitud / Longitud <span class="req">*</span></label>
+            <div class="coord-box">
+              <div class="coord-row">
+                <div class="coord-tag">LAT</div>
+                <input type="number" class="coord-inp" id="pm-lat" placeholder="-12.0816000" step="0.000001">
+              </div>
+              <div class="coord-row" style="border:none">
+                <div class="coord-tag">LNG</div>
+                <input type="number" class="coord-inp" id="pm-lng" placeholder="-77.0043000" step="0.000001">
+              </div>
+            </div>
+          </div>
+          <div class="map-placeholder">
+            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" opacity=".3"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 1 8 8c0 5.25-8 13-8 13S4 15.25 4 10a8 8 0 0 1 8-8z"/></svg>
+            <span style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)">Vista de mapa — Próximamente</span>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Inspección en Campo
+          </div>
+          <div class="fl">
+            <label>Condición del Poste</label>
+            <select id="pm-condition"></select>
+          </div>
+          <div class="fl">
+            <label>Hallazgos en campo</label>
+            <textarea id="pm-findings" placeholder="Descripción de los hallazgos durante la visita de campo..." rows="3" oninput="updateCharCount('pm-findings','pm-fc-1',500)"></textarea>
+            <div class="char-count" id="pm-fc-1">0 / 500</div>
+          </div>
+          <div class="fl">
+            <label>Observaciones adicionales</label>
+            <textarea id="pm-obs" placeholder="Observaciones adicionales relevantes para el registro..." rows="3" oninput="updateCharCount('pm-obs','pm-fc-2',500)"></textarea>
+            <div class="char-count" id="pm-fc-2">0 / 500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── TAB 3: OPERADORES EXTERNOS ─── -->
+      <div class="tpnl" id="pm-pnl-2">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Infraestructura Compartida
+          </div>
+          <div class="bool-card off" id="pm-extop-card" style="margin-bottom:0" onclick="toggleBoolCard('pm-extop','pm-extop-card');toggleExtOpSection()">
+            <div class="bool-card-l">
+              <div class="blbl">Cables de otros operadores</div>
+              <div class="bsub">¿Este poste tiene infraestructura de otro operador instalada?</div>
+            </div>
+            <label class="tgl" onclick="event.stopPropagation()">
+              <input type="checkbox" id="pm-extop" onchange="syncBoolCard('pm-extop','pm-extop-card');toggleExtOpSection()">
+              <span class="tgl-sl"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Sección visible sólo si toggle ON -->
+        <div id="pm-extop-section" style="display:none">
+          <div class="tsec">
+            <div class="tsec-hdr">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar Operador
+            </div>
+            <div class="extop-add-row">
+              <div class="fl">
+                <label>Operador</label>
+                <select id="pm-extop-sel"></select>
+              </div>
+              <div class="fl" style="max-width:130px">
+                <label>Cant. de Cables</label>
+                <input type="number" id="pm-extop-count" placeholder="1" min="1" max="99" value="1">
+              </div>
+              <button class="bp" onclick="addExtOp()" style="height:36px;padding:0 14px;white-space:nowrap;flex-shrink:0;margin-bottom:0;align-self:flex-end">
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar
+              </button>
+            </div>
+          </div>
+          <div class="tsec">
+            <div class="tsec-hdr">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Operadores Registrados
+              <span id="pm-extop-count-badge" style="margin-left:auto;background:var(--pb);color:var(--p);border-radius:20px;padding:2px 10px;font-size:9px;font-weight:900">0</span>
+            </div>
+            <div id="pm-extop-list">
+              <div class="extop-empty">Sin operadores externos agregados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /scroll -->
+
+    <!-- Footer navigation -->
+    <div class="mf-post">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="bs" id="pm-prev" onclick="postTabNav(-1)" style="display:none;align-items:center;gap:6px">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <div class="tab-dots">
+          <div class="tab-dot act" id="pm-dot-0"></div>
+          <div class="tab-dot" id="pm-dot-1"></div>
+          <div class="tab-dot" id="pm-dot-2"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="bs" onclick="closeMo('mo-post')">× Cancelar</button>
+        <button class="bs" id="pm-next" onclick="postTabNav(1)" style="display:inline-flex;align-items:center;gap:6px">
+          Siguiente
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="bp" id="pm-save" style="display:none" onclick="savePost()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="pm-save-lbl">Registrar</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -677,6 +1014,56 @@ const DB = {
       {id:8,name:'RETIRADO — Dado de baja definitiva',                   status:false},
       {id:9,name:'SINIESTRADO — Daño por accidente o fenómeno natural',  status:false},
     ]
+  },
+  fabricante:{
+    plural:'Fabricantes de Poste',col:'Fabricante',
+    tblTitle:'TABLA DE FABRICANTES DE POSTE',tblSub:'GESTIONA LOS FABRICANTES DE POSTES DEL INVENTARIO',
+    listTitle:'LISTA DE FABRICANTES DE POSTE',
+    totLbl:'TOTAL FABRICANTES',totSub:'REGISTRADOS EN EL SISTEMA',
+    actLbl:'FABRICANTES ACTIVOS',actSub:'CON ESTADO HABILITADO',
+    inaLbl:'FABRICANTES INACTIVOS',inaSub:'CON ESTADO DESHABILITADO',
+    rows:[
+      {id:1,name:'POSTES DEL SUR S.A.',          status:true},
+      {id:2,name:'CONCRETO ANDINO S.A.C.',        status:true},
+      {id:3,name:'POSTES AREQUIPA E.I.R.L.',      status:true},
+      {id:4,name:'METALPER S.A.C.',               status:true},
+      {id:5,name:'POSTES NORTE S.A.',             status:true},
+      {id:6,name:'TUBOS Y PERFILES S.A.',         status:true},
+      {id:7,name:'FIBRAFORTE S.A.',               status:true},
+      {id:8,name:'POSTES LIMA S.A.C.',            status:false},
+      {id:9,name:'CEMENTO ANDINO POSTES',         status:true},
+      {id:10,name:'INELSA ESTRUCTURAS S.A.',      status:false},
+    ]
+  },
+  postes:{
+    plural:'Postes',
+    tblTitle:'TABLA DE POSTES',tblSub:'GESTIONA EL INVENTARIO DE POSTES DE LA RED',
+    listTitle:'LISTA DE POSTES',
+    totLbl:'TOTAL POSTES',totSub:'REGISTRADOS EN EL SISTEMA',
+    actLbl:'POSTES ACTIVOS',actSub:'OPERATIVOS EN CAMPO',
+    inaLbl:'POSTES INACTIVOS',inaSub:'DADOS DE BAJA O EN MANTENIMIENTO',
+    rows:[
+      {id:1, codigo:'POL-0001',propietario:'CLARO',        manufacturer:'CONCRETO ANDINO S.A.C.',  installation_date:'2018-03-15',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'BUENO',           tipocable:'FIBRA ÓPTICA MONOMODO (SM)',        height:9.0, load:500,  depth:1.6, support_points:2, has_retainer:false, lat:-12.1011,lng:-77.0398, external_operators:[{operator:'MOVISTAR',cable_count:2}], findings:'Poste en buen estado. Se detectó oxidación leve en abrazaderas.', observations:null, status:true},
+      {id:2, codigo:'POL-0002',propietario:'MOVISTAR',     manufacturer:'POSTES DEL SUR S.A.',     installation_date:'2021-07-20',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'EXCELENTE',       tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',   height:8.5, load:420,  depth:1.4, support_points:1, has_retainer:false, lat:-12.0833,lng:-77.0353, external_operators:[], findings:null, observations:'Instalación reciente 2021, sin observaciones.', status:true},
+      {id:3, codigo:'POL-0003',propietario:'EDELNOR',      manufacturer:'METALPER S.A.C.',         installation_date:'2015-11-08',material:'CONCRETO PRETENSADO', tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)', condicion:'REGULAR',         tipocable:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',height:11.0,load:800,  depth:2.0, support_points:3, has_retainer:true,  lat:-12.0526,lng:-77.0287, external_operators:[], findings:'Grietas superficiales en la base. Requiere supervisión próxima.', observations:'Programar inspección en 6 meses.', status:true},
+      {id:4, codigo:'POL-0004',propietario:'LUZ DEL SUR', manufacturer:'POSTES NORTE S.A.',       installation_date:'2017-05-12',material:'CONCRETO ARMADO',     tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)', condicion:'BUENO',           tipocable:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',height:10.0,load:750,  depth:1.8, support_points:2, has_retainer:true,  lat:-12.1081,lng:-77.0147, external_operators:[{operator:'CLARO',cable_count:3},{operator:'ENTEL',cable_count:1}], findings:null, observations:null, status:true},
+      {id:5, codigo:'POL-0005',propietario:'CLARO',        manufacturer:null,                      installation_date:'2010-02-28',material:'MADERA TRATADA',      tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'DETERIORADO',     tipocable:'CABLE COAXIAL RG-6',                height:8.0, load:300,  depth:1.2, support_points:1, has_retainer:false, lat:-12.0568,lng:-77.0297, external_operators:[], findings:'Podrición en la base. Madera con hongos visibles. Riesgo medio.', observations:'Candidato para reemplazo en próxima campaña.', status:true},
+      {id:6, codigo:'POL-0006',propietario:'ENTEL',        manufacturer:'FIBRAFORTE S.A.',         installation_date:'2022-01-10',material:'ACERO GALVANIZADO',   tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'EXCELENTE',       tipocable:'FIBRA ÓPTICA MONOMODO (SM)',        height:9.5, load:460,  depth:1.5, support_points:0, has_retainer:false, lat:-12.0778,lng:-77.0925, external_operators:[], findings:null, observations:'Instalación nueva 2022.', status:true},
+      {id:7, codigo:'POL-0007',propietario:'WIN',          manufacturer:'CONCRETO ANDINO S.A.C.',  installation_date:'2019-09-03',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'BUENO',           tipocable:'CABLE UTP CAT 6',                   height:8.5, load:380,  depth:1.4, support_points:1, has_retainer:false, lat:-12.0765,lng:-77.0911, external_operators:[{operator:'CLARO',cable_count:2}], findings:null, observations:null, status:true},
+      {id:8, codigo:'POL-0008',propietario:'MUNICIPAL',    manufacturer:null,                      installation_date:'2008-06-17',material:'MADERA TRATADA',      tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'MALO',            tipocable:'CABLE ELÉCTRICO BAJA TENSIÓN (BT)', height:7.5, load:280,  depth:1.1, support_points:1, has_retainer:true,  lat:-12.0493,lng:-77.0298, external_operators:[], findings:'Poste inclinado ~5°. Madera muy deteriorada en tercio inferior. Riesgo alto de caída.', observations:'Intervención urgente recomendada.', status:true},
+      {id:9, codigo:'POL-0009',propietario:'CLARO',        manufacturer:'POSTES DEL SUR S.A.',     installation_date:'2016-04-22',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'REGULAR',         tipocable:'FIBRA ÓPTICA MONOMODO (SM)',        height:9.0, load:500,  depth:1.6, support_points:2, has_retainer:false, lat:-12.0654,lng:-77.0484, external_operators:[{operator:'WIN',cable_count:1}], findings:'Fisuras menores en tercio superior. Pintura deteriorada.', observations:null, status:true},
+      {id:10,codigo:'POL-0010',propietario:'MOVISTAR',     manufacturer:'FIBRAFORTE S.A.',         installation_date:'2023-02-05',material:'FIBRA DE VIDRIO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'EXCELENTE',       tipocable:'CABLE DROP ÓPTICO DIELÉCTRICO',     height:9.0, load:350,  depth:1.5, support_points:0, has_retainer:false, lat:-12.0820,lng:-77.0539, external_operators:[], findings:null, observations:'Material compuesto, sin corrosión posible.', status:true},
+      {id:11,codigo:'POL-0011',propietario:'EDELNOR',      manufacturer:'METALPER S.A.C.',         installation_date:'2014-08-30',material:'CONCRETO PRETENSADO', tension:'ALTA TENSIÓN — AT (> 60 kV)',        condicion:'BUENO',           tipocable:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',height:14.0,load:1200, depth:2.4, support_points:4, has_retainer:true,  lat:-12.0625,lng:-77.1366, external_operators:[], findings:'Poste de alta tensión en buen estado. Señalización visible.', observations:'Zona industrial. Acceso restringido.', status:true},
+      {id:12,codigo:'POL-0012',propietario:'CLARO',        manufacturer:'CONCRETO ANDINO S.A.C.',  installation_date:'2007-12-01',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'CRÍTICO',         tipocable:'CABLE COAXIAL RG-11',               height:8.0, load:500,  depth:1.6, support_points:1, has_retainer:false, lat:-12.0517,lng:-77.0294, external_operators:[], findings:'Rotura parcial a 2m de la base. Refuerzo provisional con alambre. Riesgo de colapso inminente.', observations:'RETIRAR DE SERVICIO INMEDIATAMENTE.', status:false},
+      {id:13,codigo:'POL-0013',propietario:'LUZ DEL SUR', manufacturer:'TUBOS Y PERFILES S.A.',   installation_date:'2018-10-14',material:'ACERO GALVANIZADO',   tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)', condicion:'BUENO',           tipocable:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',height:12.0,load:900,  depth:2.0, support_points:3, has_retainer:true,  lat:-12.1219,lng:-77.0326, external_operators:[], findings:null, observations:null, status:true},
+      {id:14,codigo:'POL-0014',propietario:'WIN',          manufacturer:'POSTES DEL SUR S.A.',     installation_date:'2017-03-19',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'REGULAR',         tipocable:'CABLE UTP CAT 5E',                  height:8.5, load:380,  depth:1.4, support_points:1, has_retainer:false, lat:-12.1008,lng:-77.0017, external_operators:[{operator:'ENTEL',cable_count:2}], findings:'Manchas de humedad en tercio inferior.', observations:null, status:true},
+      {id:15,codigo:'POL-0015',propietario:'ENTEL',        manufacturer:'CEMENTO ANDINO POSTES',   installation_date:'2020-06-08',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'BUENO',           tipocable:'FIBRA ÓPTICA MONOMODO (SM)',        height:9.0, load:500,  depth:1.6, support_points:2, has_retainer:false, lat:-12.1256,lng:-77.0292, external_operators:[], findings:null, observations:null, status:true},
+      {id:16,codigo:'POL-0016',propietario:'CLARO',        manufacturer:null,                      installation_date:'2009-01-25',material:'MADERA TRATADA',      tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'DETERIORADO',     tipocable:'CABLE COAXIAL RG-6',                height:7.0, load:280,  depth:1.1, support_points:1, has_retainer:true,  lat:-12.0503,lng:-77.0301, external_operators:[], findings:'Grietas longitudinales. Tratamiento antifúngico vencido.', observations:'Programar reemplazo Q1 siguiente año.', status:false},
+      {id:17,codigo:'POL-0017',propietario:'MOVISTAR',     manufacturer:'POSTES AREQUIPA E.I.R.L.',installation_date:'2022-09-11',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'EXCELENTE',       tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',   height:9.0, load:500,  depth:1.6, support_points:0, has_retainer:false, lat:-12.1271,lng:-77.0310, external_operators:[], findings:null, observations:'Instalación 2022. Sin observaciones.', status:true},
+      {id:18,codigo:'POL-0018',propietario:'MUNICIPAL',    manufacturer:'CONCRETO ANDINO S.A.C.',  installation_date:'2013-05-30',material:'CONCRETO ARMADO',     tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'EN MANTENIMIENTO',tipocable:'CABLE ELÉCTRICO BAJA TENSIÓN (BT)', height:9.0, load:500,  depth:1.6, support_points:2, has_retainer:true,  lat:-12.0544,lng:-77.0280, external_operators:[], findings:'Intervención en curso. Reemplazo de luminaria y pintura.', observations:'Se espera conclusión en 5 días hábiles.', status:false},
+      {id:19,codigo:'POL-0019',propietario:'EDELNOR',      manufacturer:'METALPER S.A.C.',         installation_date:'2016-11-17',material:'CONCRETO PRETENSADO', tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)', condicion:'BUENO',           tipocable:'CABLE ELÉCTRICO MEDIA TENSIÓN (MT)',height:11.0,load:800,  depth:2.0, support_points:3, has_retainer:false, lat:-11.9297,lng:-77.0517, external_operators:[], findings:null, observations:null, status:true},
+      {id:20,codigo:'POL-0020',propietario:'CLARO',        manufacturer:'TUBOS Y PERFILES S.A.',   installation_date:'2019-07-04',material:'ACERO GALVANIZADO',   tension:'BAJA TENSIÓN — BT (< 1 kV)',        condicion:'BUENO',           tipocable:'FIBRA ÓPTICA MONOMODO (SM)',        height:10.0,load:600,  depth:1.7, support_points:2, has_retainer:false, lat:-11.9919,lng:-77.0020, external_operators:[{operator:'WIN',cable_count:2},{operator:'MOVISTAR',cable_count:1}], findings:null, observations:null, status:true},
+    ]
   }
 };
 
@@ -697,15 +1084,15 @@ function navTo(v){
   if(!DB[v]) return;
   CT=v; CV=v; SQ=''; CP=1;
   const d=DB[v];
-  setBC(['Tablas Generales', d.plural]);
-  // loading
+  const bcSection=v==='postes'?'Postes':'Tablas Generales';
+
+  setBC([bcSection, d.plural]);
   let vEl=document.getElementById('view-'+v);
   if(!vEl){vEl=document.createElement('div');vEl.id='view-'+v;vEl.className='view';document.getElementById('cnt').appendChild(vEl);}
-  // hide all views
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
   vEl.classList.add('act');
   vEl.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt" id="ld-msg">Obteniendo información...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
-  setTimeout(()=>renderView(v),950);
+  setTimeout(()=>v==='postes'?renderPostes():renderView(v),950);
 }
 
 function toggleG(k){
@@ -908,15 +1295,406 @@ function filteredRows(rows){
   return sorted.filter(r=>r.name.toLowerCase().includes(q));
 }
 
-function onSearch(v){SQ=v;CP=1;renderView(CV);}
-function goP(p){CP=p;renderView(CV);}
-function changePS(v){PS=parseInt(v);CP=1;renderView(CV);}
+/* ════════════════════════════════ RENDER POSTES ═══ */
+const COND_COLOR={
+  'EXCELENTE':    {bg:'#DCFCE7',c:'#15803D'},
+  'BUENO':        {bg:'#D1FAE5',c:'#065F46'},
+  'REGULAR':      {bg:'#FEF9C3',c:'#A16207'},
+  'DETERIORADO':  {bg:'#FFEDD5',c:'#C2410C'},
+  'MALO':         {bg:'#FEE2E2',c:'#B91C1C'},
+  'CRÍTICO':      {bg:'#FEE2E2',c:'#991B1B'},
+  'EN MANTENIMIENTO':{bg:'#EDE9FE',c:'#6D28D9'},
+  'RETIRADO':     {bg:'#F3F4F6',c:'#6B7280'},
+  'SINIESTRADO':  {bg:'#FEE2E2',c:'#9F1239'},
+};
+function condBadge(cond){
+  const s=COND_COLOR[cond]||{bg:'#F3F4F6',c:'#6B7280'};
+  return `<span style="display:inline-flex;align-items:center;gap:5px;background:${s.bg};color:${s.c};border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap">${cond}</span>`;
+}
+
+function filteredPostes(){
+  const sorted=[...DB.postes.rows].sort((a,b)=>a.id-b.id);
+  if(!SQ) return sorted;
+  const q=SQ.toLowerCase();
+  return sorted.filter(r=>
+    r.codigo.toLowerCase().includes(q)||
+    r.propietario.toLowerCase().includes(q)||
+    r.material.toLowerCase().includes(q)||
+    r.condicion.toLowerCase().includes(q)||
+    r.direccion.toLowerCase().includes(q)
+  );
+}
+
+function renderPostes(){
+  const d=DB.postes;
+  const rows=filteredPostes();
+  const total=rows.length;
+  const activos=d.rows.filter(r=>r.status).length;
+  const inactivos=d.rows.filter(r=>!r.status).length;
+  const pages=Math.max(1,Math.ceil(total/PS));
+  if(CP>pages) CP=pages;
+  const slice=rows.slice((CP-1)*PS,CP*PS);
+
+  document.getElementById('view-postes').innerHTML=`
+  <!-- Stats -->
+  <div class="stats">
+    <div class="sc sv">
+      <div><div class="sc-num">${d.rows.length}</div><div class="sc-lbl">${d.totLbl}</div><div class="sc-sub">${d.totSub}</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="2" x2="12" y2="22"/><path d="M5 6h14M7 10h10M9 14h6"/></svg></div>
+    </div>
+    <div class="sc sg">
+      <div><div class="sc-num">${activos}</div><div class="sc-lbl">${d.actLbl}</div><div class="sc-sub">${d.actSub}</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    </div>
+    <div class="sc sr">
+      <div><div class="sc-num">${inactivos}</div><div class="sc-lbl">${d.inaLbl}</div><div class="sc-sub">${d.inaSub}</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><line x1="12" y1="2" x2="12" y2="22"/><path d="M5 6h14M7 10h10M9 14h6"/></svg></div>
+        <div><div class="ctit">${d.tblTitle}</div><div class="csub">${d.tblSub}</div></div>
+      </div>
+      <div class="card-btns">
+        <button class="bp" onclick="doGenerar()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Generar
+        </button>
+        <button class="bp" onclick="openNewPost()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo
+        </button>
+        <button class="bp" onclick="openMo('mo-imp')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importar
+        </button>
+      </div>
+    </div>
+    <div class="srch-wrap">
+      <div class="srch-inner">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar por código, propietario, condición ..." value="${SQ}" oninput="onSearch(this.value)">
+      </div>
+      <div class="srch-cnt">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        ${total} resultado${total!==1?'s':''}
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-hdr" style="border-bottom:1px solid var(--bor)">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div class="ctit">${d.listTitle}</div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      ${slice.length===0?`<div style="text-align:center;padding:40px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">No se encontraron registros</div>`:`
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">ID</th>
+            <th style="width:110px">Código</th>
+            <th>Propietario</th>
+            <th>Material</th>
+            <th style="width:150px">Condición</th>
+            <th style="width:80px">Altura</th>
+            <th style="width:70px">Año</th>
+            <th style="width:120px">Estado</th>
+            <th style="width:90px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${slice.map(r=>`
+          <tr>
+            <td class="td-id">${r.id}</td>
+            <td><span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r.codigo}</span></td>
+            <td class="td-name">${r.propietario}</td>
+            <td style="font-size:11px;color:var(--t2)">${r.material}</td>
+            <td>${condBadge(r.condicion)}</td>
+            <td style="font-size:12px;color:var(--t2);font-weight:600">${r.altura} m</td>
+            <td style="font-size:12px;color:var(--t2)">${r.anio}</td>
+            <td>${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}</td>
+            <td>
+              <div style="display:flex;gap:3px">
+                <button class="act-btn ed" title="Editar" onclick="openEditPost(${r.id})">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="act-btn dl" title="Eliminar" onclick="openDelPost(${r.id})">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`}
+    </div>
+    <div class="pgn">
+      <span class="pg-lbl">Elementos por página:</span>
+      <select class="pg-sel" onchange="changePS(this.value)">
+        <option value="10" ${PS===10?'selected':''}>10</option>
+        <option value="15" ${PS===15?'selected':''}>15</option>
+        <option value="25" ${PS===25?'selected':''}>25</option>
+      </select>
+      <span class="pg-inf">${total===0?'0':(CP-1)*PS+1}–${Math.min(CP*PS,total)} de ${total}</span>
+      <button class="pg-btn" onclick="goP(1)"       ${CP===1?'disabled':''}>
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+      </button>
+      <button class="pg-btn" onclick="goP(${CP-1})" ${CP===1?'disabled':''}>
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="pg-btn" onclick="goP(${CP+1})" ${CP===pages?'disabled':''}>
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="pg-btn" onclick="goP(${pages})" ${CP===pages?'disabled':''}>
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════ POSTES: MODAL UNIFICADO ═══ */
+let postMode='new', postTabIdx=0, currentExtOps=[];
+const POST_TABS=3;
+
+function switchPostTab(idx){
+  postTabIdx=idx;
+  document.querySelectorAll('#pm-tabs .mtab').forEach((t,i)=>t.classList.toggle('act',i===idx));
+  document.querySelectorAll('.tpnl').forEach((p,i)=>p.classList.toggle('act',i===idx));
+  for(let i=0;i<POST_TABS;i++){
+    const d=document.getElementById('pm-dot-'+i);
+    d.classList.toggle('act',i===idx);
+    d.classList.toggle('done',i<idx);
+  }
+  const isFirst=idx===0, isLast=idx===POST_TABS-1;
+  document.getElementById('pm-prev').style.display=isFirst?'none':'inline-flex';
+  document.getElementById('pm-next').style.display=isLast?'none':'inline-flex';
+  document.getElementById('pm-save').style.display=isLast?'inline-flex':'none';
+}
+
+function postTabNav(dir){
+  const next=postTabIdx+dir;
+  if(next<0||next>=POST_TABS) return;
+  if(dir>0 && postTabIdx===0 && !document.getElementById('pm-prop').value){
+    showToast('⚠ El propietario es requerido','warning'); return;
+  }
+  if(dir>0 && postTabIdx===1){
+    const lat=document.getElementById('pm-lat').value;
+    const lng=document.getElementById('pm-lng').value;
+    if(!lat||!lng){showToast('⚠ Las coordenadas GPS son requeridas','warning'); return;}
+  }
+  switchPostTab(next);
+}
+
+function toggleBoolCard(chkId,cardId){
+  const chk=document.getElementById(chkId); chk.checked=!chk.checked;
+  syncBoolCard(chkId,cardId);
+}
+function syncBoolCard(chkId,cardId){
+  const on=document.getElementById(chkId).checked;
+  document.getElementById(cardId).classList.toggle('on',on);
+  document.getElementById(cardId).classList.toggle('off',!on);
+}
+function updateCharCount(taId,cntId,max){
+  document.getElementById(cntId).textContent=`${document.getElementById(taId).value.length} / ${max}`;
+}
+function toggleExtOpSection(){
+  const on=document.getElementById('pm-extop').checked;
+  document.getElementById('pm-extop-section').style.display=on?'block':'none';
+}
+
+function pmFillSel(selId,rows,cur=''){
+  const sel=document.getElementById(selId);
+  if(!sel) return;
+  sel.innerHTML=`<option value="">— Sin especificar —</option>`+
+    rows.filter(r=>r.status).map(r=>`<option value="${r.name}" ${r.name===cur?'selected':''}>${r.name}</option>`).join('');
+}
+
+/* ─── External Operators ─── */
+function addExtOp(){
+  const op=document.getElementById('pm-extop-sel').value;
+  if(!op){showToast('⚠ Selecciona un operador','warning');return;}
+  if(currentExtOps.find(x=>x.operator===op)){showToast('⚠ Ese operador ya fue agregado','warning');return;}
+  const cnt=parseInt(document.getElementById('pm-extop-count').value)||1;
+  currentExtOps.push({operator:op, cable_count:cnt});
+  renderExtOpList();
+  document.getElementById('pm-extop-sel').value='';
+  document.getElementById('pm-extop-count').value='1';
+}
+
+function removeExtOp(idx){
+  currentExtOps.splice(idx,1);
+  renderExtOpList();
+}
+
+function renderExtOpList(){
+  const el=document.getElementById('pm-extop-list');
+  const badge=document.getElementById('pm-extop-count-badge');
+  if(badge) badge.textContent=currentExtOps.length;
+  if(!currentExtOps.length){
+    el.innerHTML='<div class="extop-empty">Sin operadores externos agregados</div>';
+    return;
+  }
+  el.innerHTML=currentExtOps.map((op,i)=>`
+    <div class="extop-row">
+      <div class="extop-info">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span class="extop-name">${op.operator}</span>
+        <span class="extop-cnt">${op.cable_count} cable${op.cable_count!==1?'s':''}</span>
+      </div>
+      <button class="act-btn dl" title="Quitar" onclick="removeExtOp(${i})">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+/* ─── Open / Save ─── */
+function openNewPost(){openPostModal('new');}
+function openEditPost(id){openPostModal('edit',id);}
+
+function openPostModal(mode,id=null){
+  postMode=mode; editId=id;
+  switchPostTab(0);
+  pmFillSel('pm-prop',      DB.propietario.rows);
+  pmFillSel('pm-manufacturer',DB.fabricante.rows);
+  pmFillSel('pm-material',  DB.material.rows);
+  pmFillSel('pm-tension',   DB.tension.rows);
+  pmFillSel('pm-cable',     DB.tipocable.rows);
+  pmFillSel('pm-condition', DB.condicion.rows);
+  // fill extop select (exclude current record's owner)
+  const extOpRows=DB.propietario.rows.filter(r=>r.status);
+  document.getElementById('pm-extop-sel').innerHTML=
+    `<option value="">— Selecciona operador —</option>`+
+    extOpRows.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+
+  if(mode==='new'){
+    document.getElementById('pm-title').textContent='Nuevo Poste';
+    document.getElementById('pm-sub').textContent='Registra un nuevo poste en el inventario';
+    document.getElementById('pm-ico').style.background='#EDE9FE';
+    document.getElementById('pm-ico-svg').setAttribute('stroke','#7B6EF8');
+    document.getElementById('pm-save-lbl').textContent='Registrar';
+    ['pm-codigo','pm-height','pm-load','pm-depth','pm-support','pm-lat','pm-lng','pm-install-date'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+    ['pm-findings','pm-obs'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('pm-status').checked=true;
+    document.getElementById('pm-extop').checked=false;
+    document.getElementById('pm-retainer').checked=false;
+    currentExtOps=[];
+  } else {
+    const r=DB.postes.rows.find(x=>x.id===id);
+    document.getElementById('pm-title').textContent=`Editar Poste ${r.codigo||'#'+r.id}`;
+    document.getElementById('pm-sub').textContent='Actualiza los datos del poste';
+    document.getElementById('pm-ico').style.background='#FFF7ED';
+    document.getElementById('pm-ico-svg').setAttribute('stroke','#F97316');
+    document.getElementById('pm-save-lbl').textContent='Actualizar';
+    pmFillSel('pm-prop',      DB.propietario.rows, r.propietario||'');
+    pmFillSel('pm-manufacturer',DB.fabricante.rows,r.manufacturer||'');
+    pmFillSel('pm-material',  DB.material.rows,    r.material||'');
+    pmFillSel('pm-tension',   DB.tension.rows,     r.tension||'');
+    pmFillSel('pm-cable',     DB.tipocable.rows,   r.tipocable||'');
+    pmFillSel('pm-condition', DB.condicion.rows,   r.condicion||'');
+    document.getElementById('pm-codigo').value        = r.codigo||'';
+    document.getElementById('pm-install-date').value  = r.installation_date||'';
+    document.getElementById('pm-height').value        = r.height??'';
+    document.getElementById('pm-load').value          = r.load??'';
+    document.getElementById('pm-depth').value         = r.depth??'';
+    document.getElementById('pm-support').value       = r.support_points??'';
+    document.getElementById('pm-lat').value           = r.lat??'';
+    document.getElementById('pm-lng').value           = r.lng??'';
+    document.getElementById('pm-findings').value      = r.findings??'';
+    document.getElementById('pm-obs').value           = r.observations??'';
+    document.getElementById('pm-status').checked      = r.status;
+    document.getElementById('pm-extop').checked       = (r.external_operators||[]).length>0;
+    document.getElementById('pm-retainer').checked    = !!r.has_retainer;
+    currentExtOps=[...(r.external_operators||[])];
+    updateCharCount('pm-findings','pm-fc-1',500);
+    updateCharCount('pm-obs','pm-fc-2',500);
+  }
+  updateToggle('pm-tw','pm-status');
+  syncBoolCard('pm-extop','pm-extop-card');
+  syncBoolCard('pm-retainer','pm-ret-card');
+  toggleExtOpSection();
+  renderExtOpList();
+  openMo('mo-post');
+  setTimeout(()=>document.getElementById('pm-prop').focus(),100);
+}
+
+function savePost(){
+  const prop=document.getElementById('pm-prop').value;
+  if(!prop){switchPostTab(0);showToast('⚠ El propietario es requerido','warning');return;}
+  const lat=parseFloat(document.getElementById('pm-lat').value);
+  const lng=parseFloat(document.getElementById('pm-lng').value);
+  if(isNaN(lat)||isNaN(lng)){switchPostTab(1);showToast('⚠ Las coordenadas GPS son requeridas','warning');return;}
+
+  const extEnabled=document.getElementById('pm-extop').checked;
+  const data={
+    codigo:          document.getElementById('pm-codigo').value.trim().toUpperCase()||null,
+    propietario:     prop,
+    manufacturer:    document.getElementById('pm-manufacturer').value||null,
+    installation_date:document.getElementById('pm-install-date').value||null,
+    material:        document.getElementById('pm-material').value||null,
+    tension:         document.getElementById('pm-tension').value||null,
+    tipocable:       document.getElementById('pm-cable').value||null,
+    condicion:       document.getElementById('pm-condition').value||null,
+    height:          parseFloat(document.getElementById('pm-height').value)||null,
+    altura:          parseFloat(document.getElementById('pm-height').value)||null,
+    load:            parseFloat(document.getElementById('pm-load').value)||null,
+    depth:           parseFloat(document.getElementById('pm-depth').value)||null,
+    support_points:  parseInt(document.getElementById('pm-support').value)||null,
+    has_retainer:    document.getElementById('pm-retainer').checked,
+    lat, lng,
+    external_operators: extEnabled ? [...currentExtOps] : [],
+    findings:    document.getElementById('pm-findings').value.trim()||null,
+    observations:document.getElementById('pm-obs').value.trim()||null,
+    status:      document.getElementById('pm-status').checked,
+  };
+
+  if(postMode==='new'){
+    const newId=Math.max(0,...DB.postes.rows.map(r=>r.id))+1;
+    DB.postes.rows.push({id:newId,...data});
+    closeMo('mo-post');
+    renderPostes();
+    showToast('✓ Poste registrado correctamente','success');
+  } else {
+    Object.assign(DB.postes.rows.find(x=>x.id===editId),data);
+    closeMo('mo-post');
+    renderPostes();
+    showToast('✓ Poste actualizado correctamente','success');
+  }
+}
+
+/* ════════════════════════════════ POSTES: ELIMINAR ═══ */
+function openDelPost(id){
+  delId=id;
+  const r=DB.postes.rows.find(x=>x.id===id);
+  document.getElementById('mdel-title').textContent=`Eliminar Poste ${r.codigo||'#'+r.id}`;
+  document.getElementById('mdel-name').textContent=`${r.codigo||'—'} · ${r.propietario||'Sin propietario'}`;
+  document.getElementById('mdel-badge').innerHTML=r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>';
+  openMo('mo-del');
+}
+
+function confirmDelPost(){
+  DB.postes.rows=DB.postes.rows.filter(r=>r.id!==delId);
+  closeMo('mo-del');
+  renderPostes();
+  showToast('✓ Poste eliminado','danger');
+}
+
+function onSearch(v){SQ=v;CP=1;CV==='postes'?renderPostes():renderView(CV);}
+function goP(p){CP=p;CV==='postes'?renderPostes():renderView(CV);}
+function changePS(v){PS=parseInt(v);CP=1;CV==='postes'?renderPostes():renderView(CV);}
 
 /* ════════════════════════════════ MODAL: NUEVO ═══ */
 function openNew(){
   const d=DB[CT];
-  document.getElementById('mnew-title').textContent=`Nuevo ${d.plural.slice(0,-1)||'Registro'}`.replace(' de ','').replace('s de','');
-  document.getElementById('mnew-title').textContent=`Nuevo ${CT==='propietario'?'Propietario de Poste':CT==='material'?'Material de Poste':CT==='tension'?'Tensión de Poste':CT==='tipocable'?'Tipo de Cable':'Condición de Poste'}`;
+  const TITLES={propietario:'Propietario de Poste',material:'Material de Poste',tension:'Tensión de Poste',tipocable:'Tipo de Cable',condicion:'Condición de Poste',fabricante:'Fabricante de Poste'};
+  document.getElementById('mnew-title').textContent=`Nuevo ${TITLES[CT]||d.plural}`;
+  document.getElementById('mnew-sub').textContent=`Registra un nuevo elemento en ${d.plural}`;
   document.getElementById('mnew-sub').textContent=`Registra un nuevo registro en ${d.plural}`;
   document.getElementById('fnew-lbl').textContent=d.col;
   document.getElementById('fnew-name').value='';
