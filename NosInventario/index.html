@@ -1186,7 +1186,7 @@
           Siguiente
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-        <button class="bp" id="cm-save" style="display:none;background:#F97316;border-color:#F97316" onclick="saveCliente()">
+        <button class="bp" id="cm-save" style="display:none" onclick="saveCliente()">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           <span id="cm-save-lbl">Registrar</span>
         </button>
@@ -1827,7 +1827,6 @@ function filteredPostes(){
 /* ════════════════════════════════ CLIENTES: RENDER ═══ */
 function renderClientes(){
   const d=DB.clientes;
-  const pgs_svg=(pts)=>pts.map(([ev,fn,dis])=>`<button class="pg-btn" onclick="${fn}" ${dis?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">${ev}</svg></button>`).join('');
   const sorted=[...d.rows].sort((a,b)=>a.id-b.id);
   const q=SQ.toLowerCase();
   const rows=sorted.filter(r=>
@@ -1843,101 +1842,155 @@ function renderClientes(){
   if(CP>pages) CP=pages;
   const slice=rows.slice((CP-1)*PS,CP*PS);
 
-  const vEl=document.getElementById('view-clientes');
-  const ico=`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">`;
-  vEl.innerHTML=`
-  <div style="padding:24px 28px 0">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:46px;height:46px;border-radius:12px;background:#FFF7ED;display:flex;align-items:center;justify-content:center">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#F97316" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  document.getElementById('view-clientes').innerHTML=`
+  <!-- Stats -->
+  <div class="stats">
+    <div class="sc sv">
+      <div>
+        <div class="sc-num">${d.rows.length}</div>
+        <div class="sc-lbl">Total Clientes</div>
+        <div class="sc-sub">Registrados en el sistema</div>
+      </div>
+      <div class="sc-ico">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+    </div>
+    <div class="sc sg">
+      <div>
+        <div class="sc-num">${activos}</div>
+        <div class="sc-lbl">Clientes Activos</div>
+        <div class="sc-sub">Vigentes en el sistema</div>
+      </div>
+      <div class="sc-ico">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+    </div>
+    <div class="sc sr">
+      <div>
+        <div class="sc-num">${sinNap}</div>
+        <div class="sc-lbl">Sin NAP Asignada</div>
+        <div class="sc-sub">Pendientes de vinculación</div>
+      </div>
+      <div class="sc-ico">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table header + search -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hl">
+        <div class="cico">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:900;color:var(--t1);letter-spacing:.03em;text-transform:uppercase">TABLA DE CLIENTES</div>
-          <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px">GESTIONA EL INVENTARIO DE CLIENTES FINALES</div>
+          <div class="ctit">Tabla de Clientes</div>
+          <div class="csub">Gestiona el inventario de clientes finales</div>
         </div>
       </div>
-      <button class="bp" onclick="openNewCliente()" style="display:inline-flex;align-items:center;gap:7px;background:#F97316;border-color:#F97316">
-        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        NUEVO CLIENTE
-      </button>
+      <div class="card-btns">
+        <button class="bp" onclick="doGenerar()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+          Generar
+        </button>
+        <button class="bp" onclick="openNewCliente()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Nuevo Cliente
+        </button>
+        <button class="bp" onclick="openMo('mo-imp')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Importar
+        </button>
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
-      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
-        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">TOTAL CLIENTES</div>
-        <div style="font-size:26px;font-weight:900;color:var(--t1);margin:4px 0 2px">${d.rows.length}</div>
-        <div style="font-size:9px;color:var(--t3)">REGISTRADOS EN EL SISTEMA</div>
+    <div class="srch-wrap">
+      <div class="srch-inner">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar por código, dirección, distrito, NAP ..." value="${SQ}" oninput="onSearch(this.value)">
       </div>
-      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
-        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">CLIENTES ACTIVOS</div>
-        <div style="font-size:26px;font-weight:900;color:#22C55E;margin:4px 0 2px">${activos}</div>
-        <div style="font-size:9px;color:var(--t3)">VIGENTES EN EL SISTEMA</div>
-      </div>
-      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
-        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">SIN NAP ASIGNADA</div>
-        <div style="font-size:26px;font-weight:900;color:#F97316;margin:4px 0 2px">${sinNap}</div>
-        <div style="font-size:9px;color:var(--t3)">PENDIENTES DE VINCULACIÓN</div>
+      <div class="srch-cnt">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        ${total} resultado${total!==1?'s':''}
       </div>
     </div>
   </div>
-  <div style="background:var(--sur);border-top:1px solid var(--bor);border-bottom:1px solid var(--bor)">
-    <div style="padding:12px 28px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bor)">
-      <div style="flex:1;position:relative">
-        <input style="width:100%;padding:8px 12px 8px 36px;border:1px solid var(--bor);border-radius:8px;font-size:11px;background:var(--bg);color:var(--t1);outline:none"
-          placeholder="BUSCAR CÓDIGO, DIRECCIÓN, DISTRITO, NAP..." value="${SQ}" oninput="onSearch(this.value)">
-        <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3)" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+
+  <!-- Table list -->
+  <div class="card">
+    <div class="card-hdr" style="border-bottom:1px solid var(--bor)">
+      <div class="card-hl">
+        <div class="cico">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </div>
+        <div class="ctit">Listado de Clientes</div>
       </div>
-      <span class="srch-cnt">
-        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
-        ${total} RESULTADOS
-      </span>
     </div>
-    ${total===0?`<div style="padding:60px;text-align:center;color:var(--t3);font-size:12px;font-style:italic">Sin resultados</div>`:`
-    <table>
-      <thead><tr>
-        <th style="width:60px">ID</th>
-        <th style="width:130px">Código</th>
-        <th>Dirección</th>
-        <th style="width:130px">Distrito</th>
-        <th style="width:165px">NAP Asignada</th>
-        <th style="width:110px">Estado</th>
-        <th style="width:100px">Acciones</th>
-      </tr></thead>
-      <tbody>
-        ${slice.map(r=>`<tr>
-          <td class="td-id">${r.id}</td>
-          <td><span style="display:inline-block;background:#FFF7ED;color:#C2410C;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:800;letter-spacing:.04em">${r.object_id}</span></td>
-          <td class="td-name" style="font-size:11px">${r.address}</td>
-          <td style="font-size:11px;color:var(--t2)">${r.district||'—'}</td>
-          <td>${r.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:7px;padding:2px 9px;font-size:9px;font-weight:800;letter-spacing:.04em">${r.nap_id}</span>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Sin NAP</span>'}</td>
-          <td>${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}</td>
-          <td><div style="display:flex;gap:3px">
-            <button class="act-btn" title="Ver detalle" onclick="openViewCliente(${r.id})" style="color:var(--p)">
-              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button class="act-btn ed" title="Editar" onclick="openEditCliente(${r.id})">
-              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="act-btn dl" title="Eliminar" onclick="openDelCliente(${r.id})">
-              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
-            </button>
-          </div></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`}
-  </div>
-  <div class="pgn">
-    <span class="pg-lbl">Elementos por página:</span>
-    <select class="pg-sel" onchange="changePS(this.value)">
-      <option value="10" ${PS===10?'selected':''}>10</option>
-      <option value="15" ${PS===15?'selected':''}>15</option>
-      <option value="25" ${PS===25?'selected':''}>25</option>
-    </select>
-    <span class="pg-inf">${total===0?'0':(CP-1)*PS+1}–${Math.min(CP*PS,total)} de ${total}</span>
-    <button class="pg-btn" onclick="goP(1)" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
-    <button class="pg-btn" onclick="goP(${CP-1})" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <button class="pg-btn" onclick="goP(${CP+1})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
-    <button class="pg-btn" onclick="goP(${pages})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+    <div class="tbl-wrap">
+      ${slice.length===0?`<div style="text-align:center;padding:40px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">No se encontraron registros</div>`:`
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px">ID</th>
+            <th style="width:130px">Código</th>
+            <th>Dirección</th>
+            <th style="width:130px">Distrito</th>
+            <th style="width:165px">NAP Asignada</th>
+            <th style="width:110px">Estado</th>
+            <th style="width:100px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${slice.map(r=>`
+          <tr>
+            <td class="td-id">${r.id}</td>
+            <td><span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r.object_id}</span></td>
+            <td class="td-name" style="font-size:11px">${r.address}</td>
+            <td style="font-size:11px;color:var(--t2)">${r.district||'—'}</td>
+            <td>${r.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:7px;padding:2px 9px;font-size:9px;font-weight:800;letter-spacing:.04em">${r.nap_id}</span>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Sin NAP</span>'}</td>
+            <td>${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}</td>
+            <td>
+              <div style="display:flex;gap:3px">
+                <button class="act-btn" title="Ver detalle" onclick="openViewCliente(${r.id})" style="color:var(--p)">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="act-btn ed" title="Editar" onclick="openEditCliente(${r.id})">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="act-btn dl" title="Eliminar" onclick="openDelCliente(${r.id})">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`}
+    </div>
+    <div class="pgn">
+      <span class="pg-lbl">Elementos por página:</span>
+      <select class="pg-sel" onchange="changePS(this.value)">
+        <option value="10" ${PS===10?'selected':''}>10</option>
+        <option value="15" ${PS===15?'selected':''}>15</option>
+        <option value="25" ${PS===25?'selected':''}>25</option>
+      </select>
+      <span class="pg-inf">${total===0?'0':(CP-1)*PS+1}–${Math.min(CP*PS,total)} de ${total}</span>
+      <button class="pg-btn" onclick="goP(1)" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+      <button class="pg-btn" onclick="goP(${CP-1})" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="pg-btn" onclick="goP(${CP+1})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="pg-btn" onclick="goP(${pages})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+    </div>
   </div>`;
 }
 
