@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *{-webkit-font-smoothing:antialiased;box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -357,6 +359,34 @@
     body.dark .hist-badge.ev-created{background:rgba(34,197,94,.15);color:#4ADE80}
     body.dark .hist-badge.ev-updated{background:var(--pb);color:var(--p)}
     body.dark .hist-badge.ev-deleted{background:rgba(239,68,68,.15);color:#F87171}
+
+    /* ─── NAP Searchable Select ─── */
+    .nap-sel-wrap{position:relative}
+    .nap-sel-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sur);border:1px solid var(--bor);border-radius:8px;cursor:pointer;font-size:12px;color:var(--t1);gap:8px;transition:border-color .15s;user-select:none}
+    .nap-sel-btn:hover,.nap-sel-btn.open{border-color:var(--p)}
+    .nap-sel-btn .nsb-val{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .nap-sel-btn .nsb-val.ph{color:var(--t3)}
+    .nap-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sur);border:1px solid var(--bor);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.14);z-index:300;overflow:hidden;display:none}
+    .nap-dropdown.open{display:block}
+    .nap-search-wrap{padding:8px;border-bottom:1px solid var(--bor)}
+    .nap-search-inp{width:100%;padding:7px 10px;border:1px solid var(--bor);border-radius:7px;font-size:11px;background:var(--bg);color:var(--t1);outline:none;transition:border-color .15s}
+    .nap-search-inp:focus{border-color:var(--p)}
+    .nap-list{max-height:190px;overflow-y:auto}
+    .nap-item{padding:8px 12px;cursor:pointer;font-size:11px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bor);transition:background .12s}
+    .nap-item:last-child{border-bottom:none}
+    .nap-item:hover,.nap-item.selected{background:var(--pb)}
+    .nap-item.selected .nap-code{background:var(--p);color:#fff}
+    .nap-item.no-res,.nap-item.clear-opt{cursor:default;color:var(--t3);font-style:italic;font-weight:400}
+    .nap-item.clear-opt{cursor:pointer;border-top:1px solid var(--bor);color:var(--t2);font-style:normal}
+    .nap-code{background:var(--pb);color:var(--p);border-radius:5px;padding:2px 7px;font-size:9px;font-weight:800;letter-spacing:.04em;white-space:nowrap;flex-shrink:0}
+    .nap-detail-card{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:14px 16px;margin-top:12px}
+    .nap-detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+
+    /* ─── Mapa Leaflet ─── */
+    #clt-map{width:100%;height:210px;border-radius:10px;border:1px solid var(--bor);overflow:hidden}
+    .clt-coord-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .clt-map-hint{font-size:9px;color:var(--t3);margin-top:7px;display:flex;align-items:center;gap:5px;font-weight:600}
+    .leaflet-container{font-family:inherit}
   </style>
 </head>
 <body>
@@ -426,7 +456,8 @@
       <svg class="chev" id="chev-postes-grp" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="sbs" id="sub-postes-grp">
-      <div class="sbsi" id="nav-postes" onclick="navTo('postes')"><span>+</span> Postes</div>
+      <div class="sbsi" id="nav-postes"   onclick="navTo('postes')"><span>+</span> Postes</div>
+      <div class="sbsi" id="nav-clientes" onclick="navTo('clientes')"><span>+</span> Clientes</div>
     </div>
 
     <!-- Tablas Generales -->
@@ -617,7 +648,7 @@
     </div>
     <div class="mf">
       <button class="bs" onclick="closeMo('mo-del')">× Cancelar</button>
-      <button class="br" onclick="CV==='postes'?confirmDelPost():confirmDel()">
+      <button class="br" onclick="CV==='postes'?confirmDelPost():(CV==='clientes'?confirmDelCliente():confirmDel())">
         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <polyline points="3 6 5 6 21 6"/>
           <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
@@ -959,6 +990,211 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════ MODAL: CLIENTE ══ -->
+<div class="mo" id="mo-cliente">
+  <div class="mc mc-post">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" id="cm-ico" style="background:#FFF7ED">
+          <svg id="cm-ico-svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#F97316" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div>
+          <div class="mtit" id="cm-title">Nuevo Cliente</div>
+          <div class="msub" id="cm-sub">Registra un nuevo cliente en el inventario</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-cliente')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="mtabs" id="cm-tabs">
+      <button class="mtab act" onclick="switchClienTab(0)"><span class="mtab-num" id="cm-tnum-0">1</span>DATOS</button>
+      <button class="mtab" onclick="switchClienTab(1)"><span class="mtab-num" id="cm-tnum-1">2</span>UBICACIÓN</button>
+      <button class="mtab" onclick="switchClienTab(2)"><span class="mtab-num" id="cm-tnum-2">3</span>NAP ASIGNADA</button>
+      <button class="mtab" onclick="switchClienTab(3)"><span class="mtab-num" id="cm-tnum-3">4</span>FOTO</button>
+    </div>
+
+    <div style="flex:1;overflow-y:auto">
+
+      <!-- Tab 1: DATOS -->
+      <div class="tpnl act" id="cm-pnl-0">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Identificación
+          </div>
+          <div class="fg2">
+            <div class="fl">
+              <label>Código de Cliente</label>
+              <input type="text" id="cm-objid" readonly placeholder="Se genera automáticamente" style="background:var(--bg);color:var(--t2);cursor:default">
+            </div>
+            <div class="fl fc2">
+              <label>Dirección de la Vivienda <span class="req">*</span></label>
+              <input type="text" id="cm-address" placeholder="Ej. Av. Javier Prado Este 1234, Dpto. 502">
+            </div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ubicación Administrativa
+          </div>
+          <div class="fg2">
+            <div class="fl">
+              <label>País</label>
+              <select id="cm-country" onchange="cltCascade('country')"></select>
+            </div>
+            <div class="fl">
+              <label>Departamento</label>
+              <select id="cm-dept" onchange="cltCascade('dept')"></select>
+            </div>
+            <div class="fl">
+              <label>Provincia</label>
+              <select id="cm-prov" onchange="cltCascade('prov')"></select>
+            </div>
+            <div class="fl">
+              <label>Distrito</label>
+              <select id="cm-dist"></select>
+            </div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Estado del Registro
+          </div>
+          <div class="fl" style="max-width:260px">
+            <label>Estado</label>
+            <div class="toggle-wrap on" id="cm-tw" onclick="toggleCltStatus()">
+              <div class="tw-knob"></div>
+              <span class="tw-lbl">Activo</span>
+            </div>
+            <input type="checkbox" id="cm-status" style="display:none" checked>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: UBICACIÓN GPS -->
+      <div class="tpnl" id="cm-pnl-1">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Coordenadas GPS Referenciales
+          </div>
+          <div class="clt-coord-row">
+            <div class="fl" style="margin-bottom:0">
+              <label>Latitud <span class="req">*</span></label>
+              <input type="number" id="cm-lat" placeholder="-12.097900" step="0.000001" oninput="cltMapUpdate()">
+            </div>
+            <div class="fl" style="margin-bottom:0">
+              <label>Longitud <span class="req">*</span></label>
+              <input type="number" id="cm-lng" placeholder="-77.029800" step="0.000001" oninput="cltMapUpdate()">
+            </div>
+          </div>
+          <div id="clt-map"></div>
+          <div class="clt-map-hint">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Arrastra el marcador en el mapa para ajustar la posición exacta
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: NAP ASIGNADA -->
+      <div class="tpnl" id="cm-pnl-2">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            NAP de la Vivienda
+          </div>
+          <p style="font-size:11px;color:var(--t2);margin-bottom:14px;line-height:1.6">Selecciona la NAP (Nodo de Acceso de Planta) que sirve a esta vivienda. Este campo es opcional.</p>
+          <div class="fl">
+            <label>Código NAP <span style="font-size:9px;color:var(--t3);font-weight:400">(Opcional)</span></label>
+            <div class="nap-sel-wrap">
+              <div class="nap-sel-btn" id="nap-sel-btn" onclick="toggleNapDrop()">
+                <span class="nsb-val ph" id="nap-sel-val">— Sin NAP asignada —</span>
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="nap-dropdown" id="nap-dropdown">
+                <div class="nap-search-wrap">
+                  <input class="nap-search-inp" type="text" placeholder="Buscar por código o distrito..." oninput="filterNapList(this.value)">
+                </div>
+                <div class="nap-list" id="nap-list"></div>
+              </div>
+            </div>
+            <input type="hidden" id="cm-nap">
+          </div>
+          <div class="nap-detail-card" id="nap-detail-card" style="display:none">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">DETALLES DE LA NAP SELECCIONADA</div>
+            <div class="nap-detail-grid" id="nap-detail-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: FOTO -->
+      <div class="tpnl" id="cm-pnl-3">
+        <div class="tsec">
+          <div class="tsec-hdr">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Fotografía de la Vivienda
+          </div>
+          <p style="font-size:11px;color:var(--t2);margin-bottom:18px;line-height:1.6">Agrega una fotografía de la fachada o vista general de la vivienda del cliente. Formatos: JPG, PNG, WEBP.</p>
+          <div class="photo-card" style="max-width:380px;margin:0 auto">
+            <div class="photo-lbl-top">FOTO 1 — VISTA GENERAL DE LA CASA<span>· Fachada o área exterior</span></div>
+            <div class="photo-slot" id="ps-clt" onclick="triggerClientPhoto()">
+              <input type="file" id="pf-clt" accept="image/*" style="display:none" onchange="handleClientPhoto(this)">
+              <div class="ps-empty" id="ps-clt-empty">
+                <div class="ps-ico">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div class="ps-txt">Haz clic para<br>agregar foto de la vivienda</div>
+              </div>
+              <img id="ps-clt-img" style="display:none" alt="Vista General Casa">
+              <div class="photo-overlay">
+                <button class="photo-ov-btn" onclick="event.stopPropagation();triggerClientPhoto()">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Cambiar
+                </button>
+                <button class="photo-ov-btn del" onclick="event.stopPropagation();removeClientPhoto()">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /scroll -->
+
+    <div class="mf-post">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="bs" id="cm-prev" onclick="clienTabNav(-1)" style="display:none;align-items:center;gap:6px">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <div class="tab-dots">
+          <div class="tab-dot act" id="cm-dot-0"></div>
+          <div class="tab-dot" id="cm-dot-1"></div>
+          <div class="tab-dot" id="cm-dot-2"></div>
+          <div class="tab-dot" id="cm-dot-3"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="bs" onclick="closeMo('mo-cliente')">× Cancelar</button>
+        <button class="bs" id="cm-next" onclick="clienTabNav(1)" style="display:inline-flex;align-items:center;gap:6px">
+          Siguiente
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="bp" id="cm-save" style="display:none;background:#F97316;border-color:#F97316" onclick="saveCliente()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="cm-save-lbl">Registrar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════ MODAL: VER POSTE ══ -->
 <div class="mo" id="mo-view">
   <div class="mc mc-view">
@@ -1261,6 +1497,74 @@ const DB = {
   }
 };
 
+/* ════════════════════════════════ GEO PERU ═══ */
+const GEO_DEPTS={
+  'PERÚ':['AMAZONAS','ÁNCASH','APURÍMAC','AREQUIPA','AYACUCHO','CAJAMARCA','CALLAO','CUSCO','HUANCAVELICA','HUÁNUCO','ICA','JUNÍN','LA LIBERTAD','LAMBAYEQUE','LIMA','LORETO','MADRE DE DIOS','MOQUEGUA','PASCO','PIURA','PUNO','SAN MARTÍN','TACNA','TUMBES','UCAYALI']
+};
+const GEO_PROVS={
+  'LIMA':['BARRANCA','CAJATAMBO','CANTA','CAÑETE','HUARAL','HUAROCHIRÍ','HUAURA','LIMA','OYÓN','YAUYOS'],
+  'CALLAO':['CALLAO'],
+  'AREQUIPA':['AREQUIPA','CAMANÁ','CARAVELÍ','CASTILLA','CAYLLOMA','CONDESUYOS','ISLAY','LA UNIÓN'],
+  'CUSCO':['ACOMAYO','ANTA','CALCA','CANAS','CANCHIS','CHUMBIVILCAS','CUSCO','ESPINAR','LA CONVENCIÓN','PARURO','PAUCARTAMBO','QUISPICANCHI','URUBAMBA'],
+  'PIURA':['AYABACA','HUANCABAMBA','MORROPÓN','PAITA','PIURA','SECHURA','SULLANA','TALARA'],
+  'LA LIBERTAD':['ASCOPE','BOLÍVAR','CHEPÉN','GRAN CHIMÚ','JULCÁN','OTUZCO','PACASMAYO','PATAZ','SÁNCHEZ CARRIÓN','SANTIAGO DE CHUCO','TRUJILLO','VIRU'],
+  'LAMBAYEQUE':['CHICLAYO','FERREÑAFE','LAMBAYEQUE'],
+  'ICA':['CHINCHA','ICA','NAZCA','PALPA','PISCO'],
+  'JUNÍN':['CHANCHAMAYO','CHUPACA','CONCEPCIÓN','HUANCAYO','JAUJA','JUNÍN','OROYA','SATIPO','TARMA','YAULI'],
+};
+const GEO_DISTS={
+  'LIMA':['ANCÓN','ATE','BARRANCO','BREÑA','CARABAYLLO','CHACLACAYO','CHORRILLOS','CIENEGUILLA','COMAS','EL AGUSTINO','INDEPENDENCIA','JESÚS MARÍA','LA MOLINA','LA VICTORIA','LIMA','LINCE','LOS OLIVOS','LURIGANCHO','LURÍN','MAGDALENA DEL MAR','MIRAFLORES','PACHACÁMAC','PUEBLO LIBRE','PUENTE PIEDRA','RÍMAC','SAN BORJA','SAN ISIDRO','SAN JUAN DE LURIGANCHO','SAN JUAN DE MIRAFLORES','SAN LUIS','SAN MARTÍN DE PORRES','SAN MIGUEL','SANTA ANITA','SANTA ROSA','SANTIAGO DE SURCO','SURQUILLO','VILLA EL SALVADOR','VILLA MARÍA DEL TRIUNFO'],
+  'CALLAO':['BELLAVISTA','CALLAO','CARMEN DE LA LEGUA REYNOSO','LA PERLA','LA PUNTA','MI PERÚ','VENTANILLA'],
+  'AREQUIPA':['ALTO SELVA ALEGRE','AREQUIPA','CAYMA','CERRO COLORADO','CHARACATO','JACOBO HUNTER','MARIANO MELGAR','MIRAFLORES','PAUCARPATA','SOCABAYA','TIABAYA','UCHUMAYO','YANAHUARA','YURA'],
+  'CUSCO':['CCORCA','CUSCO','POROY','SAN JERÓNIMO','SAN SEBASTIÁN','SANTIAGO','WANCHAQ'],
+  'PIURA':['CASTILLA','CATACAOS','CURA MORI','LA ARENA','PIURA','TAMBO GRANDE','VEINTISEIS DE OCTUBRE'],
+  'CHICLAYO':['CHICLAYO','CHONGOYAPE','ETEN','ETEN PUERTO','JOSÁS MARÍA','LA VICTORIA','LAGUNAS','MONSEFU','NUEVA ARICA','OYOTÚN','PICSI','PIMENTEL','REQUE','SANTA ROSA','SAÑA','TUMÁN'],
+  'TRUJILLO':['EL PORVENIR','FLORENCIA DE MORA','HUANCHACO','LA ESPERANZA','LAREDO','MOCHE','SALAVERRY','SIMBAL','TRUJILLO','VÍCTOR LARCO HERRERA'],
+  'HUANCAYO':['CHILCA','EL TAMBO','HUANCAYO','SAN AGUSTÍN','SAN CARLOS'],
+};
+
+/* ════════════════════════════════ NAPS LIST ═══ */
+const NAPS_LIST=[
+  {code:'WN-230-2247119',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918},
+  {code:'NAP-00001',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
+  {code:'WN-230-2049378',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10846,lng:-77.04209},
+  {code:'WN-230-1624765',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10006,lng:-77.03996},
+  {code:'WN-230-2247122',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918},
+  {code:'WN-230-1495546',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09233,lng:-77.02761},
+  {code:'WN-20A-2208089',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023},
+  {code:'NAP-00005',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
+  {code:'NAP-00006',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
+  {code:'WN-230-1303500',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
+  {code:'WN-230-1118303',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10005,lng:-77.04017},
+  {code:'WN-230-2218676',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10898,lng:-77.04186},
+  {code:'WN-230-1303495',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
+  {code:'WN-230-1303498',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
+  {code:'WN-20A-2208090',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023},
+];
+
+/* ════════════════════════════════ DB: CLIENTES ═══ */
+DB.clientes={
+  plural:'Clientes',col:'Cliente',
+  tblTitle:'TABLA DE CLIENTES',tblSub:'GESTIONA EL INVENTARIO DE CLIENTES FINALES',
+  totLbl:'TOTAL CLIENTES',totSub:'REGISTRADOS EN EL SISTEMA',
+  actLbl:'CLIENTES ACTIVOS',actSub:'VIGENTES EN EL SISTEMA',
+  inaLbl:'SIN NAP ASIGNADA',inaSub:'PENDIENTES DE VINCULACIÓN',
+  rows:[
+    {id:1, object_id:'CLT-000001',address:'Av. Javier Prado Este 1234, Dpto. 502', country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN ISIDRO',    lat_ref:-12.0979,lng_ref:-77.0298, nap_id:'NAP-00001',     photos:{general:'https://picsum.photos/seed/building1/600/400'},  status:true},
+    {id:2, object_id:'CLT-000002',address:'Calle Los Pinos 456, Urb. San Felipe',  country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',    lat_ref:-12.1184,lng_ref:-77.0290, nap_id:'WN-230-2247119', photos:{general:'https://picsum.photos/seed/building2/600/400'},  status:true},
+    {id:3, object_id:'CLT-000003',address:'Jr. Las Flores 789, Piso 3',            country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN BORJA',      lat_ref:-12.1011,lng_ref:-77.0025, nap_id:null,             photos:{general:null},                                             status:true},
+    {id:4, object_id:'CLT-000004',address:'Av. La Marina 1500, Of. 301',           country:'PERÚ',department:'LIMA',province:'LIMA',district:'SAN MIGUEL',     lat_ref:-12.0780,lng_ref:-77.0850, nap_id:'WN-230-1303500', photos:{general:'https://picsum.photos/seed/building4/600/400'},  status:false},
+    {id:5, object_id:'CLT-000005',address:'Psje. Los Jazmines 23',                 country:'PERÚ',department:'LIMA',province:'LIMA',district:'SANTIAGO DE SURCO',lat_ref:-12.1301,lng_ref:-76.9965, nap_id:'NAP-00005',    photos:{general:'https://picsum.photos/seed/building5/600/400'},  status:true},
+    {id:6, object_id:'CLT-000006',address:'Calle Nicolás de Piérola 88',           country:'PERÚ',department:'LIMA',province:'LIMA',district:'BARRANCO',       lat_ref:-12.1521,lng_ref:-77.0213, nap_id:'NAP-00006',      photos:{general:'https://picsum.photos/seed/building6/600/400'},  status:true},
+    {id:7, object_id:'CLT-000007',address:'Av. Universitaria 3456, Block B',       country:'PERÚ',department:'LIMA',province:'LIMA',district:'LOS OLIVOS',     lat_ref:-11.9897,lng_ref:-77.0607, nap_id:'WN-230-2049378', photos:{general:'https://picsum.photos/seed/building7/600/400'},  status:true},
+    {id:8, object_id:'CLT-000008',address:'Jr. Callao 1200, Int. 4B',             country:'PERÚ',department:'LIMA',province:'LIMA',district:'JESÚS MARÍA',    lat_ref:-12.0770,lng_ref:-77.0474, nap_id:null,             photos:{general:null},                                             status:true},
+    {id:9, object_id:'CLT-000009',address:'Av. Benavides 5500, Torre C Piso 8',   country:'PERÚ',department:'LIMA',province:'LIMA',district:'MIRAFLORES',     lat_ref:-12.1298,lng_ref:-77.0063, nap_id:'WN-230-1624765', photos:{general:'https://picsum.photos/seed/building9/600/400'},  status:true},
+    {id:10,object_id:'CLT-000010',address:'Calle Los Álamos 321',                  country:'PERÚ',department:'LIMA',province:'LIMA',district:'LA MOLINA',      lat_ref:-12.0862,lng_ref:-76.9524, nap_id:null,             photos:{general:'https://picsum.photos/seed/building10/600/400'}, status:false},
+    {id:11,object_id:'CLT-000011',address:'Av. Túpac Amaru 2890, Dpto. 3A',       country:'PERÚ',department:'LIMA',province:'LIMA',district:'COMAS',          lat_ref:-11.9430,lng_ref:-77.0462, nap_id:'WN-20A-2208089', photos:{general:'https://picsum.photos/seed/building11/600/400'}, status:true},
+    {id:12,object_id:'CLT-000012',address:'Jr. Huáscar 440',                       country:'PERÚ',department:'LIMA',province:'LIMA',district:'BREÑA',          lat_ref:-12.0618,lng_ref:-77.0556, nap_id:'WN-230-1303495', photos:{general:'https://picsum.photos/seed/building12/600/400'}, status:true},
+  ]
+};
+
 /* ════════════════════════════════ STATE ═══ */
 let CV='inicio', CT=null, editId=null, delId=null, SQ='', CP=1, PS=15;
 
@@ -1278,7 +1582,8 @@ function navTo(v){
   if(!DB[v]) return;
   CT=v; CV=v; SQ=''; CP=1;
   const d=DB[v];
-  const bcSection=v==='postes'?'Postes':'Tablas Generales';
+  const POSTES_SEC=['postes','clientes'];
+  const bcSection=POSTES_SEC.includes(v)?'Postes':'Tablas Generales';
 
   setBC([bcSection, d.plural]);
   let vEl=document.getElementById('view-'+v);
@@ -1286,7 +1591,7 @@ function navTo(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
   vEl.classList.add('act');
   vEl.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt" id="ld-msg">Obteniendo información...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
-  setTimeout(()=>v==='postes'?renderPostes():renderView(v),950);
+  setTimeout(()=>{if(v==='postes')renderPostes();else if(v==='clientes')renderClientes();else renderView(v);},950);
 }
 
 function toggleG(k){
@@ -1517,6 +1822,123 @@ function filteredPostes(){
     r.condicion.toLowerCase().includes(q)||
     r.direccion.toLowerCase().includes(q)
   );
+}
+
+/* ════════════════════════════════ CLIENTES: RENDER ═══ */
+function renderClientes(){
+  const d=DB.clientes;
+  const pgs_svg=(pts)=>pts.map(([ev,fn,dis])=>`<button class="pg-btn" onclick="${fn}" ${dis?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">${ev}</svg></button>`).join('');
+  const sorted=[...d.rows].sort((a,b)=>a.id-b.id);
+  const q=SQ.toLowerCase();
+  const rows=sorted.filter(r=>
+    !q||r.object_id.toLowerCase().includes(q)||
+    (r.address||'').toLowerCase().includes(q)||
+    (r.district||'').toLowerCase().includes(q)||
+    (r.nap_id||'').toLowerCase().includes(q)
+  );
+  const total=rows.length;
+  const activos=d.rows.filter(r=>r.status).length;
+  const sinNap=d.rows.filter(r=>!r.nap_id).length;
+  const pages=Math.max(1,Math.ceil(total/PS));
+  if(CP>pages) CP=pages;
+  const slice=rows.slice((CP-1)*PS,CP*PS);
+
+  const vEl=document.getElementById('view-clientes');
+  const ico=`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">`;
+  vEl.innerHTML=`
+  <div style="padding:24px 28px 0">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:46px;height:46px;border-radius:12px;background:#FFF7ED;display:flex;align-items:center;justify-content:center">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#F97316" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:900;color:var(--t1);letter-spacing:.03em;text-transform:uppercase">TABLA DE CLIENTES</div>
+          <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px">GESTIONA EL INVENTARIO DE CLIENTES FINALES</div>
+        </div>
+      </div>
+      <button class="bp" onclick="openNewCliente()" style="display:inline-flex;align-items:center;gap:7px;background:#F97316;border-color:#F97316">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        NUEVO CLIENTE
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
+        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">TOTAL CLIENTES</div>
+        <div style="font-size:26px;font-weight:900;color:var(--t1);margin:4px 0 2px">${d.rows.length}</div>
+        <div style="font-size:9px;color:var(--t3)">REGISTRADOS EN EL SISTEMA</div>
+      </div>
+      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
+        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">CLIENTES ACTIVOS</div>
+        <div style="font-size:26px;font-weight:900;color:#22C55E;margin:4px 0 2px">${activos}</div>
+        <div style="font-size:9px;color:var(--t3)">VIGENTES EN EL SISTEMA</div>
+      </div>
+      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:16px 20px">
+        <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:800">SIN NAP ASIGNADA</div>
+        <div style="font-size:26px;font-weight:900;color:#F97316;margin:4px 0 2px">${sinNap}</div>
+        <div style="font-size:9px;color:var(--t3)">PENDIENTES DE VINCULACIÓN</div>
+      </div>
+    </div>
+  </div>
+  <div style="background:var(--sur);border-top:1px solid var(--bor);border-bottom:1px solid var(--bor)">
+    <div style="padding:12px 28px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bor)">
+      <div style="flex:1;position:relative">
+        <input style="width:100%;padding:8px 12px 8px 36px;border:1px solid var(--bor);border-radius:8px;font-size:11px;background:var(--bg);color:var(--t1);outline:none"
+          placeholder="BUSCAR CÓDIGO, DIRECCIÓN, DISTRITO, NAP..." value="${SQ}" oninput="onSearch(this.value)">
+        <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3)" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <span class="srch-cnt">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+        ${total} RESULTADOS
+      </span>
+    </div>
+    ${total===0?`<div style="padding:60px;text-align:center;color:var(--t3);font-size:12px;font-style:italic">Sin resultados</div>`:`
+    <table>
+      <thead><tr>
+        <th style="width:60px">ID</th>
+        <th style="width:130px">Código</th>
+        <th>Dirección</th>
+        <th style="width:130px">Distrito</th>
+        <th style="width:165px">NAP Asignada</th>
+        <th style="width:110px">Estado</th>
+        <th style="width:100px">Acciones</th>
+      </tr></thead>
+      <tbody>
+        ${slice.map(r=>`<tr>
+          <td class="td-id">${r.id}</td>
+          <td><span style="display:inline-block;background:#FFF7ED;color:#C2410C;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:800;letter-spacing:.04em">${r.object_id}</span></td>
+          <td class="td-name" style="font-size:11px">${r.address}</td>
+          <td style="font-size:11px;color:var(--t2)">${r.district||'—'}</td>
+          <td>${r.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:7px;padding:2px 9px;font-size:9px;font-weight:800;letter-spacing:.04em">${r.nap_id}</span>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Sin NAP</span>'}</td>
+          <td>${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}</td>
+          <td><div style="display:flex;gap:3px">
+            <button class="act-btn" title="Ver detalle" onclick="openViewCliente(${r.id})" style="color:var(--p)">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="act-btn ed" title="Editar" onclick="openEditCliente(${r.id})">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="act-btn dl" title="Eliminar" onclick="openDelCliente(${r.id})">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+            </button>
+          </div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`}
+  </div>
+  <div class="pgn">
+    <span class="pg-lbl">Elementos por página:</span>
+    <select class="pg-sel" onchange="changePS(this.value)">
+      <option value="10" ${PS===10?'selected':''}>10</option>
+      <option value="15" ${PS===15?'selected':''}>15</option>
+      <option value="25" ${PS===25?'selected':''}>25</option>
+    </select>
+    <span class="pg-inf">${total===0?'0':(CP-1)*PS+1}–${Math.min(CP*PS,total)} de ${total}</span>
+    <button class="pg-btn" onclick="goP(1)" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+    <button class="pg-btn" onclick="goP(${CP-1})" ${CP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="pg-btn" onclick="goP(${CP+1})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <button class="pg-btn" onclick="goP(${pages})" ${CP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+  </div>`;
 }
 
 function renderPostes(){
@@ -1891,9 +2313,10 @@ function confirmDelPost(){
   showToast('✓ Poste eliminado','danger');
 }
 
-function onSearch(v){SQ=v;CP=1;CV==='postes'?renderPostes():renderView(CV);}
-function goP(p){CP=p;CV==='postes'?renderPostes():renderView(CV);}
-function changePS(v){PS=parseInt(v);CP=1;CV==='postes'?renderPostes():renderView(CV);}
+function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else renderView(CV);}
+function onSearch(v){SQ=v;CP=1;_refresh();}
+function goP(p){CP=p;_refresh();}
+function changePS(v){PS=parseInt(v);CP=1;_refresh();}
 
 /* ════════════════════════════════ MODAL: NUEVO ═══ */
 function openNew(){
@@ -2302,6 +2725,322 @@ function openHistoryPost(id){
 
   openMo('mo-hist');
 }
+
+/* ════════════════════════════════ CLIENTES: MODAL ═══ */
+const CLIEN_TABS=4;
+let clienMode='new', clienTabIdx=0, _cltPhoto=null;
+let cltMap=null, cltMarker=null, _selectedNap=null;
+
+function switchClienTab(idx){
+  clienTabIdx=idx;
+  document.querySelectorAll('#cm-tabs .mtab').forEach((t,i)=>t.classList.toggle('act',i===idx));
+  document.querySelectorAll('#cm-pnl-0,#cm-pnl-1,#cm-pnl-2,#cm-pnl-3').forEach((p,i)=>p.classList.toggle('act',i===idx));
+  for(let i=0;i<CLIEN_TABS;i++){
+    const d=document.getElementById('cm-dot-'+i);
+    if(d){d.classList.toggle('act',i===idx);d.classList.toggle('done',i<idx);}
+  }
+  const isFirst=idx===0, isLast=idx===CLIEN_TABS-1;
+  document.getElementById('cm-prev').style.display=isFirst?'none':'inline-flex';
+  document.getElementById('cm-next').style.display=isLast?'none':'inline-flex';
+  document.getElementById('cm-save').style.display=isLast?'inline-flex':'none';
+  if(idx===1) setTimeout(()=>{initCltMap();if(cltMap)cltMap.invalidateSize();},80);
+}
+
+function clienTabNav(dir){
+  const next=clienTabIdx+dir;
+  if(next<0||next>=CLIEN_TABS) return;
+  if(dir>0 && clienTabIdx===0){
+    if(!document.getElementById('cm-address').value.trim()){showToast('⚠ La dirección es requerida','warning');return;}
+  }
+  if(dir>0 && clienTabIdx===1){
+    const lat=document.getElementById('cm-lat').value;
+    const lng=document.getElementById('cm-lng').value;
+    if(!lat||!lng){showToast('⚠ Las coordenadas GPS son requeridas','warning');return;}
+  }
+  switchClienTab(next);
+}
+
+/* ─── Geographic Cascade ─── */
+function cltCascade(level){
+  if(level==='country'){
+    const c=document.getElementById('cm-country').value;
+    const depts=GEO_DEPTS[c]||[];
+    document.getElementById('cm-dept').innerHTML=`<option value="">— Selecciona —</option>`+depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+    cltCascade('dept');
+  } else if(level==='dept'){
+    const dept=document.getElementById('cm-dept').value;
+    const provs=GEO_PROVS[dept]||[];
+    document.getElementById('cm-prov').innerHTML=`<option value="">— Selecciona —</option>`+provs.map(p=>`<option value="${p}">${p}</option>`).join('');
+    cltCascade('prov');
+  } else if(level==='prov'){
+    const prov=document.getElementById('cm-prov').value;
+    const dists=GEO_DISTS[prov]||[];
+    document.getElementById('cm-dist').innerHTML=`<option value="">— Selecciona —</option>`+dists.map(d=>`<option value="${d}">${d}</option>`).join('');
+  }
+}
+
+function cltFillGeo(country,dept,prov,dist){
+  document.getElementById('cm-country').innerHTML=`<option value="PERÚ">PERÚ</option>`;
+  document.getElementById('cm-country').value=country||'PERÚ';
+  cltCascade('country');
+  if(dept){document.getElementById('cm-dept').value=dept;cltCascade('dept');}
+  if(prov){document.getElementById('cm-prov').value=prov;cltCascade('prov');}
+  if(dist) document.getElementById('cm-dist').value=dist;
+}
+
+/* ─── Toggle Status ─── */
+function toggleCltStatus(){
+  const inp=document.getElementById('cm-status');
+  inp.checked=!inp.checked;
+  updateToggle('cm-tw','cm-status');
+}
+
+/* ─── Leaflet Map ─── */
+function initCltMap(){
+  if(cltMap) return;
+  const defaultLat=-12.0974, defaultLng=-77.0344;
+  cltMap=L.map('clt-map',{zoomControl:true,scrollWheelZoom:false}).setView([defaultLat,defaultLng],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19
+  }).addTo(cltMap);
+  const icon=L.divIcon({className:'',html:`<div style="width:24px;height:24px;background:#F97316;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,iconSize:[24,24],iconAnchor:[12,24]});
+  cltMarker=L.marker([defaultLat,defaultLng],{draggable:true,icon}).addTo(cltMap);
+  cltMarker.on('dragend',function(e){
+    const p=e.target.getLatLng();
+    document.getElementById('cm-lat').value=p.lat.toFixed(6);
+    document.getElementById('cm-lng').value=p.lng.toFixed(6);
+  });
+}
+
+function cltMapUpdate(){
+  const lat=parseFloat(document.getElementById('cm-lat').value);
+  const lng=parseFloat(document.getElementById('cm-lng').value);
+  if(!isNaN(lat)&&!isNaN(lng)&&cltMap&&cltMarker){
+    cltMarker.setLatLng([lat,lng]);
+    cltMap.setView([lat,lng],15,{animate:true});
+  }
+}
+
+function cltMapSetCoords(lat,lng){
+  document.getElementById('cm-lat').value=lat??'';
+  document.getElementById('cm-lng').value=lng??'';
+}
+
+/* ─── NAP Searchable Select ─── */
+function toggleNapDrop(){
+  const dd=document.getElementById('nap-dropdown');
+  const btn=document.getElementById('nap-sel-btn');
+  if(dd.classList.contains('open')){closeNapDrop();}
+  else{
+    renderNapListItems('');
+    dd.classList.add('open');btn.classList.add('open');
+    setTimeout(()=>dd.querySelector('.nap-search-inp').focus(),50);
+  }
+}
+function closeNapDrop(){
+  document.getElementById('nap-dropdown').classList.remove('open');
+  document.getElementById('nap-sel-btn').classList.remove('open');
+}
+function filterNapList(q){renderNapListItems(q);}
+function renderNapListItems(q){
+  const filtered=NAPS_LIST.filter(n=>!q||n.code.toUpperCase().includes(q.toUpperCase())||n.distrito.toUpperCase().includes(q.toUpperCase()));
+  let html=`<div class="nap-item clear-opt" onclick="selectNap(null)">— Sin NAP asignada —</div>`;
+  if(filtered.length===0){
+    html+=`<div class="nap-item no-res">Sin resultados para "${q}"</div>`;
+  } else {
+    html+=filtered.map(n=>`<div class="nap-item ${_selectedNap===n.code?'selected':''}" onclick="selectNap('${n.code}')">
+      <span class="nap-code">${n.code}</span>
+      <span style="font-size:10px;color:var(--t2)">${n.tipo} · ${n.distrito}</span>
+    </div>`).join('');
+  }
+  document.getElementById('nap-list').innerHTML=html;
+}
+function selectNap(code){
+  _selectedNap=code;
+  document.getElementById('cm-nap').value=code||'';
+  const valEl=document.getElementById('nap-sel-val');
+  if(code){
+    valEl.textContent=code; valEl.classList.remove('ph');
+    const nap=NAPS_LIST.find(n=>n.code===code);
+    if(nap){
+      document.getElementById('nap-detail-card').style.display='block';
+      document.getElementById('nap-detail-grid').innerHTML=[
+        ['Tipo',nap.tipo],['Distrito',nap.distrito],
+        ['Latitud',nap.lat.toFixed(5)],['Longitud',nap.lng.toFixed(5)],
+      ].map(([l,v])=>`<div class="vm-field"><div class="vm-f-lbl">${l}</div><div class="vm-f-val" style="font-size:11px">${v}</div></div>`).join('');
+    }
+  } else {
+    valEl.textContent='— Sin NAP asignada —'; valEl.classList.add('ph');
+    document.getElementById('nap-detail-card').style.display='none';
+  }
+  closeNapDrop();
+}
+
+/* ─── Client Photo ─── */
+function triggerClientPhoto(){document.getElementById('pf-clt').click();}
+function handleClientPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{_cltPhoto=e.target.result;renderClientPhotoSlot(_cltPhoto);};
+  reader.readAsDataURL(file);
+}
+function removeClientPhoto(){_cltPhoto=null;renderClientPhotoSlot(null);}
+function renderClientPhotoSlot(url){
+  const ps=document.getElementById('ps-clt');
+  const img=document.getElementById('ps-clt-img');
+  const empty=document.getElementById('ps-clt-empty');
+  if(!ps) return;
+  if(url){img.src=url;img.style.display='block';empty.style.display='none';ps.classList.add('filled');}
+  else{img.src='';img.style.display='none';empty.style.display='flex';ps.classList.remove('filled');document.getElementById('pf-clt').value='';}
+}
+
+/* ─── Open / Save ─── */
+function generateClientId(){
+  const max=Math.max(0,...DB.clientes.rows.map(r=>parseInt(r.object_id.replace('CLT-',''))||0));
+  return 'CLT-'+String(max+1).padStart(6,'0');
+}
+function openNewCliente(){openClienModal('new');}
+function openEditCliente(id){openClienModal('edit',id);}
+
+function openClienModal(mode,id=null){
+  clienMode=mode; editId=id; _selectedNap=null;
+  switchClienTab(0);
+  document.getElementById('cm-country').innerHTML=`<option value="PERÚ">PERÚ</option>`;
+
+  if(mode==='new'){
+    document.getElementById('cm-title').textContent='Nuevo Cliente';
+    document.getElementById('cm-sub').textContent='Registra un nuevo cliente en el inventario';
+    document.getElementById('cm-ico').style.background='#FFF7ED';
+    document.getElementById('cm-ico-svg').setAttribute('stroke','#F97316');
+    document.getElementById('cm-save-lbl').textContent='Registrar';
+    document.getElementById('cm-objid').value=generateClientId();
+    document.getElementById('cm-address').value='';
+    cltFillGeo('PERÚ','LIMA','LIMA','');
+    document.getElementById('cm-lat').value='';
+    document.getElementById('cm-lng').value='';
+    document.getElementById('cm-status').checked=true;
+    _cltPhoto=null;
+    selectNap(null);
+  } else {
+    const r=DB.clientes.rows.find(x=>x.id===id);
+    document.getElementById('cm-title').textContent=`Editar ${r.object_id}`;
+    document.getElementById('cm-sub').textContent='Actualiza los datos del cliente';
+    document.getElementById('cm-ico').style.background='#FFF7ED';
+    document.getElementById('cm-ico-svg').setAttribute('stroke','#F97316');
+    document.getElementById('cm-save-lbl').textContent='Actualizar';
+    document.getElementById('cm-objid').value=r.object_id;
+    document.getElementById('cm-address').value=r.address||'';
+    cltFillGeo(r.country||'PERÚ',r.department||'LIMA',r.province||'LIMA',r.district||'');
+    document.getElementById('cm-lat').value=r.lat_ref??'';
+    document.getElementById('cm-lng').value=r.lng_ref??'';
+    document.getElementById('cm-status').checked=r.status;
+    _cltPhoto=(r.photos||{}).general||null;
+    selectNap(r.nap_id||null);
+  }
+  updateToggle('cm-tw','cm-status');
+  renderClientPhotoSlot(_cltPhoto);
+  if(cltMap){cltMap.remove();cltMap=null;cltMarker=null;}
+  document.querySelectorAll('.nap-search-inp').forEach(i=>i.value='');
+  openMo('mo-cliente');
+  setTimeout(()=>document.getElementById('cm-address').focus(),100);
+}
+
+function saveCliente(){
+  const address=document.getElementById('cm-address').value.trim();
+  if(!address){switchClienTab(0);showToast('⚠ La dirección es requerida','warning');return;}
+  const lat=parseFloat(document.getElementById('cm-lat').value);
+  const lng=parseFloat(document.getElementById('cm-lng').value);
+  if(isNaN(lat)||isNaN(lng)){switchClienTab(1);showToast('⚠ Las coordenadas GPS son requeridas','warning');return;}
+  const data={
+    object_id:  document.getElementById('cm-objid').value,
+    address,
+    country:    document.getElementById('cm-country').value||'PERÚ',
+    department: document.getElementById('cm-dept').value||null,
+    province:   document.getElementById('cm-prov').value||null,
+    district:   document.getElementById('cm-dist').value||null,
+    lat_ref: lat, lng_ref: lng,
+    nap_id:  document.getElementById('cm-nap').value||null,
+    photos:  {general:_cltPhoto},
+    status:  document.getElementById('cm-status').checked,
+  };
+  if(clienMode==='new'){
+    const newId=Math.max(0,...DB.clientes.rows.map(r=>r.id))+1;
+    DB.clientes.rows.push({id:newId,...data});
+    closeMo('mo-cliente');renderClientes();showToast('✓ Cliente registrado correctamente','success');
+  } else {
+    Object.assign(DB.clientes.rows.find(x=>x.id===editId),data);
+    closeMo('mo-cliente');renderClientes();showToast('✓ Cliente actualizado correctamente','success');
+  }
+}
+
+/* ─── Delete ─── */
+function openDelCliente(id){
+  delId=id;
+  const r=DB.clientes.rows.find(x=>x.id===id);
+  document.getElementById('mdel-title').textContent=`Eliminar Cliente ${r.object_id}`;
+  document.getElementById('mdel-name').textContent=`${r.object_id} · ${r.address||'—'}`;
+  document.getElementById('mdel-badge').innerHTML=r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>';
+  openMo('mo-del');
+}
+function confirmDelCliente(){
+  DB.clientes.rows=DB.clientes.rows.filter(r=>r.id!==delId);
+  closeMo('mo-del');renderClientes();showToast('✓ Cliente eliminado','danger');
+}
+
+/* ─── View Cliente ─── */
+function openViewCliente(id){
+  const r=DB.clientes.rows.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('vm-code').textContent=r.object_id;
+  document.getElementById('vm-meta').textContent=[r.district,r.province,r.department,r.country].filter(Boolean).join(' · ');
+  const napBadge=r.nap_id?`<span style="background:var(--pb);color:var(--p);font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:6px;padding:3px 10px">NAP: ${r.nap_id}</span>`:'';
+  document.getElementById('vm-badges').innerHTML=napBadge+(r.status?'<span class="badge-act" style="margin-left:2px">Activo</span>':'<span class="badge-ina" style="margin-left:2px">Inactivo</span>');
+  const fv=(lbl,val,sp=1)=>`<div class="vm-field"${sp>1?` style="grid-column:span ${sp}"`:''}>
+    <div class="vm-f-lbl">${lbl}</div>
+    <div class="vm-f-val${val==null?' muted':''}">${val!=null?val:'<em>No especificado</em>'}</div>
+  </div>`;
+  const nap=r.nap_id?NAPS_LIST.find(n=>n.code===r.nap_id):null;
+  const photo=(r.photos||{}).general;
+  document.getElementById('vm-body').innerHTML=`
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Identificación</div>
+      <div class="vm-grid g2">${fv('Código de Cliente',r.object_id)}${fv('Estado',r.status?'Activo':'Inactivo')}${fv('Dirección',r.address,2)}</div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Ubicación Administrativa</div>
+      <div class="vm-grid">${fv('País',r.country)}${fv('Departamento',r.department)}${fv('Provincia',r.province)}${fv('Distrito',r.district)}</div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Coordenadas GPS</div>
+      <div class="vm-grid g2">${fv('Latitud',r.lat_ref!=null?r.lat_ref.toString():null)}${fv('Longitud',r.lng_ref!=null?r.lng_ref.toString():null)}</div>
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>NAP Asignada</div>
+      ${r.nap_id?`<div class="vm-extop-row">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span class="vm-op-lbl">${r.nap_id}</span>
+        ${nap?`<span class="vm-op-cnt">${nap.tipo} · ${nap.distrito}</span>`:''}
+      </div>`:
+      `<div style="font-size:11px;color:var(--t2);font-style:italic;padding:4px 0">Sin NAP asignada</div>`}
+    </div>
+    <div class="vm-sec">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Fotografía de la Vivienda</div>
+      <div style="max-width:380px">
+        <div class="vm-photo-lbl">FOTO 1 — VISTA GENERAL DE LA CASA</div>
+        <div class="vm-photo-box" style="aspect-ratio:4/3">
+          ${photo?`<img src="${photo}" alt="Vista General Casa" style="width:100%;height:100%;object-fit:cover">`:
+          `<div class="vm-photo-empty"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="var(--bor)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span style="font-size:9px;color:var(--t3);font-weight:600;margin-top:4px">Sin foto</span></div>`}
+        </div>
+      </div>
+    </div>`;
+  openMo('mo-view');
+}
+
+/* ─── Close NAP dropdown on outside click ─── */
+document.addEventListener('click',function(e){
+  const wrap=document.getElementById('nap-sel-wrap');
+  if(wrap&&!wrap.contains(e.target)) closeNapDrop();
+});
 
 /* ════════════════════════════════ THEME ═══ */
 function applyTheme(dark){
