@@ -550,6 +550,17 @@
     .relv-seq-item:last-child{border-bottom:none}
     .relv-seq-num{width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .relv-nap-num{background:#10B981;border-radius:50%}
+    .relv-det-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .relv-det-sec{padding:4px 16px 14px}
+    .relv-det-sec-hdr{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin:12px 0 8px;padding-top:4px;border-top:1px solid var(--bor)}
+    .relv-det-sec-hdr:first-child{border-top:none;margin-top:0;padding-top:0}
+    .relv-tip-wrap{position:relative;display:inline-flex;vertical-align:middle}
+    .relv-tip-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--bor);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;flex-shrink:0;padding:0}
+    .relv-tip-btn:hover,.relv-tip-btn.open{border-color:var(--p);color:var(--p);background:var(--pb)}
+    .relv-tip-panel{position:absolute;top:calc(100% + 8px);left:0;z-index:400;width:min(340px,calc(100vw - 48px));background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.14);font-size:11px;color:var(--t2);line-height:1.55;display:none}
+    .relv-tip-panel.show{display:block}
+    .relv-tip-panel strong{color:var(--t1);font-weight:700}
+    .relv-tip-panel ul{margin:6px 0 0;padding-left:16px;display:grid;gap:4px}
     @media(max-width:768px){.relv-acc-row{flex-direction:column}}
   </style>
 </head>
@@ -1726,63 +1737,35 @@
   </div>
 </div>
 
-<!-- Modal: iniciar / continuar relevamiento -->
-<div class="mo" id="mo-relev-inicio">
-  <div class="mc" style="max-width:460px">
+<!-- Modal: confirmar sin acceso al domicilio -->
+<div class="mo" id="mo-relev-fallo">
+  <div class="mc" style="max-width:440px">
     <div class="mh">
       <div class="mh-l">
-        <div class="m-ico" id="relv-mo-ico" style="background:#EFF6FF">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#3B82F6" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <div class="m-ico" style="background:#FEF2F2">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#DC2626" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div>
-          <div class="mtit" id="relv-mo-title">Relevamiento</div>
-          <div class="msub" id="relv-mo-sub">Asignación pendiente</div>
+          <div class="mtit">Registrar Sin Acceso</div>
+          <div class="msub">Confirma el cierre de la asignación</div>
         </div>
       </div>
-      <button class="mx" onclick="closeMo('mo-relev-inicio')">
+      <button class="mx" onclick="closeMo('mo-relev-fallo')">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="mb" style="padding:18px 20px">
-      <!-- cliente info -->
-      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:14px">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Datos del Cliente</div>
-        <div style="display:grid;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:9px;font-weight:700;letter-spacing:.04em;color:var(--p)" id="relv-mo-cltcode">—</span>
-            <span id="relv-mo-cltstatus"></span>
-          </div>
-          <div style="font-size:13px;font-weight:600;color:var(--t1);line-height:1.4" id="relv-mo-addr">—</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="relv-mo-district">—</span>
-          </div>
-        </div>
-      </div>
-      <!-- asignacion info -->
-      <div style="background:var(--bg);border-radius:10px;padding:14px 16px">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Asignación</div>
-        <div style="display:grid;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2)">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span id="relv-mo-tec">—</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2)">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="relv-mo-date">—</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2)" id="relv-mo-nap-row">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>
-            <span id="relv-mo-nap">—</span>
-          </div>
-        </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:12px">
+      <div id="mrf-body" style="background:var(--bg);border-radius:10px;padding:14px 16px;display:grid;gap:8px;font-size:11px"></div>
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:11px 14px;font-size:11px;color:#991B1B;display:flex;align-items:flex-start;gap:8px">
+        <svg style="flex-shrink:0;margin-top:1px" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>La asignación pasará a estado <strong>fallido</strong> y desaparecerá del listado de Relevamiento. No se registrarán postes ni NAP.</span>
       </div>
     </div>
     <div class="mf">
-      <button class="bs" onclick="closeMo('mo-relev-inicio')">Cancelar</button>
-      <button class="bp" id="relv-mo-cta" onclick="goRelvDetail()">
-        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/></svg>
-        Iniciar Relevamiento
+      <button class="bs" onclick="closeMo('mo-relev-fallo')">Cancelar</button>
+      <button class="br" onclick="doSaveDomicilioFallo()" style="gap:6px">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Confirmar Sin Acceso
       </button>
     </div>
   </div>
@@ -2124,19 +2107,28 @@ const TECHNICIANS=[
 // client_id → {technician_id, status, assigned_at}
 const ASSIGNMENTS={
   1: {technician_id:1, status:'completado',  assigned_at:'2025-01-10'},
-  2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15'},
+  2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15', started_at:'2025-03-16', access:true, gpsLat:-12.1186, gpsLng:-77.0292, fachada:['https://picsum.photos/seed/fach2a/600/400','https://picsum.photos/seed/fach2b/600/400'], poles:[
+    {existingId:2,seq_order:1,codigo:'POL-0002',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.0833,lng:-77.0353,has_nap:false},
+    {existingId:17,seq_order:2,codigo:'POL-0017',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.1271,lng:-77.0310,has_nap:false},
+  ]},
   5: {technician_id:4, status:'pendiente',   assigned_at:'2025-04-02'},
   6: {technician_id:4, status:'completado',  assigned_at:'2025-02-28'},
   7: {technician_id:3, status:'pendiente',   assigned_at:'2025-04-10'},
-  9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18'},
+  9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18', started_at:'2025-04-19', access:true, gpsLat:-12.1299, gpsLng:-77.0065, fachada:['https://picsum.photos/seed/fach9a/600/400',null], poles:[
+    {existingId:1,seq_order:1,codigo:'POL-0001',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1011,lng:-77.0398,has_nap:false},
+    {existingId:9,seq_order:2,codigo:'POL-0009',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'REGULAR',lat:-12.0654,lng:-77.0484,has_nap:false},
+    {existingId:15,seq_order:3,codigo:'POL-0015',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1256,lng:-77.0292,has_nap:false},
+  ]},
   11:{technician_id:3, status:'completado',  assigned_at:'2025-01-22'},
   12:{technician_id:5, status:'fallido',     assigned_at:'2025-03-05'},
   15:{technician_id:2, status:'completado',  assigned_at:'2025-02-10'},
   18:{technician_id:3, status:'fallido',     assigned_at:'2025-03-20'},
-  20:{technician_id:1, status:'en_progreso', assigned_at:'2025-04-25'},
+  20:{technician_id:1, status:'en_progreso', assigned_at:'2025-04-25', started_at:'2025-04-26', access:true, gpsLat:-12.1102, gpsLng:-77.0046, fachada:['https://picsum.photos/seed/fach20/600/400',null], poles:[
+    {existingId:4,seq_order:1,codigo:'POL-0004',propietario:'LUZ DEL SUR',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1081,lng:-77.0147,has_nap:false},
+  ]},
   22:{technician_id:4, status:'completado',  assigned_at:'2025-01-30'},
   25:{technician_id:5, status:'pendiente',   assigned_at:'2025-04-12'},
-  27:{technician_id:2, status:'en_progreso', assigned_at:'2025-04-20'},
+  27:{technician_id:2, status:'en_progreso', assigned_at:'2025-04-20', started_at:'2025-04-21', access:true, gpsLat:-12.0016, gpsLng:-77.0064, fachada:['https://picsum.photos/seed/fach27/600/400',null], poles:[]},
   30:{technician_id:1, status:'completado',  assigned_at:'2025-02-05'},
   33:{technician_id:3, status:'fallido',     assigned_at:'2025-03-28'},
   34:{technician_id:5, status:'cancelado',   assigned_at:'2025-04-01'},
@@ -3666,7 +3658,7 @@ function renderRelevamiento(){
         const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
         const isP=a.status==='pendiente';
         const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-        return `<div class="relev-card ${isP?'relev-pend':'relev-prog'}" onclick="openRelvModal(${r.id})" style="cursor:pointer">
+        return `<div class="relev-card ${isP?'relev-pend':'relev-prog'}" onclick="openRelvDetail(${r.id})" style="cursor:pointer">
           <div class="rc-top">
             <span class="rc-code">${r.object_id}</span>
             <span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>
@@ -3704,45 +3696,6 @@ function setRelvFilt(f){relvFilt=f;renderRelevamiento();}
 function onRelvSearch(q){SQ=q;renderRelevamiento();}
 
 /* ════════════════════════════════ RELEVAMIENTO DETAIL ═══ */
-function openRelvModal(clientId){
-  _relvClientId=clientId;
-  const r=DB.clientes.rows.find(x=>x.id===clientId);
-  const a=ASSIGNMENTS[clientId];
-  const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
-  const isP=a.status==='pendiente';
-
-  const ico=document.getElementById('relv-mo-ico');
-  ico.style.background=isP?'#EFF6FF':'#FFF7ED';
-  ico.querySelector('svg').setAttribute('stroke',isP?'#3B82F6':'#F97316');
-
-  document.getElementById('relv-mo-title').textContent='Relevamiento';
-  document.getElementById('relv-mo-sub').textContent=isP?'Asignación pendiente':'Asignación en progreso';
-  document.getElementById('relv-mo-cltcode').textContent=r.object_id||'—';
-  document.getElementById('relv-mo-cltstatus').innerHTML=r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>';
-  document.getElementById('relv-mo-addr').textContent=r.address||'—';
-  document.getElementById('relv-mo-district').textContent=r.district||'—';
-  document.getElementById('relv-mo-tec').innerHTML=tec?`<span style="font-weight:600;color:var(--t1)">${tec.name}</span>&nbsp;<span style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</span>`:'Sin técnico';
-  document.getElementById('relv-mo-date').textContent='Asignado: '+a.assigned_at;
-  const napEl=document.getElementById('relv-mo-nap');
-  const napRow=document.getElementById('relv-mo-nap-row');
-  if(r.nap_id){napEl.innerHTML=`<span class="rc-nap">${r.nap_id}</span>`;napRow.style.display='';}
-  else napRow.style.display='none';
-
-  const cta=document.getElementById('relv-mo-cta');
-  cta.innerHTML=(isP
-    ?`<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar Relevamiento`
-    :`<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/></svg> Continuar Relevamiento`);
-  cta.style.background=isP?'#3B82F6':'#F97316';
-  cta.style.borderColor=isP?'#2563EB':'#EA580C';
-
-  openMo('mo-relev-inicio');
-}
-
-function goRelvDetail(){
-  closeMo('mo-relev-inicio');
-  openRelvDetail(_relvClientId);
-}
-
 function openRelvDetail(clientId){
   _relvClientId=clientId;
   const r=DB.clientes.rows.find(x=>x.id===clientId);
@@ -3762,16 +3715,18 @@ function renderRelvDetail(clientId){
   const a=ASSIGNMENTS[clientId];
   const tec=TECHNICIANS.find(t=>t.id===a?.technician_id);
   const isP=a?.status==='pendiente';
+  const inProg=a?.status==='en_progreso';
   const vEl=document.getElementById('view-relev-detail');
   if(!vEl)return;
   const nap=r.nap_id?NAPS_LIST.find(n=>n.code===r.nap_id):null;
   const napLabel=nap?`${nap.tipo} · ${nap.distrito}`:'';
   const p1=r.photos?.general, p2=r.photos?.extra;
   const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-  const photoCnt=[p1,p2].filter(Boolean).length;
+  const poles=a?.poles||[];
+  const hasProgress=inProg&&(a?.started_at||poles.length>0);
 
   const photoThumb=(src,lbl)=>src
-    ?`<div style="border-radius:8px;overflow:hidden;height:130px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+    ?`<div style="border-radius:8px;overflow:hidden;height:120px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
     :`<div style="height:100px;border-radius:8px;border:1px dashed var(--bor);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg)">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <span style="font-size:9px;color:var(--t3)">${lbl}</span>
@@ -3779,12 +3734,50 @@ function renderRelvDetail(clientId){
 
   const infoRow=(lbl,val)=>`
     <div style="display:flex;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px solid var(--bor)">
-      <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:80px;flex-shrink:0">${lbl}</span>
+      <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:88px;flex-shrink:0">${lbl}</span>
       <span style="font-size:12px;font-weight:600;color:var(--t1);line-height:1.4">${val}</span>
     </div>`;
 
+  const progressSection=hasProgress?`
+  <div class="card" style="margin-bottom:12px">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Avance del Relevamiento</div>
+        <div style="font-size:11px;color:var(--t3)">${poles.length} poste${poles.length!==1?'s':''} registrado${poles.length!==1?'s':''}${a.started_at?' · Iniciado '+a.started_at:''}</div>
+      </div>
+      <span class="asign-stat as-prog">En Progreso</span>
+    </div>
+    <div class="relv-det-sec">
+      ${a.gpsLat&&a.gpsLng?`
+      <div class="relv-seq-item">
+        <div class="relv-seq-num" style="background:#3B82F6">D</div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:700;color:var(--t1)">Domicilio verificado</div>
+          <div style="font-size:10px;color:var(--t3);font-family:monospace">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</div>
+          <div style="font-size:10px;color:var(--t2);margin-top:2px">${a.access===true?'Con acceso':'Sin acceso'}</div>
+        </div>
+      </div>`:''}
+      ${poles.map(p=>`
+      <div class="relv-seq-item">
+        <div class="relv-seq-num${p.has_nap?' relv-nap-num':''}">${p.has_nap?'N':p.seq_order}</div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:700;color:var(--t1)">Poste #${p.seq_order} · ${p.codigo||'Sin código'}</div>
+          <div style="font-size:10px;color:var(--t2)">${p.propietario||'—'}${p.material?' · '+p.material:''}${p.condition?' · '+p.condition:''}</div>
+          ${p.lat&&p.lng?`<div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(p.lat).toFixed(5)}, ${parseFloat(p.lng).toFixed(5)}</div>`:''}
+        </div>
+        ${p.existingId?`<span class="badge-act" style="font-size:9px;flex-shrink:0">Existente</span>`:''}
+      </div>`).join('')}
+      ${!poles.length?`<div style="font-size:11px;color:var(--t3);font-style:italic;padding:8px 0">Domicilio registrado — pendiente primer poste</div>`:''}
+      ${(a.fachada||[]).some(Boolean)?`
+      <div class="relv-det-sec-hdr">Fotos de fachada (campo)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${photoThumb(a.fachada[0],'Sin foto principal')}
+        ${photoThumb(a.fachada[1],'Sin foto adicional')}
+      </div>`:''}
+    </div>
+  </div>`:''
+
   vEl.innerHTML=`
-  <!-- Back row -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
     <button class="bs" style="padding:5px 11px;font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0" onclick="navTo('relevamiento')">
       <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
@@ -3795,84 +3788,72 @@ function renderRelvDetail(clientId){
     <span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>
   </div>
 
-  <!-- Assignment strip -->
-  <div class="card" style="padding:12px 16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:9px">
-        <div style="width:30px;height:30px;border-radius:50%;background:${isP?'#DBEAFE':'#FFEDD5'};color:${isP?'#1D4ED8':'#C2410C'};font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+  <div class="relv-det-grid">
+    <!-- Cliente -->
+    <div class="card">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
-          <div style="font-size:11px;font-weight:700;color:var(--t1)">${tec?tec.name:'Sin técnico'}</div>
-          ${tec?`<div style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</div>`:''}
+          <div style="font-size:13px;font-weight:700;color:var(--t1)">${r.object_id}</div>
+          <div style="font-size:11px;color:var(--t3)">Datos del Cliente</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}
+          <button class="bp" onclick="openRelvEdit(${r.id})" style="font-size:11px;padding:6px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar
+          </button>
         </div>
       </div>
-      <div style="height:16px;width:1px;background:var(--bor)"></div>
-      <div style="font-size:11px;color:var(--t2)">Asignado: <strong style="color:var(--t1)">${a?.assigned_at||'—'}</strong></div>
-      ${r.nap_id?`<div style="height:16px;width:1px;background:var(--bor)"></div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span class="rc-nap" style="font-size:9px">${r.nap_id}</span>
-          <span style="font-size:10px;color:var(--t2)">${napLabel}</span>
-        </div>`:''}
+      <div class="relv-det-sec">
+        ${infoRow('Dirección', r.address||'—')}
+        ${infoRow('Distrito', r.district||'—')}
+        ${infoRow('Ubicación', [r.department,r.province,r.district].filter(Boolean).join(', ')||'—')}
+        ${(r.lat_ref&&r.lng_ref)
+          ? infoRow('GPS referencial', `<span style="font-family:monospace;font-size:11px">${r.lat_ref}, ${r.lng_ref}</span>`)
+          : infoRow('GPS referencial','<span style="color:var(--t3);font-style:italic;font-size:11px">Sin coordenadas</span>')}
+        ${r.nap_id
+          ? infoRow('NAP asignada', `<span class="rc-nap" style="font-size:9px">${r.nap_id}</span><span style="font-size:11px;color:var(--t2);margin-left:7px">${napLabel}</span>`)
+          : infoRow('NAP asignada','<span style="color:var(--t3);font-style:italic;font-size:11px">Sin NAP asignada</span>')}
+        <div class="relv-det-sec-hdr">Fotografías del cliente</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${photoThumb(p1,'Foto principal')}
+          ${photoThumb(p2,'Foto adicional')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Asignación -->
+    <div class="card">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Asignación del Trabajo</div>
+        <div style="font-size:11px;color:var(--t3)">Encargo al técnico de campo</div>
+      </div>
+      <div class="relv-det-sec">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;border-bottom:1px solid var(--bor);margin-bottom:4px">
+          <div style="width:36px;height:36px;border-radius:50%;background:${isP?'#DBEAFE':'#FFEDD5'};color:${isP?'#1D4ED8':'#C2410C'};font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--t1)">${tec?tec.name:'Sin técnico'}</div>
+            ${tec?`<div style="font-size:9px;color:var(--p);font-weight:700">${tec.code} · ${tec.zone}</div>`:'<div style="font-size:10px;color:var(--t3);font-style:italic">Sin técnico asignado</div>'}
+          </div>
+        </div>
+        ${infoRow('Estado', `<span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>`)}
+        ${infoRow('Fecha asignación', a?.assigned_at||'—')}
+        ${a?.started_at?infoRow('Inicio relevamiento', a.started_at):''}
+        ${inProg&&a?.gpsLat?infoRow('GPS domicilio', `<span style="font-family:monospace;font-size:11px">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</span>`):''}
+        ${inProg&&a?.access!=null?infoRow('Acceso domicilio', a.access?'<span class="badge-act">Con acceso</span>':'<span class="badge-ina">Sin acceso</span>'):''}
+        ${r.nap_id?infoRow('NAP objetivo', `<span class="rc-nap" style="font-size:9px">${r.nap_id}</span> <span style="font-size:11px;color:var(--t2)">${napLabel}</span>`):infoRow('NAP objetivo','<span style="color:var(--t3);font-style:italic;font-size:11px">Por determinar en campo</span>')}
+        ${inProg?infoRow('Postes relevados', `<strong>${poles.length}</strong>`):''}
+      </div>
     </div>
   </div>
 
-  <!-- CTA start/continue flow -->
-  <button onclick="startRelvFlow(${_ss.clientId||clientId})" class="bp" style="width:100%;padding:14px;font-size:13px;font-weight:700;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;background:${isP?'#3B82F6':'#F97316'};border-color:${isP?'#2563EB':'#EA580C'}">
+  ${progressSection}
+
+  <button onclick="startRelvFlow(${clientId})" class="bp" style="width:100%;padding:14px;font-size:13px;font-weight:700;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:${isP?'#3B82F6':'#F97316'};border-color:${isP?'#2563EB':'#EA580C'}">
     ${isP
       ?`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar Relevamiento`
       :`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg> Continuar Relevamiento`}
-  </button>
-
-  <!-- Client data card -->
-  <div class="card">
-    <!-- Header -->
-    <div style="padding:12px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--t1)">${r.object_id}</div>
-        <div style="font-size:11px;color:var(--t3)">Datos del Cliente · ${r.district||'—'}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        ${r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'}
-        <button class="bp" onclick="openRelvEdit(${r.id})" style="font-size:11px;padding:6px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Editar
-        </button>
-      </div>
-    </div>
-
-    <!-- Info rows -->
-    <div style="padding:4px 16px 0">
-      ${infoRow('Dirección', r.address||'—')}
-      ${infoRow('Ubicación', [r.department,r.province,r.district].filter(Boolean).join(', ')||'—')}
-      ${(r.lat_ref&&r.lng_ref)
-        ? infoRow('GPS', `<span style="font-family:monospace;font-size:11px">${r.lat_ref}, ${r.lng_ref}</span>`)
-        : infoRow('GPS','<span style="color:var(--t3);font-style:italic;font-size:11px">Sin coordenadas</span>')}
-      ${r.nap_id
-        ? infoRow('NAP', `<span class="rc-nap" style="font-size:9px">${r.nap_id}</span><span style="font-size:11px;color:var(--t2);margin-left:7px">${napLabel}</span>`)
-        : infoRow('NAP','<span style="color:var(--t3);font-style:italic;font-size:11px">Sin NAP asignada</span>')}
-    </div>
-
-    <!-- Photos accordion -->
-    <div style="border-top:1px solid var(--bor);margin-top:4px">
-      <div onclick="toggleRelvAcc('relv-photos-body','relv-photos-arr')" style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">
-        <div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--t2)">
-          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          Fotografías
-          <span style="background:var(--pb);color:var(--p);border-radius:10px;padding:1px 8px;font-size:9px;font-weight:700">${photoCnt}/2</span>
-        </div>
-        <svg id="relv-photos-arr" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <div id="relv-photos-body" style="display:none;padding:0 16px 14px;gap:10px">
-        <div>
-          <div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:5px">FOTO PRINCIPAL</div>
-          ${photoThumb(p1,'Sin foto')}
-        </div>
-        <div>
-          <div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:5px">FOTO ADICIONAL</div>
-          ${photoThumb(p2,'Sin foto')}
-        </div>
-      </div>
-    </div>
-  </div>`;
+  </button>`;
 }
 
 function openRelvEdit(clientId){
@@ -3944,23 +3925,13 @@ function saveRelvEdit(){
   showToast('✓ Datos actualizados correctamente','success');
 }
 
-function toggleRelvAcc(bodyId,arrowId){
-  const body=document.getElementById(bodyId);
-  const arrow=document.getElementById(arrowId);
-  if(!body)return;
-  const open=body.style.display==='grid'||body.style.display==='block';
-  body.style.display=open?'none':'grid';
-  if(arrow)arrow.style.transform=open?'rotate(0deg)':'rotate(180deg)';
-}
-
 /* ════════════════════════════════ RELV FLOW ═══ */
 function startRelvFlow(clientId){
   _relvClientId=clientId;
   _ss.clientId=clientId;
   const a=ASSIGNMENTS[clientId];
   if(!a.poles) a.poles=[];
-  // Determine resume step
-  if(a.poles && a.poles.length>0 && a.status==='en_progreso'){
+  if(a.status==='en_progreso'&&(a.poles.length>0||a.started_at||a.access!=null)){
     _ss.step='poste'; _ss.poles=[...a.poles];
   } else {
     _ss.step='domicilio'; _ss.poles=[];
@@ -4050,30 +4021,47 @@ function renderStepDomicilio(){
     ${_stepsBar('domicilio')}
     <div class="card">
       <div style="padding:13px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div><div style="font-size:13px;font-weight:700;color:var(--t1)">Verificación del Domicilio</div>
-          <div style="font-size:11px;color:var(--t3)">${r.object_id} · ${r.address}</div></div>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="font-size:13px;font-weight:700;color:var(--t1)">Verificación del Domicilio</div>
+            <div class="relv-tip-wrap">
+              <button type="button" class="relv-tip-btn" onclick="event.stopPropagation();toggleRelvTip(this)" aria-label="¿Qué se guarda en la base de datos?">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </button>
+              <div class="relv-tip-panel">
+                <strong>¿Dónde se guarda?</strong> En la tabla <strong>assignments</strong>.
+                <ul>
+                  <li><strong>Sin acceso:</strong> access=false, failed_reason, lat/lng, status=fallido, started_at y closed_at.</li>
+                  <li><strong>Con acceso:</strong> access=true, lat/lng, status=en_progreso, started_at. Las fotos van a <strong>attachments</strong>.</li>
+                </ul>
+                Sin acceso cierra el relevamiento aquí. Con acceso continúa al registro de postes.
+              </div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--t3)">${r.object_id} · ${r.address}</div>
+        </div>
         <button class="bs" style="font-size:11px;padding:5px 11px" onclick="openRelvDetail(_ss.clientId)">← Volver</button>
       </div>
       <div style="padding:18px">
-        <div class="tsec">
+        <div class="tsec" style="${_ss.acceso===null?'margin-bottom:0':''}">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>¿Tiene acceso al domicilio? <span class="req">*</span></div>
+          ${accRow}
+        </div>
+        ${_ss.acceso!==null?`<div class="tsec">
           <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS del Domicilio <span class="req">*</span></div>
           <div class="fg2">
             <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sd-lat" value="${_ss.gpsLat||''}" step="0.000001" placeholder="-12.0464"></div>
             <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sd-lng" value="${_ss.gpsLng||''}" step="0.000001" placeholder="-77.0428"></div>
           </div>
           ${_gpsBtnHtml('sd-gpsbtn',_ss.gpsLat,_ss.gpsLng,`captureGPS('sd-gpsbtn','sd-lat','sd-lng',${r.lat_ref||'-12.0464'},${r.lng_ref||'-77.0428'},'dom')`)}
-        </div>
-        <div class="tsec" style="${_ss.acceso===null?'margin-bottom:0':''}">
-          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>¿Tiene acceso al domicilio? <span class="req">*</span></div>
-          ${accRow}
-        </div>
+        </div>`:''}
         ${_ss.acceso===false?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Motivo del fallo <span class="req">*</span></div>
-          <div class="fl" style="margin-bottom:0"><label>Describe el motivo</label><textarea id="sd-motivo" rows="3" placeholder="Ej. No había nadie en el domicilio. El portero negó el acceso.">${_ss.motivo}</textarea></div></div>`:''}
+          <div class="fl" style="margin-bottom:0"><label>Describe el motivo</label><textarea id="sd-motivo" rows="3" placeholder="Ej. No había nadie en el domicilio. El portero negó el acceso." oninput="_ss.motivo=this.value">${_ss.motivo}</textarea></div></div>`:''}
         ${_ss.acceso===true?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotos de la Fachada</div>
           <div class="fg2">${_pslot('sd-ph1',_ss.fachada[0],'sd-finp1','Fachada principal','handleFachadaPhoto(0,this)')} ${_pslot('sd-ph2',_ss.fachada[1],'sd-finp2','Fachada adicional','handleFachadaPhoto(1,this)')}</div></div>`:''}
       </div>
       <div class="mf" style="border-top:1px solid var(--bor);padding:14px 18px;display:flex;gap:10px">
-        ${_ss.acceso===false?`<button class="br" onclick="saveDomicilioFallo()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Registrar como Sin Acceso</button>`:''}
+        ${_ss.acceso===false?`<button class="br" onclick="confirmSaveDomicilioFallo()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Registrar como Sin Acceso</button>`:''}
         ${_ss.acceso===true?`<button class="bp" onclick="saveDomicilio()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px">Continuar al registro de postes <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`:''}
         ${_ss.acceso===null?`<div style="width:100%;text-align:center;font-size:11px;color:var(--t3)">Selecciona acceso para continuar</div>`:''}
       </div>
@@ -4094,6 +4082,7 @@ function handleFachadaPhoto(n,inp){
 }
 
 function saveDomicilio(){
+  if(_ss.acceso!==true){showToast('⚠ Indica si tienes acceso al domicilio','warning');return;}
   const lat=parseFloat(document.getElementById('sd-lat')?.value);
   const lng=parseFloat(document.getElementById('sd-lng')?.value);
   if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS primero','warning');return;}
@@ -4108,15 +4097,42 @@ function saveDomicilio(){
   showToast('✓ Domicilio registrado','success');
 }
 
-function saveDomicilioFallo(){
+function toggleRelvTip(btn){
+  const panel=btn.nextElementSibling;
+  const open=panel?.classList.contains('show');
+  document.querySelectorAll('.relv-tip-panel').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.relv-tip-btn').forEach(b=>b.classList.remove('open'));
+  if(panel&&!open){panel.classList.add('show');btn.classList.add('open');}
+}
+
+function _mrfRow(lbl,val){return `<div style="display:flex;gap:8px"><span style="color:var(--t3);min-width:72px;flex-shrink:0">${lbl}</span><span style="color:var(--t1);font-weight:600;line-height:1.4">${val}</span></div>`;}
+
+function confirmSaveDomicilioFallo(){
+  if(_ss.acceso!==false){showToast('⚠ Indica que no tienes acceso al domicilio','warning');return;}
   const lat=parseFloat(document.getElementById('sd-lat')?.value);
   const lng=parseFloat(document.getElementById('sd-lng')?.value);
-  const motivo=document.getElementById('sd-motivo')?.value.trim();
+  const motivo=(document.getElementById('sd-motivo')?.value||'').trim();
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS del domicilio','warning');return;}
   if(!motivo){showToast('⚠ Escribe el motivo del fallo','warning');return;}
-  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS primero','warning');return;}
+  _ss.gpsLat=lat; _ss.gpsLng=lng; _ss.motivo=motivo;
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  document.getElementById('mrf-body').innerHTML=
+    _mrfRow('Cliente',`${r?.object_id||'—'} · ${r?.address||'—'}`)+
+    _mrfRow('Acceso','<span class="badge-ina">Sin acceso</span>')+
+    _mrfRow('GPS',`<span style="font-family:monospace;font-size:10px">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>`)+
+    _mrfRow('Motivo',motivo)+
+    _mrfRow('Nuevo estado','<span class="asign-stat as-fail">Fallido</span>');
+  openMo('mo-relev-fallo');
+}
+
+function doSaveDomicilioFallo(){
+  const lat=_ss.gpsLat, lng=_ss.gpsLng, motivo=_ss.motivo;
+  if(_ss.acceso!==false||!motivo||isNaN(lat)||isNaN(lng)){showToast('⚠ Completa todos los campos requeridos','warning');return;}
   const a=ASSIGNMENTS[_ss.clientId];
   a.access=false; a.failed_reason=motivo; a.gpsLat=lat; a.gpsLng=lng;
   a.status='fallido'; a.started_at=new Date().toISOString().slice(0,10);
+  a.closed_at=new Date().toISOString().slice(0,10);
+  closeMo('mo-relev-fallo');
   showToast('Asignación registrada como sin acceso','danger');
   navTo('relevamiento');
 }
@@ -5292,6 +5308,10 @@ function openViewCliente(id){
 document.addEventListener('click',function(e){
   const wrap=document.getElementById('nap-sel-wrap');
   if(wrap&&!wrap.contains(e.target)) closeNapDrop();
+  if(!e.target.closest('.relv-tip-wrap')){
+    document.querySelectorAll('.relv-tip-panel').forEach(p=>p.classList.remove('show'));
+    document.querySelectorAll('.relv-tip-btn').forEach(b=>b.classList.remove('open'));
+  }
 });
 
 /* ════════════════════════════════ THEME ═══ */
