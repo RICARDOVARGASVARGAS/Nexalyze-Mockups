@@ -2181,7 +2181,7 @@ let relvFilt='all';
 let _relvClientId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
-const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null],napData:null,napPoleIdx:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,napModalOpen:false,napModalPhase:'pole'};
+const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null],napData:null,napPoleIdx:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole'};
 const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
 
 /* ════════════════════════════════ NAV ═══ */
@@ -3982,7 +3982,7 @@ function startRelvFlow(clientId){
   _ss.motivo=a.failed_reason||'';
   _ss.curPole=null; _ss.curPolePhotos=[null,null];
   _ss.extOps=[]; _ss.foundPoste=null;
-  _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null]; _ss.napData=null; _ss.napPoleIdx=null; _ss.showPoleList=false; _ss.addFormOpen=false; _ss.addPhase='search'; _ss.addConfirm=false; _ss.napModalOpen=false; _ss.napModalPhase='pole';
+  _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null]; _ss.napData=null; _ss.napPoleIdx=null; _ss.showPoleList=false; _ss.addFormOpen=false; _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false; _ss.napModalOpen=false; _ss.napModalPhase='pole';
 
   CV='relevamiento-flow';
   setBC(['Relevamiento','Flujo de Relevamiento']);
@@ -4208,13 +4208,13 @@ function removeExtOp(i){_ss.extOps.splice(i,1);const el=document.getElementById(
 /* ── Pole list helpers ── */
 function toggleAddForm(){
   _ss.addFormOpen=!_ss.addFormOpen;
-  if(!_ss.addFormOpen){_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.foundPoste=null;_ss.addPhase='search';_ss.addConfirm=false;}
+  if(!_ss.addFormOpen){_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.foundPoste=null;_ss.addPhase='search';_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;}
   renderStepPoste();
   if(_ss.addFormOpen) setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
-function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;renderStepPoste();}
+function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;renderStepPoste();}
 function _openAddConfirm(){_ss.addConfirm=true;renderStepPoste();}
-function _closeAddConfirm(){_ss.addConfirm=false;renderStepPoste();}
+function _closeAnyConfirm(){_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;renderStepPoste();}
 
 function removePoste(i){
   _ss.poles.splice(i,1);
@@ -4295,6 +4295,7 @@ function _renderAddPoleForm(){
       <div style="font-size:10px;color:var(--t3)">${phase==='search'?'Busca por propietario y código primero':phase==='found'?'Poste encontrado en el inventario':'Poste nuevo — completa el formulario'}</div>
     </div>
     ${phase!=='search'?`<button onclick="_resetAddSearch()" style="font-size:10px;color:var(--t2);background:none;border:1px solid var(--bor);cursor:pointer;font-weight:600;padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Buscar otro</button>`:''}
+    <button onclick="toggleAddForm()" title="Cerrar" style="width:26px;height:26px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>`;
 
   /* ══ FASE: SEARCH ══ */
@@ -4321,16 +4322,7 @@ function _renderAddPoleForm(){
     if(!p) return `<div class="relv-add-panel">${hdr}</div>`;
     const extOps=(p.external_operators||[]);
     const infoRow=(l,v)=>v?`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:11px;color:var(--t3);min-width:110px;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1);font-weight:700">${v}</span></div>`:'';
-    const confirmArea=_ss.addConfirm
-      ? `<div style="background:var(--pb);border:1.5px solid var(--p);border-radius:10px;padding:14px 16px;margin-top:14px">
-          <div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:4px">¿Confirmar agregar al recorrido?</div>
-          <div style="font-size:11px;color:var(--t2);margin-bottom:12px">El poste <strong>${p.codigo}</strong> se vinculará como Poste #${pNum} en <code>assignment_poles</code>. No se crea ningún duplicado.</div>
-          <div style="display:flex;gap:8px">
-            <button class="bs" onclick="_closeAddConfirm()" style="flex:1;padding:9px;font-size:12px;justify-content:center;display:flex">Cancelar</button>
-            <button class="bp" onclick="confirmAddExistingPoste(${p.id})" style="flex:2;padding:9px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Confirmar</button>
-          </div>
-        </div>`
-      : `<button class="bp" onclick="_openAddConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:14px">
+    const confirmArea=`<button class="bp" onclick="_openAddConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:14px">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar este poste a la ruta
         </button>`;
     return `<div class="relv-add-panel">
@@ -4421,7 +4413,7 @@ function _renderAddPoleForm(){
           ${_pslot('sp-ph2',_ss.curPolePhotos[1],'sp-pinp2','Detalle','handlePolePhoto(1,this)')}
         </div>
       </div>
-      <button class="bp" onclick="savePoste()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:16px">
+      <button class="bp" onclick="_openNewPoleConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:16px">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Guardar y agregar a la ruta
       </button>
@@ -4524,6 +4516,110 @@ function _renderNapModal(){
   </div>`;
 }
 
+/* ── Confirm modals ── */
+function _renderExistingPoleConfirmModal(){
+  const p=_ss.foundPoste; if(!p)return '';
+  const pNum=_ss.poles.length+1;
+  const closeBtn=`<button onclick="_closeAnyConfirm()" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  return `<div class="nap-mo">
+    <div class="nap-mo-bg" onclick="_closeAnyConfirm()"></div>
+    <div class="nap-mo-box" style="max-width:400px">
+      <div class="nap-mo-hdr">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Agregar poste a la ruta</div>
+        ${closeBtn}
+      </div>
+      <div class="nap-mo-body">
+        <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:2px">${p.codigo||'Sin código'}</div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:8px">${p.propietario} · ${p.material||'—'} · ${p.condicion||'—'}</div>
+          <div style="font-size:10px;color:var(--t3);font-family:monospace">${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}</div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px">¿Confirmas agregar este poste como <strong style="color:var(--t1)">Poste #${pNum}</strong> en el recorrido?</div>
+        <div class="relv-save-hint">Se vinculará en <code>assignment_poles</code> sin crear un duplicado en <code>poles</code>.</div>
+      </div>
+      <div class="nap-mo-ftr">
+        <button class="bs" onclick="_closeAnyConfirm()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex">Cancelar</button>
+        <button class="bp" onclick="confirmAddExistingPoste(${p.id})" style="flex:2;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Confirmar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _renderNewPoleConfirmModal(){
+  const p=_ss.curPole; if(!p)return '';
+  const pNum=_ss.poles.length+1;
+  const closeBtn=`<button onclick="_closeAnyConfirm()" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  return `<div class="nap-mo">
+    <div class="nap-mo-bg" onclick="_closeAnyConfirm()"></div>
+    <div class="nap-mo-box" style="max-width:400px">
+      <div class="nap-mo-hdr">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Confirmar nuevo poste</div>
+        ${closeBtn}
+      </div>
+      <div class="nap-mo-body">
+        <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:15px;font-weight:800;color:var(--t1)">${p.propietario}</span>
+            <span class="rc-nap" style="background:rgba(251,146,60,.12);color:#C2410C">Nuevo</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);margin-bottom:6px">${p.codigo||'Sin código'} · ${p.material||'—'} · ${p.condition||'—'}</div>
+          <div style="font-size:10px;color:var(--t3);font-family:monospace">GPS: ${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}</div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:4px">¿Confirmas el registro de este nuevo poste como <strong style="color:var(--t1)">Poste #${pNum}</strong>?</div>
+        <div class="relv-save-hint">Se creará un registro en <code>poles</code> y se vinculará en <code>assignment_poles</code>.</div>
+      </div>
+      <div class="nap-mo-ftr">
+        <button class="bs" onclick="_closeAnyConfirm()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex">Cancelar</button>
+        <button class="bp" onclick="savePosteConfirmed()" style="flex:2;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Guardar y agregar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _openNewPoleConfirm(){
+  const owner=document.getElementById('sp-owner')?.value;
+  if(!owner){showToast('⚠ Selecciona el propietario del poste','warning');return;}
+  const lat=parseFloat(document.getElementById('sp-lat')?.value);
+  const lng=parseFloat(document.getElementById('sp-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS del poste','warning');return;}
+  _ss.curPole={
+    existingId:null, is_existing:false,
+    propietario:owner,
+    codigo:document.getElementById('sp-code')?.value||'',
+    manufacturer:document.getElementById('sp-manufacturer')?.value||'',
+    installation_date:document.getElementById('sp-install-date')?.value||'',
+    material:document.getElementById('sp-material')?.value||'',
+    tension:document.getElementById('sp-tension')?.value||'',
+    cable_type:document.getElementById('sp-cable')?.value||'',
+    condition:document.getElementById('sp-cond')?.value||'',
+    height:parseFloat(document.getElementById('sp-height')?.value)||null,
+    load:parseFloat(document.getElementById('sp-load')?.value)||null,
+    depth:parseFloat(document.getElementById('sp-depth')?.value)||null,
+    support_points:parseInt(document.getElementById('sp-support')?.value)||null,
+    has_retainer:document.getElementById('sp-ret')?.checked||false,
+    findings:document.getElementById('sp-findings')?.value||'',
+    observations:document.getElementById('sp-obs')?.value||'',
+    lat,lng,
+  };
+  _ss.newPoleConfirmOpen=true;
+  renderStepPoste();
+}
+
+function savePosteConfirmed(){
+  const p=_ss.curPole; if(!p)return;
+  const pNum=_ss.poles.length+1;
+  const newId=Math.max(0,...DB.postes.rows.map(r=>r.id))+1;
+  DB.postes.rows.push({id:newId,codigo:p.codigo||`POL-NEW${newId}`,propietario:p.propietario,manufacturer:p.manufacturer||null,installation_date:p.installation_date||null,material:p.material,tension:p.tension,tipocable:p.cable_type,condicion:p.condition,height:p.height,load:p.load,depth:p.depth,support_points:p.support_points,has_retainer:p.has_retainer,findings:p.findings,observations:p.observations,lat:p.lat,lng:p.lng,external_operators:_ss.extOps.map(e=>({operator:e.owner_name,cable_count:e.cable_count})),status:true});
+  const pole={pole_id:newId,existingId:newId,is_existing:false,...p,observation:p.observations||'',access:true,external_operators:[..._ss.extOps],photos:[..._ss.curPolePhotos],seq_order:pNum,nap_id:null,nap_access:null,nap_observation:null};
+  _ss.poles.push(pole);
+  const a=ASSIGNMENTS[_ss.clientId]; if(!a.poles)a.poles=[]; a.poles=[..._ss.poles];
+  _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
+  _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false;
+  renderStepPoste();
+  showToast(`✓ Poste #${pNum} creado en inventario y agregado al recorrido`,'success');
+  setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+
 function renderStepPoste(){
   const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
   const vEl=document.getElementById('view-relev-flow');
@@ -4531,6 +4627,8 @@ function renderStepPoste(){
   const addOpen=_ss.addFormOpen;
   const addFormHTML=addOpen?_renderAddPoleForm():'';
   const napModalHTML=_ss.napModalOpen?_renderNapModal():'';
+  const existingConfirmHTML=_ss.addConfirm?_renderExistingPoleConfirmModal():'';
+  const newPoleConfirmHTML=_ss.newPoleConfirmOpen?_renderNewPoleConfirmModal():'';
 
   vEl.innerHTML=`<div>
     ${_stepsBar('poste')}
@@ -4548,10 +4646,8 @@ function renderStepPoste(){
           ${_renderPoleTimeline()}
         </div>
         <div style="padding:8px 16px 14px;display:flex;gap:8px;flex-wrap:wrap;${_ss.poles.length?'border-top:1px solid var(--bor);margin-top:8px':''}">
-          <button onclick="toggleAddForm()" style="flex:1;min-width:140px;padding:9px 14px;border-radius:8px;border:1.5px solid var(--p);background:${addOpen?'var(--p)':'transparent'};color:${addOpen?'#fff':'var(--p)'};font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s">
-            ${addOpen
-              ? `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cancelar`
-              : `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar Poste`}
+          <button onclick="toggleAddForm()" style="flex:1;min-width:140px;padding:9px 14px;border-radius:8px;border:1.5px solid var(--p);background:transparent;color:var(--p);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar Poste
           </button>
           ${_ss.poles.length ? `<button onclick="openNapModal()" style="flex:1;min-width:140px;padding:9px 14px;border-radius:8px;border:1.5px solid #10B981;background:transparent;color:#10B981;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s" onmouseenter="this.style.background='#10B981';this.style.color='#fff'" onmouseleave="this.style.background='transparent';this.style.color='#10B981'">
             <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>Sincronizar NAP
@@ -4563,6 +4659,8 @@ function renderStepPoste(){
 
     </div>
     ${napModalHTML}
+    ${existingConfirmHTML}
+    ${newPoleConfirmHTML}
   </div>`;
 }
 
