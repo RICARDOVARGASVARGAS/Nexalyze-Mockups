@@ -520,6 +520,37 @@
       #tbc{font-size:10px}
       .tb-ul{display:none}
     }
+    /* ── Relevamiento flow ── */
+    .relv-steps-bar{display:flex;align-items:center;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;gap:0}
+    .relv-sb-item{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .relv-sb-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;border:2px solid transparent;transition:all .2s}
+    .relv-sb-lbl{font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.02em;transition:color .2s}
+    .relv-sb-line{flex:1;height:2px;min-width:16px;margin:0 4px;background:var(--bor);flex-shrink:0;transition:background .2s}
+    .relv-sb-item.done .relv-sb-dot{background:#10B981;color:#fff;border-color:#10B981}
+    .relv-sb-item.act  .relv-sb-dot{background:var(--p);color:#fff;border-color:var(--p)}
+    .relv-sb-item.pend .relv-sb-dot{background:var(--sur);color:var(--t3);border-color:var(--bor)}
+    .relv-sb-item.done .relv-sb-lbl,.relv-sb-item.done+.relv-sb-line{color:#10B981;background:#10B981}
+    .relv-sb-item.act  .relv-sb-lbl{color:var(--p)}
+    .relv-sb-item.pend .relv-sb-lbl{color:var(--t3)}
+    .relv-acc-row{display:flex;gap:10px;margin-top:12px}
+    .relv-acc-btn{flex:1;padding:14px 10px;border-radius:10px;border:2px solid var(--bor);background:var(--sur);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--t2);transition:all .15s;user-select:none}
+    .relv-acc-btn:hover:not(.sel){border-color:var(--p);color:var(--p)}
+    .relv-acc-btn.si.sel{border-color:#10B981;background:#ECFDF5;color:#065F46}
+    .relv-acc-btn.no.sel{border-color:#EF4444;background:#FEF2F2;color:#991B1B}
+    .relv-gps-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--bor);background:var(--sur);cursor:pointer;font-size:11px;font-weight:600;color:var(--t2);transition:all .15s}
+    .relv-gps-btn:hover{border-color:var(--p);color:var(--p)}
+    .relv-gps-btn.capt{border-color:#10B981;color:#065F46;background:#ECFDF5}
+    .relv-photo-slot{border-radius:8px;overflow:hidden;background:var(--bg);border:2px dashed var(--bor);cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:108px;transition:border-color .15s}
+    .relv-photo-slot:hover{border-color:var(--p)}
+    .relv-photo-slot img{width:100%;height:108px;object-fit:cover;display:block}
+    .relv-found-card{background:var(--bg);border:1.5px solid #10B981;border-radius:10px;padding:12px 14px;margin-top:10px}
+    .relv-extop-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bor)}
+    .relv-extop-row:last-child{border-bottom:none}
+    .relv-seq-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bor)}
+    .relv-seq-item:last-child{border-bottom:none}
+    .relv-seq-num{width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .relv-nap-num{background:#10B981;border-radius:50%}
+    @media(max-width:768px){.relv-acc-row{flex-direction:column}}
   </style>
 </head>
 <body>
@@ -2119,6 +2150,7 @@ let relvFilt='all';
 let _relvClientId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
+const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null],foundPoste:null};
 const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
 
 /* ════════════════════════════════ NAV ═══ */
@@ -3565,7 +3597,7 @@ function confirmDelPost(){
   showToast('✓ Poste eliminado','danger');
 }
 
-function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else if(CV==='asignaciones')renderAsignaciones();else if(CV==='relevamiento')renderRelevamiento();else if(CV==='relevamiento-detail')renderRelvDetail(_relvClientId);else renderView(CV);}
+function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else if(CV==='asignaciones')renderAsignaciones();else if(CV==='relevamiento')renderRelevamiento();else if(CV==='relevamiento-detail')renderRelvDetail(_relvClientId);else if(CV==='relevamiento-flow')renderRelvStep();else renderView(CV);}
 
 /* ════════════════════════════════ RELEVAMIENTO ═══ */
 function renderRelevamiento(){
@@ -3783,6 +3815,13 @@ function renderRelvDetail(clientId){
     </div>
   </div>
 
+  <!-- CTA start/continue flow -->
+  <button onclick="startRelvFlow(${_ss.clientId||clientId})" class="bp" style="width:100%;padding:14px;font-size:13px;font-weight:700;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;background:${isP?'#3B82F6':'#F97316'};border-color:${isP?'#2563EB':'#EA580C'}">
+    ${isP
+      ?`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar Relevamiento`
+      :`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg> Continuar Relevamiento`}
+  </button>
+
   <!-- Client data card -->
   <div class="card">
     <!-- Header -->
@@ -3912,6 +3951,602 @@ function toggleRelvAcc(bodyId,arrowId){
   const open=body.style.display==='grid'||body.style.display==='block';
   body.style.display=open?'none':'grid';
   if(arrow)arrow.style.transform=open?'rotate(0deg)':'rotate(180deg)';
+}
+
+/* ════════════════════════════════ RELV FLOW ═══ */
+function startRelvFlow(clientId){
+  _relvClientId=clientId;
+  _ss.clientId=clientId;
+  const a=ASSIGNMENTS[clientId];
+  if(!a.poles) a.poles=[];
+  // Determine resume step
+  if(a.poles && a.poles.length>0 && a.status==='en_progreso'){
+    _ss.step='poste'; _ss.poles=[...a.poles];
+  } else {
+    _ss.step='domicilio'; _ss.poles=[];
+  }
+  _ss.acceso=a.access??null;
+  _ss.gpsLat=a.gpsLat??null; _ss.gpsLng=a.gpsLng??null;
+  _ss.fachada=[...(a.fachada||[null,null])];
+  _ss.motivo=a.failed_reason||'';
+  _ss.curPole=null; _ss.curPolePhotos=[null,null];
+  _ss.extOps=[]; _ss.foundPoste=null;
+  _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null];
+
+  CV='relevamiento-flow';
+  setBC(['Relevamiento','Flujo de Relevamiento']);
+  let vEl=document.getElementById('view-relev-flow');
+  if(!vEl){vEl=document.createElement('div');vEl.id='view-relev-flow';vEl.className='view';document.getElementById('cnt').appendChild(vEl);}
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
+  vEl.classList.add('act');
+  renderRelvStep();
+}
+
+function renderRelvStep(){
+  switch(_ss.step){
+    case 'domicilio': renderStepDomicilio(); break;
+    case 'poste':     renderStepPoste();     break;
+    case 'nap':       renderStepNap();       break;
+    case 'cierre':    renderStepCierre();    break;
+  }
+}
+
+function _stepsBar(cur){
+  const steps=[{k:'domicilio',l:'Domicilio',n:1},{k:'poste',l:`Postes (${_ss.poles.length})`,n:2},{k:'nap',l:'NAP',n:3},{k:'cierre',l:'Cierre',n:4}];
+  const ci=steps.findIndex(s=>s.k===cur);
+  const chk=`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  return `<div class="relv-steps-bar">
+    ${steps.map((s,i)=>{const st=i<ci?'done':i===ci?'act':'pend';return `<div class="relv-sb-item ${st}"><div class="relv-sb-dot">${i<ci?chk:s.n}</div><div class="relv-sb-lbl">${s.l}</div></div>${i<steps.length-1?'<div class="relv-sb-line"></div>':''}`;}).join('')}
+  </div>`;
+}
+
+function _pslot(slotId, src, finpId, label, onch){
+  return `<div>
+    <div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">${label}</div>
+    <div class="relv-photo-slot" id="${slotId}" onclick="document.getElementById('${finpId}').click()">
+      ${src?`<img src="${src}">`:`<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:16px;pointer-events:none"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:10px;color:var(--t3)">Agregar foto</span></div>`}
+    </div>
+    <input type="file" id="${finpId}" accept="image/*" style="display:none" onchange="${onch}">
+  </div>`;
+}
+
+function _gpsBtnHtml(btnId, lat, lng, label){
+  const capt=!!(lat&&lng);
+  return `<button id="${btnId}" class="relv-gps-btn${capt?' capt':''}" onclick="${label}">
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    ${capt?`✓ GPS: ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`:'Capturar GPS automáticamente'}
+  </button>`;
+}
+
+function captureGPS(btnId,latId,lngId,refLat,refLng,storeKey){
+  const dlat=(Math.random()-.5)*.0004, dlng=(Math.random()-.5)*.0004;
+  const lat=(+refLat+dlat).toFixed(6), lng=(+refLng+dlng).toFixed(6);
+  const li=document.getElementById(latId), lni=document.getElementById(lngId);
+  if(li)li.value=lat; if(lni)lni.value=lng;
+  if(storeKey==='dom'){_ss.gpsLat=+lat;_ss.gpsLng=+lng;}
+  else if(storeKey==='pole'&&_ss.curPole){_ss.curPole.lat=+lat;_ss.curPole.lng=+lng;}
+  else if(storeKey==='nap'){_ss.napData.lat=+lat;_ss.napData.lng=+lng;}
+  const btn=document.getElementById(btnId);
+  if(btn){btn.className='relv-gps-btn capt';btn.innerHTML=`<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ✓ GPS: ${lat}, ${lng}`;}
+}
+
+/* ─── STEP 1: DOMICILIO ─── */
+function renderStepDomicilio(){
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  const vEl=document.getElementById('view-relev-flow');
+  if(!vEl)return;
+  const accRow=`<div class="relv-acc-row">
+    <button class="relv-acc-btn si${_ss.acceso===true?' sel':''}" onclick="setRelvAcceso(true)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      SÍ, TENGO ACCESO
+    </button>
+    <button class="relv-acc-btn no${_ss.acceso===false?' sel':''}" onclick="setRelvAcceso(false)">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      NO, SIN ACCESO
+    </button>
+  </div>`;
+
+  vEl.innerHTML=`<div style="max-width:600px;margin:0 auto">
+    ${_stepsBar('domicilio')}
+    <div class="card">
+      <div style="padding:13px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div><div style="font-size:13px;font-weight:700;color:var(--t1)">Verificación del Domicilio</div>
+          <div style="font-size:11px;color:var(--t3)">${r.object_id} · ${r.address}</div></div>
+        <button class="bs" style="font-size:11px;padding:5px 11px" onclick="openRelvDetail(_ss.clientId)">← Volver</button>
+      </div>
+      <div style="padding:18px">
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS del Domicilio <span class="req">*</span></div>
+          <div class="fg2">
+            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sd-lat" value="${_ss.gpsLat||''}" step="0.000001" placeholder="-12.0464"></div>
+            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sd-lng" value="${_ss.gpsLng||''}" step="0.000001" placeholder="-77.0428"></div>
+          </div>
+          ${_gpsBtnHtml('sd-gpsbtn',_ss.gpsLat,_ss.gpsLng,`captureGPS('sd-gpsbtn','sd-lat','sd-lng',${r.lat_ref||'-12.0464'},${r.lng_ref||'-77.0428'},'dom')`)}
+        </div>
+        <div class="tsec" style="${_ss.acceso===null?'margin-bottom:0':''}">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>¿Tiene acceso al domicilio? <span class="req">*</span></div>
+          ${accRow}
+        </div>
+        ${_ss.acceso===false?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Motivo del fallo <span class="req">*</span></div>
+          <div class="fl" style="margin-bottom:0"><label>Describe el motivo</label><textarea id="sd-motivo" rows="3" placeholder="Ej. No había nadie en el domicilio. El portero negó el acceso.">${_ss.motivo}</textarea></div></div>`:''}
+        ${_ss.acceso===true?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotos de la Fachada</div>
+          <div class="fg2">${_pslot('sd-ph1',_ss.fachada[0],'sd-finp1','Fachada principal','handleFachadaPhoto(0,this)')} ${_pslot('sd-ph2',_ss.fachada[1],'sd-finp2','Fachada adicional','handleFachadaPhoto(1,this)')}</div></div>`:''}
+      </div>
+      <div class="mf" style="border-top:1px solid var(--bor);padding:14px 18px;display:flex;gap:10px">
+        ${_ss.acceso===false?`<button class="br" onclick="saveDomicilioFallo()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Registrar como Sin Acceso</button>`:''}
+        ${_ss.acceso===true?`<button class="bp" onclick="saveDomicilio()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px">Continuar al registro de postes <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`:''}
+        ${_ss.acceso===null?`<div style="width:100%;text-align:center;font-size:11px;color:var(--t3)">Selecciona acceso para continuar</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function setRelvAcceso(val){
+  _ss.acceso=val;
+  renderStepDomicilio();
+}
+
+function handleFachadaPhoto(n,inp){
+  const f=inp.files[0]; if(!f)return;
+  const rdr=new FileReader();
+  rdr.onload=e=>{_ss.fachada[n]=e.target.result;const s=document.getElementById(`sd-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
+  rdr.readAsDataURL(f); inp.value='';
+}
+
+function saveDomicilio(){
+  const lat=parseFloat(document.getElementById('sd-lat')?.value);
+  const lng=parseFloat(document.getElementById('sd-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS primero','warning');return;}
+  _ss.gpsLat=lat; _ss.gpsLng=lng;
+  const a=ASSIGNMENTS[_ss.clientId];
+  a.access=true; a.gpsLat=lat; a.gpsLng=lng;
+  a.fachada=[..._ss.fachada]; a.started_at=new Date().toISOString().slice(0,10);
+  a.status='en_progreso';
+  _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
+  _ss.step='poste';
+  renderRelvStep();
+  showToast('✓ Domicilio registrado','success');
+}
+
+function saveDomicilioFallo(){
+  const lat=parseFloat(document.getElementById('sd-lat')?.value);
+  const lng=parseFloat(document.getElementById('sd-lng')?.value);
+  const motivo=document.getElementById('sd-motivo')?.value.trim();
+  if(!motivo){showToast('⚠ Escribe el motivo del fallo','warning');return;}
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS primero','warning');return;}
+  const a=ASSIGNMENTS[_ss.clientId];
+  a.access=false; a.failed_reason=motivo; a.gpsLat=lat; a.gpsLng=lng;
+  a.status='fallido'; a.started_at=new Date().toISOString().slice(0,10);
+  showToast('Asignación registrada como sin acceso','danger');
+  navTo('relevamiento');
+}
+
+/* ─── STEP 2: POSTE ─── */
+function _renderExtOpRows(){
+  const propOpts=DB.propietario.rows.filter(r=>r.status).map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+  if(!_ss.extOps.length) return `<div style="font-size:11px;color:var(--t3);font-style:italic;padding:4px 0">Sin operadores externos</div>`;
+  return _ss.extOps.map((op,i)=>`<div class="relv-extop-row">
+    <select onchange="_ss.extOps[${i}].owner_name=this.value" style="flex:1;border:1px solid var(--bor);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--t1);background:var(--sur);outline:none">
+      <option value="">Operador...</option>${propOpts.replace(`value="${op.owner_name}"`,`value="${op.owner_name}" selected`)}
+    </select>
+    <input type="number" min="1" placeholder="# cables" value="${op.cable_count||1}" onchange="_ss.extOps[${i}].cable_count=parseInt(this.value)||1" style="width:80px;border:1px solid var(--bor);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--t1);background:var(--sur);outline:none;text-align:center">
+    <button onclick="removeExtOp(${i})" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>`).join('');
+}
+
+function addExtOp(){_ss.extOps.push({owner_name:'',cable_count:1});const el=document.getElementById('sp-extops-list');if(el)el.innerHTML=_renderExtOpRows();}
+function removeExtOp(i){_ss.extOps.splice(i,1);const el=document.getElementById('sp-extops-list');if(el)el.innerHTML=_renderExtOpRows();}
+
+function renderStepPoste(){
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  const pNum=_ss.poles.length+1;
+  const vEl=document.getElementById('view-relev-flow');
+  if(!vEl)return;
+  if(!_ss.curPole){_ss.curPole={codigo:'',propietario:'',material:'',tension:'',cable_type:'',condition:'',height:'',load:'',depth:'',support_points:'',has_retainer:false,findings:'',observations:'',lat:'',lng:'',existingId:null};}
+  const p=_ss.curPole;
+  const gpsCapt=!!(p.lat&&p.lng);
+  const mkOpt=(rows,cur)=>rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${cur===r.name?' selected':''}>${r.name}</option>`).join('');
+
+  vEl.innerHTML=`<div style="max-width:660px;margin:0 auto">
+    ${_stepsBar('poste')}
+    <!-- Search -->
+    <div class="card" style="padding:14px 18px;margin-bottom:12px">
+      <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Buscar poste existente</div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div class="fl" style="margin-bottom:0;flex:1;min-width:120px"><label>Propietario</label><select id="sp-srch-owner"><option value="">Seleccionar...</option>${mkOpt(DB.propietario.rows,'')}</select></div>
+        <div class="fl" style="margin-bottom:0;flex:1;min-width:100px"><label>Código</label><input type="text" id="sp-srch-code" placeholder="POL-XXXX"></div>
+        <button class="bs" onclick="searchPoste()" style="padding:9px 14px;font-size:11px;flex-shrink:0">Buscar</button>
+      </div>
+      <div id="sp-search-result"></div>
+    </div>
+    <!-- Form -->
+    <div class="card">
+      <div style="padding:12px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div><div style="font-size:13px;font-weight:700;color:var(--t1)">Registro del Poste #${pNum}</div>
+          <div style="font-size:11px;color:var(--t3)">${r.object_id} · ${pNum>1?`${_ss.poles.length} poste(s) ya registrado(s)`:'Primer poste del recorrido'}</div></div>
+        ${p.existingId?`<span class="badge-act" style="font-size:10px">Reutilizando POL existente</span>`:''}
+      </div>
+      <div style="padding:18px">
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Identificación</div>
+          <div class="fg2">
+            <div class="fl"><label>Propietario <span class="req">*</span></label><select id="sp-owner"><option value="">Seleccionar...</option>${mkOpt(DB.propietario.rows,p.propietario)}</select></div>
+            <div class="fl"><label>Código del Poste</label><input type="text" id="sp-code" placeholder="POL-XXXX" value="${p.codigo}"></div>
+            <div class="fl"><label>Material</label><select id="sp-material"><option value="">—</option>${mkOpt(DB.material.rows,p.material)}</select></div>
+            <div class="fl"><label>Tensión</label><select id="sp-tension"><option value="">—</option>${mkOpt(DB.tension.rows,p.tension)}</select></div>
+            <div class="fl"><label>Tipo de Cable</label><select id="sp-cable"><option value="">—</option>${mkOpt(DB.tipocable.rows,p.cable_type)}</select></div>
+            <div class="fl"><label>Estado / Condición</label><select id="sp-cond"><option value="">—</option>${mkOpt(DB.condicion.rows,p.condition)}</select></div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Dimensiones</div>
+          <div class="fg2">
+            <div class="fl"><label>Altura (m)</label><input type="number" id="sp-height" step="0.1" placeholder="9.0" value="${p.height}"></div>
+            <div class="fl"><label>Carga (kg)</label><input type="number" id="sp-load" step="1" placeholder="500" value="${p.load}"></div>
+            <div class="fl"><label>Profundidad (m)</label><input type="number" id="sp-depth" step="0.1" placeholder="1.6" value="${p.depth}"></div>
+            <div class="fl"><label>Pts. de Apoyo</label><input type="number" id="sp-support" step="1" placeholder="2" value="${p.support_points}"></div>
+          </div>
+          <div class="fl" style="margin-bottom:0">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11px;font-weight:600;color:var(--t2)"><input type="checkbox" id="sp-ret" ${p.has_retainer?'checked':''}>Tiene retenida</label>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Observaciones</div>
+          <div class="fl"><label>Hallazgos</label><textarea id="sp-findings" rows="2" placeholder="Describe lo que encontraste...">${p.findings}</textarea></div>
+          <div class="fl" style="margin-bottom:0"><label>Observaciones</label><textarea id="sp-obs" rows="2" placeholder="Notas adicionales...">${p.observations}</textarea></div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Operadores Externos</div>
+          <div id="sp-extops-list">${_renderExtOpRows()}</div>
+          <button class="bs" onclick="addExtOp()" style="font-size:11px;padding:6px 12px;margin-top:8px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar operador</button>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS del Poste <span class="req">*</span></div>
+          <div class="fg2">
+            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sp-lat" value="${p.lat}" step="0.000001" placeholder="-12.0464"></div>
+            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sp-lng" value="${p.lng}" step="0.000001" placeholder="-77.0428"></div>
+          </div>
+          ${_gpsBtnHtml('sp-gpsbtn',p.lat,p.lng,`captureGPS('sp-gpsbtn','sp-lat','sp-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotografías del Poste</div>
+          <div class="fg2">
+            ${_pslot('sp-ph1',_ss.curPolePhotos[0],'sp-pinp1','Panorámica','handlePolePhoto(0,this)')}
+            ${_pslot('sp-ph2',_ss.curPolePhotos[1],'sp-pinp2','Detalle','handlePolePhoto(1,this)')}
+          </div>
+        </div>
+        <!-- NAP question -->
+        <div style="background:var(--pb);border-radius:10px;padding:16px;border:1px solid rgba(123,110,248,.2)">
+          <div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:12px;display:flex;align-items:center;gap:7px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>¿Este poste tiene la NAP del cliente?</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="bs" onclick="savePoste(false)" style="flex:1;min-width:140px;padding:10px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>No — siguiente poste</button>
+            <button class="bp" onclick="savePoste(true)" style="flex:1;min-width:140px;padding:10px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#10B981;border-color:#059669">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Sí — registrar NAP</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function searchPoste(){
+  const owner=document.getElementById('sp-srch-owner')?.value;
+  const code=document.getElementById('sp-srch-code')?.value.trim().toUpperCase();
+  if(!owner&&!code){showToast('⚠ Ingresa propietario o código para buscar','warning');return;}
+  const found=DB.postes.rows.find(p=>{
+    const matchOwner=!owner||p.propietario===owner;
+    const matchCode=!code||p.codigo.toUpperCase().includes(code);
+    return matchOwner&&matchCode&&p.status;
+  });
+  const res=document.getElementById('sp-search-result');
+  if(!res)return;
+  if(found){
+    res.innerHTML=`<div class="relv-found-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:#065F46;display:flex;align-items:center;gap:6px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Poste encontrado en el inventario</div>
+        <span style="font-size:10px;font-weight:700;color:var(--p)">${found.codigo}</span>
+      </div>
+      <div style="display:grid;gap:4px;font-size:11px;color:var(--t2);margin-bottom:10px">
+        <div><strong style="color:var(--t1)">${found.propietario}</strong> · ${found.material} · ${found.condicion}</div>
+        <div>Altura: ${found.height}m · GPS: ${found.lat}, ${found.lng}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="bp" onclick="useFoundPoste(${found.id})" style="font-size:11px;padding:7px 14px">Usar este poste</button>
+        <button class="bs" onclick="document.getElementById('sp-search-result').innerHTML=''" style="font-size:11px;padding:7px 14px">Crear nuevo</button>
+      </div>
+    </div>`;
+  } else {
+    res.innerHTML=`<div style="margin-top:8px;font-size:11px;color:var(--t3);font-style:italic;display:flex;align-items:center;gap:5px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Poste no encontrado — completa el formulario para crear uno nuevo</div>`;
+  }
+}
+
+function useFoundPoste(id){
+  const p=DB.postes.rows.find(x=>x.id===id);
+  if(!p)return;
+  _ss.curPole={codigo:p.codigo,propietario:p.propietario,material:p.material,tension:p.tension,cable_type:p.tipocable,condition:p.condicion,height:p.height,load:p.load,depth:p.depth,support_points:p.support_points,has_retainer:p.has_retainer,findings:p.findings||'',observations:p.observations||'',lat:p.lat,lng:p.lng,existingId:id};
+  _ss.extOps=(p.external_operators||[]).map(e=>({owner_name:e.operator,cable_count:e.cable_count}));
+  _ss.foundPoste=p;
+  renderStepPoste();
+  showToast('✓ Datos del poste cargados','success');
+}
+
+function handlePolePhoto(n,inp){
+  const f=inp.files[0]; if(!f)return;
+  const rdr=new FileReader();
+  rdr.onload=e=>{_ss.curPolePhotos[n]=e.target.result;const s=document.getElementById(`sp-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
+  rdr.readAsDataURL(f); inp.value='';
+}
+
+function savePoste(hasNap){
+  const owner=document.getElementById('sp-owner')?.value;
+  if(!owner){showToast('⚠ Selecciona el propietario del poste','warning');return;}
+  const lat=parseFloat(document.getElementById('sp-lat')?.value);
+  const lng=parseFloat(document.getElementById('sp-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS del poste','warning');return;}
+
+  // Read form values
+  const pole={
+    existingId: _ss.curPole?.existingId||null,
+    codigo:     document.getElementById('sp-code')?.value||'',
+    propietario:owner,
+    material:   document.getElementById('sp-material')?.value||'',
+    tension:    document.getElementById('sp-tension')?.value||'',
+    cable_type: document.getElementById('sp-cable')?.value||'',
+    condition:  document.getElementById('sp-cond')?.value||'',
+    height:     parseFloat(document.getElementById('sp-height')?.value)||null,
+    load:       parseFloat(document.getElementById('sp-load')?.value)||null,
+    depth:      parseFloat(document.getElementById('sp-depth')?.value)||null,
+    support_points: parseInt(document.getElementById('sp-support')?.value)||null,
+    has_retainer:   document.getElementById('sp-ret')?.checked||false,
+    findings:   document.getElementById('sp-findings')?.value||'',
+    observations:document.getElementById('sp-obs')?.value||'',
+    lat, lng,
+    external_operators:[..._ss.extOps],
+    photos:[..._ss.curPolePhotos],
+    seq_order:  _ss.poles.length+1,
+    has_nap:    hasNap,
+  };
+
+  // If new pole (not existing), create it in DB
+  if(!pole.existingId){
+    const newId=Math.max(0,...DB.postes.rows.map(r=>r.id))+1;
+    DB.postes.rows.push({id:newId,codigo:pole.codigo||`POL-NEW${newId}`,propietario:pole.propietario,material:pole.material,tension:pole.tension,tipocable:pole.cable_type,condicion:pole.condition,height:pole.height,load:pole.load,depth:pole.depth,support_points:pole.support_points,has_retainer:pole.has_retainer,findings:pole.findings,observations:pole.observations,lat,lng,external_operators:_ss.extOps.map(e=>({operator:e.owner_name,cable_count:e.cable_count})),status:true});
+    pole.existingId=newId;
+  }
+
+  _ss.poles.push(pole);
+  const a=ASSIGNMENTS[_ss.clientId];
+  if(!a.poles)a.poles=[];
+  a.poles.push(pole);
+
+  if(hasNap){
+    _ss.step='nap';
+    _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[];
+    renderRelvStep();
+    showToast(`✓ Poste #${pole.seq_order} registrado — Registra la NAP`,'success');
+  } else {
+    _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
+    renderRelvStep();
+    showToast(`✓ Poste #${pole.seq_order} registrado — Registra el siguiente`,'success');
+  }
+}
+
+/* ─── STEP 3: NAP ─── */
+function renderStepNap(){
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  const lastPole=_ss.poles[_ss.poles.length-1];
+  const vEl=document.getElementById('view-relev-flow');
+  if(!vEl)return;
+  const nd=_ss.napData||{};
+  const gpsCapt=!!(nd.lat&&nd.lng);
+
+  vEl.innerHTML=`<div style="max-width:600px;margin:0 auto">
+    ${_stepsBar('nap')}
+    <!-- Search -->
+    <div class="card" style="padding:14px 18px;margin-bottom:12px">
+      <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Buscar NAP existente</div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <div class="fl" style="margin-bottom:0;flex:1"><label>Código de la NAP</label><input type="text" id="sn-srch-code" placeholder="NAP-XXXXX / WN-230-XXXXX" value="${r.nap_id||''}"></div>
+        <button class="bs" onclick="searchNap()" style="padding:9px 14px;font-size:11px;flex-shrink:0">Buscar</button>
+      </div>
+      <div id="sn-search-result"></div>
+    </div>
+    <!-- Form -->
+    <div class="card">
+      <div style="padding:12px 18px;border-bottom:1px solid var(--bor)">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Registro de la NAP</div>
+        <div style="font-size:11px;color:var(--t3)">${r.object_id} · Poste final del recorrido · ${_ss.poles.length} poste(s) registrado(s)</div>
+      </div>
+      <div style="padding:18px">
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>Datos de la NAP</div>
+          <div class="fg2">
+            <div class="fl"><label>Código de la NAP <span class="req">*</span></label><input type="text" id="sn-code" placeholder="NAP-XXXXX" value="${nd.code||r.nap_id||''}"></div>
+            <div class="fl"><label>Tipo</label><input type="text" id="sn-tipo" placeholder="VERTICAL / EDIFICIO" value="${nd.tipo||''}"></div>
+            <div class="fl"><label>Total de Puertos</label><input type="number" id="sn-ports" step="1" placeholder="16" value="${nd.total_ports||''}"></div>
+            <div class="fl"><label>Puertos Secuenciales</label><input type="number" id="sn-sport" step="1" placeholder="8" value="${nd.seq_ports||''}"></div>
+          </div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS de la NAP <span class="req">*</span></div>
+          <div class="fg2">
+            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sn-lat" value="${nd.lat||''}" step="0.000001" placeholder="-12.0464"></div>
+            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sn-lng" value="${nd.lng||''}" step="0.000001" placeholder="-77.0428"></div>
+          </div>
+          ${_gpsBtnHtml('sn-gpsbtn',nd.lat,nd.lng,`captureGPS('sn-gpsbtn','sn-lat','sn-lng',${lastPole?.lat||'-12.0464'},${lastPole?.lng||'-77.0428'},'nap')`)}
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Acceso a la NAP <span class="req">*</span></div>
+          <div class="relv-acc-row">
+            <button class="relv-acc-btn si${_ss.napAcceso===true?' sel':''}" onclick="_ss.napAcceso=true;this.parentElement.querySelectorAll('.relv-acc-btn').forEach(b=>{b.classList.remove('sel');});this.classList.add('sel')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SÍ, TENGO ACCESO
+            </button>
+            <button class="relv-acc-btn no${_ss.napAcceso===false?' sel':''}" onclick="_ss.napAcceso=false;this.parentElement.querySelectorAll('.relv-acc-btn').forEach(b=>{b.classList.remove('sel');});this.classList.add('sel')">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>NO, SIN ACCESO
+            </button>
+          </div>
+          <div class="fl" style="margin-top:12px;margin-bottom:0"><label>Observaciones de la NAP</label><textarea id="sn-obs" rows="2" placeholder="Estado de la NAP, puertos disponibles, etc.">${_ss.napObs}</textarea></div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotografías de la NAP</div>
+          <div class="fg2">
+            ${_pslot('sn-ph1',_ss.napPhotos[0],'sn-pinp1','Panorámica','handleNapPhoto(0,this)')}
+            ${_pslot('sn-ph2',_ss.napPhotos[1],'sn-pinp2','Puertos','handleNapPhoto(1,this)')}
+          </div>
+        </div>
+      </div>
+      <div class="mf" style="border-top:1px solid var(--bor);padding:14px 18px">
+        <button class="bp" onclick="saveNap()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:7px;background:#10B981;border-color:#059669;font-size:12px;font-weight:700">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Confirmar NAP y ver resumen
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function searchNap(){
+  const code=document.getElementById('sn-srch-code')?.value.trim().toUpperCase();
+  if(!code){showToast('⚠ Ingresa el código de la NAP','warning');return;}
+  const found=NAPS_LIST.find(n=>n.code.toUpperCase()===code||n.code.toUpperCase().includes(code));
+  const res=document.getElementById('sn-search-result');
+  if(!res)return;
+  if(found){
+    res.innerHTML=`<div class="relv-found-card">
+      <div style="font-size:11px;font-weight:700;color:#065F46;display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>NAP encontrada</div>
+      <div style="font-size:11px;color:var(--t2)"><strong style="color:var(--t1)">${found.code}</strong> · ${found.tipo} · ${found.distrito}</div>
+      <button class="bp" onclick="useFoundNap('${found.code}')" style="font-size:11px;padding:6px 12px;margin-top:8px">Usar esta NAP</button>
+    </div>`;
+  } else {
+    res.innerHTML=`<div style="margin-top:8px;font-size:11px;color:var(--t3);font-style:italic">NAP no encontrada — completa el formulario</div>`;
+  }
+}
+
+function useFoundNap(code){
+  const n=NAPS_LIST.find(x=>x.code===code);
+  if(!n)return;
+  _ss.napData={code:n.code,tipo:n.tipo,lat:n.lat,lng:n.lng,total_ports:16,seq_ports:8};
+  renderStepNap();
+  showToast('✓ Datos de la NAP cargados','success');
+}
+
+function handleNapPhoto(n,inp){
+  const f=inp.files[0]; if(!f)return;
+  const rdr=new FileReader();
+  rdr.onload=e=>{_ss.napPhotos[n]=e.target.result;const s=document.getElementById(`sn-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
+  rdr.readAsDataURL(f); inp.value='';
+}
+
+function saveNap(){
+  const code=document.getElementById('sn-code')?.value.trim();
+  if(!code){showToast('⚠ El código de la NAP es requerido','warning');return;}
+  if(_ss.napAcceso===null){showToast('⚠ Indica si tienes acceso a la NAP','warning');return;}
+  const lat=parseFloat(document.getElementById('sn-lat')?.value);
+  const lng=parseFloat(document.getElementById('sn-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS de la NAP','warning');return;}
+  _ss.napData={
+    code, tipo:document.getElementById('sn-tipo')?.value||'',
+    total_ports:parseInt(document.getElementById('sn-ports')?.value)||null,
+    seq_ports:parseInt(document.getElementById('sn-sport')?.value)||null,
+    lat, lng, access:_ss.napAcceso,
+    observation:document.getElementById('sn-obs')?.value||'',
+    photos:[..._ss.napPhotos],
+  };
+  _ss.napObs=_ss.napData.observation;
+  _ss.step='cierre';
+  renderRelvStep();
+}
+
+/* ─── STEP 4: CIERRE ─── */
+function _haversine(lat1,lng1,lat2,lng2){
+  const R=6371,d2r=Math.PI/180;
+  const dLat=(lat2-lat1)*d2r, dLng=(lng2-lng1)*d2r;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*d2r)*Math.cos(lat2*d2r)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function renderStepCierre(){
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  const a=ASSIGNMENTS[_ss.clientId];
+  const vEl=document.getElementById('view-relev-flow');
+  if(!vEl)return;
+  const nd=_ss.napData;
+
+  // Calculate total km
+  const pts=[];
+  if(_ss.gpsLat&&_ss.gpsLng) pts.push({lat:_ss.gpsLat,lng:_ss.gpsLng,label:'Domicilio'});
+  _ss.poles.forEach((p,i)=>pts.push({lat:p.lat,lng:p.lng,label:`Poste #${i+1} ${p.codigo||''}`}));
+  if(nd?.lat&&nd?.lng) pts.push({lat:nd.lat,lng:nd.lng,label:`NAP ${nd.code||''}`});
+  let km=0;
+  for(let i=1;i<pts.length;i++) km+=_haversine(pts[i-1].lat,pts[i-1].lng,pts[i].lat,pts[i].lng);
+  const kmStr=km.toFixed(3);
+  const dbAtten=(km*0.35+0.5*2).toFixed(2);
+
+  vEl.innerHTML=`<div style="max-width:600px;margin:0 auto">
+    ${_stepsBar('cierre')}
+    <div class="card">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--t1)">Resumen del Relevamiento</div>
+          <div style="font-size:11px;color:var(--t3)">${r.object_id} · Confirma para cerrar</div></div>
+      </div>
+      <div style="padding:18px;display:grid;gap:16px">
+        <!-- Métricas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--p)">${kmStr}</div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">km de recorrido</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#F97316">${dbAtten}</div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)">dB atenuación</div>
+          </div>
+        </div>
+        <!-- Recorrido -->
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Recorrido (${pts.length} puntos)</div>
+          <div>${pts.map((pt,i)=>{
+            const isNap=i===pts.length-1&&nd?.code;
+            return `<div class="relv-seq-item">
+              <div class="relv-seq-num${isNap?' relv-nap-num':''}">${isNap?'N':i+1}</div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:700;color:var(--t1)">${pt.label}</div>
+                <div style="font-size:10px;color:var(--t3);font-family:monospace">${parseFloat(pt.lat).toFixed(5)}, ${parseFloat(pt.lng).toFixed(5)}</div>
+              </div>
+              ${i<pts.length-1?`<div style="font-size:9px;color:var(--t3)">${_haversine(pt.lat,pt.lng,pts[i+1].lat,pts[i+1].lng).toFixed(3)} km →</div>`:''}
+            </div>`;
+          }).join('')}</div>
+        </div>
+        <!-- Resumen textos -->
+        <div style="background:var(--bg);border-radius:10px;padding:14px 16px;display:grid;gap:7px">
+          <div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t3);min-width:100px">Cliente</span><strong style="color:var(--t1)">${r.object_id} · ${r.address}</strong></div>
+          <div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t3);min-width:100px">Postes relevados</span><strong style="color:var(--t1)">${_ss.poles.length}</strong></div>
+          <div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t3);min-width:100px">NAP encontrada</span><span class="rc-nap" style="font-size:10px">${nd?.code||'—'}</span></div>
+          <div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t3);min-width:100px">Acceso NAP</span><span class="${_ss.napAcceso?'badge-act':'badge-ina'}">${_ss.napAcceso?'Con acceso':'Sin acceso'}</span></div>
+          ${_ss.napObs?`<div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t3);min-width:100px">Obs. NAP</span><span style="color:var(--t1);font-size:11px">${_ss.napObs}</span></div>`:''}
+        </div>
+      </div>
+      <div class="mf" style="border-top:1px solid var(--bor);padding:14px 18px;display:flex;gap:10px">
+        <button class="bs" onclick="_ss.step='nap';renderRelvStep()" style="padding:10px 14px;font-size:11px">← Volver</button>
+        <button class="bp" onclick="closeRelevamiento(${kmStr},${dbAtten})" style="flex:1;justify-content:center;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;background:#10B981;border-color:#059669">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Confirmar y Cerrar Relevamiento
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function closeRelevamiento(km,db){
+  const a=ASSIGNMENTS[_ss.clientId];
+  a.status='completado';
+  a.iea_km=parseFloat(km);
+  a.attenuation_db=parseFloat(db);
+  a.closed_at=new Date().toISOString().slice(0,10);
+  a.nap_found=_ss.napData?.code||null;
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  if(_ss.napData?.code && !r.nap_id) r.nap_id=_ss.napData.code;
+  showToast(`✓ Relevamiento completado — ${km} km · ${db} dB`,'success');
+  navTo('relevamiento');
 }
 
 /* ════════════════════════════════ MOBILE MENU ═══ */
