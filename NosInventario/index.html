@@ -2181,7 +2181,7 @@ let relvFilt='all';
 let _relvClientId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
-const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null],napData:null,napPoleIdx:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole'};
+const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole'};
 const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
 
 /* ════════════════════════════════ NAV ═══ */
@@ -3982,7 +3982,7 @@ function startRelvFlow(clientId){
   _ss.motivo=a.failed_reason||'';
   _ss.curPole=null; _ss.curPolePhotos=[null,null];
   _ss.extOps=[]; _ss.foundPoste=null;
-  _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null]; _ss.napData=null; _ss.napPoleIdx=null; _ss.showPoleList=false; _ss.addFormOpen=false; _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false; _ss.napModalOpen=false; _ss.napModalPhase='pole';
+  _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null,null,null]; _ss.napData=null; _ss.napPoleIdx=null; _ss.foundNap=null; _ss.showPoleList=false; _ss.addFormOpen=false; _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false; _ss.napModalOpen=false; _ss.napModalPhase='pole';
 
   CV='relevamiento-flow';
   setBC(['Relevamiento','Flujo de Relevamiento']);
@@ -4230,6 +4230,7 @@ function openNapModal(){
   if(_ss.napPoleIdx==null) _ss.napPoleIdx=_ss.poles.length-1;
   _ss.napModalOpen=true;
   _ss.napModalPhase='pole';
+  _ss.napAcceso=null; _ss.napObs=''; _ss.foundNap=null; _ss.napData=null;
   _ss.addFormOpen=false;
   renderStepPoste();
 }
@@ -4239,10 +4240,69 @@ function closeNapModal(){
   renderStepPoste();
 }
 
-function napGoToNap(){
+function napGoToAccess(){
   if(_ss.napPoleIdx==null){showToast('⚠ Selecciona el poste donde está la NAP','warning');return;}
-  _ss.napModalPhase='nap';
+  _ss.napAcceso=null; _ss.napObs=''; _ss.foundNap=null;
+  _ss.napModalPhase='access';
   renderStepPoste();
+}
+
+function napGoToNap(){napGoToAccess();}
+
+function saveNapNoAccess(){
+  const obs=document.getElementById('sn-noacc-obs')?.value||'';
+  if(!obs.trim()){showToast('⚠ Ingresa el motivo de sin acceso','warning');return;}
+  const idx=_ss.napPoleIdx??(_ss.poles.length-1);
+  _ss.napObs=obs;
+  _ss.poles.forEach((p,i)=>{p.nap_id=null;p.nap_access=i===idx?false:null;p.nap_observation=i===idx?obs:null;});
+  const a=ASSIGNMENTS[_ss.clientId]; if(a)a.poles=[..._ss.poles];
+  _ss.napModalOpen=false; _ss.addFormOpen=false; _ss.step='cierre';
+  renderRelvStep();
+  showToast('Visita a NAP registrada sin acceso','warning');
+}
+
+function saveNapExisting(){
+  const fn=_ss.foundNap; if(!fn){showToast('⚠ No hay NAP seleccionada','warning');return;}
+  const idx=_ss.napPoleIdx??(_ss.poles.length-1);
+  const code=fn.code;
+  _ss.poles.forEach((p,i)=>{p.nap_id=i===idx?code:null;p.nap_access=i===idx?true:null;p.nap_observation=null;});
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId); if(r)r.nap_id=code;
+  const a=ASSIGNMENTS[_ss.clientId]; if(a){a.poles=[..._ss.poles];a.nap_found=code;}
+  _ss.napModalOpen=false; _ss.addFormOpen=false; _ss.step='cierre';
+  renderRelvStep();
+  showToast(`✓ NAP ${code} vinculada al poste #${_ss.poles[idx].seq_order}`,'success');
+}
+
+function saveNapNew(){
+  const code=document.getElementById('sn-new-code')?.value.trim().toUpperCase();
+  if(!code){showToast('⚠ El código de la NAP es requerido','warning');return;}
+  if(NAPS_LIST.find(n=>n.code.toUpperCase()===code)){showToast('⚠ Ya existe una NAP con ese código — buscala en la búsqueda','warning');return;}
+  const lat=parseFloat(document.getElementById('sn-new-lat')?.value);
+  const lng=parseFloat(document.getElementById('sn-new-lng')?.value);
+  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS de la NAP','warning');return;}
+  const tipo=document.getElementById('sn-new-tipo')?.value||'VERTICAL';
+  const ports=parseInt(document.getElementById('sn-new-ports')?.value)||8;
+  const sportCount=parseInt(document.getElementById('sn-new-sport')?.value)||null;
+  const emplaz=document.getElementById('sn-new-emplaz')?.value||'';
+  const propPoste=document.getElementById('sn-new-propposte')?.value||'';
+  const splitter=document.getElementById('sn-new-splitter')?.value||'';
+  const estadoCaja=document.getElementById('sn-new-estado')?.value||'';
+  const ubicacion=document.getElementById('sn-new-ubicacion')?.value||'';
+  const conector=document.getElementById('sn-new-conector')?.value||'';
+  const normalizar=document.getElementById('sn-new-normalizar')?.value||'';
+  const enfrentador=document.getElementById('sn-new-enfrentador')?.value||'NO';
+  const obs=document.getElementById('sn-new-obs')?.value||'';
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+  NAPS_LIST.push({code,tipo,distrito:r?.district||'—',lat,lng,total_ports:ports,seq_ports:sportCount,emplaz,prop_poste:propPoste,splitter,estado_caja:estadoCaja,ubicacion,conector,normalizar,enfrentador});
+  const idx=_ss.napPoleIdx??(_ss.poles.length-1);
+  _ss.napData={code,tipo,lat,lng,total_ports:ports,seq_ports:sportCount,access:true,observation:obs,photos:[..._ss.napPhotos]};
+  _ss.napObs=obs;
+  _ss.poles.forEach((p,i)=>{p.nap_id=i===idx?code:null;p.nap_access=i===idx?true:null;p.nap_observation=i===idx?obs||null:null;});
+  if(r)r.nap_id=code;
+  const a=ASSIGNMENTS[_ss.clientId]; if(a){a.poles=[..._ss.poles];a.nap_found=code;}
+  _ss.napModalOpen=false; _ss.addFormOpen=false; _ss.step='cierre';
+  renderRelvStep();
+  showToast(`✓ NAP ${code} creada y vinculada al poste #${_ss.poles[idx].seq_order}`,'success');
 }
 
 function _renderPoleTimeline(){
@@ -4422,12 +4482,32 @@ function _renderAddPoleForm(){
 }
 
 function _renderNapModal(){
-  const ph=_ss.napModalPhase||'pole'; const nd=_ss.napData||{};
-  const phasePills=`<div style="display:flex;gap:0;margin-top:6px">
-    <span class="nap-mo-pill ${ph==='pole'?'act':'done'}">${ph==='nap'?`<svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}1 Selec. Poste</span>
-    <span class="nap-mo-pill ${ph==='nap'?'act':'pend'}">2 Datos NAP</span>
+  const ph=_ss.napModalPhase||'pole';
+  const fn=_ss.foundNap;
+  const sp=_ss.poles[_ss.napPoleIdx??(_ss.poles.length-1)??0];
+  const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
+
+  const phDone=(k)=>({pole:false,access:ph==='access'||ph==='search'||ph==='found'||ph==='new',search:ph==='found'||ph==='new',found:false,new:false})[k];
+  const phAct=(k)=>ph===k;
+  const phP3act=ph==='search'||ph==='found'||ph==='new';
+  const chk=`<svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const pills=`<div style="display:flex;gap:0;margin-top:6px">
+    <span class="nap-mo-pill ${ph!=='pole'?'done':phAct('pole')?'act':'pend'}">${ph!=='pole'?chk:''}1 Poste</span>
+    <span class="nap-mo-pill ${phP3act?'done':phAct('access')?'act':'pend'}">${phP3act?chk:''}2 Acceso</span>
+    <span class="nap-mo-pill ${phP3act?'act':'pend'}">3 Datos NAP</span>
   </div>`;
-  let body='',ftr='';
+
+  const poleChip=sp?`<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+    <div class="relv-tl-dot" style="width:22px;height:22px;font-size:9px;flex-shrink:0">${sp.seq_order||'?'}</div>
+    <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:var(--t1)">Poste #${sp.seq_order} · ${sp.codigo||'Sin código'}</div><div style="font-size:10px;color:var(--t2)">${sp.propietario||'—'}</div></div>
+    <button onclick="_ss.napModalPhase='pole';renderStepPoste()" style="font-size:10px;color:var(--p);background:none;border:none;cursor:pointer;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(123,110,248,.3)">Cambiar</button>
+  </div>`:'';
+
+  const volver=(toPh)=>`<button class="bs" onclick="_ss.napModalPhase='${toPh}';renderStepPoste()" style="padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Volver</button>`;
+
+  let body='',ftr='',wBox='500px';
+
+  /* ── FASE 1: SELECCIÓN DE POSTE ── */
   if(ph==='pole'){
     body=`<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">¿En qué poste está la NAP? <span class="req">*</span></div>
       ${_ss.poles.map((p,i)=>`<label class="relv-nap-pole-opt${_ss.napPoleIdx===i?' sel':''}" onclick="_ss.napPoleIdx=${i};renderStepPoste()">
@@ -4436,75 +4516,153 @@ function _renderNapModal(){
           <div style="font-size:12px;font-weight:700;color:var(--t1)">Poste #${p.seq_order} · ${p.codigo||'Sin código'}</div>
           <div style="font-size:10px;color:var(--t2)">${p.propietario||'—'}${p.is_existing?' · Inventario':''}</div>
         </div>
-        ${_ss.napPoleIdx===i?`<div style="width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>`:''}
+        ${_ss.napPoleIdx===i?`<div style="width:18px;height:18px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">${chk}</div>`:''}
       </label>`).join('')}
-      <div class="relv-save-hint">La NAP siempre está en el <strong>último poste del recorrido</strong>. Si hay dudas, selecciona el último.</div>`;
+      <div class="relv-save-hint">La NAP siempre está en el <strong>último poste del recorrido</strong>.</div>`;
     ftr=`<button class="bs" onclick="closeNapModal()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex">Cancelar</button>
-      <button class="bp" onclick="napGoToNap()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px">Siguiente <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`;
-  } else {
-    const sp=_ss.poles[_ss.napPoleIdx??0]; const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
-    body=`<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
-        <div class="relv-tl-dot" style="width:22px;height:22px;font-size:9px;flex-shrink:0">${sp?.seq_order||'?'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:700;color:var(--t1)">Poste #${sp?.seq_order} · ${sp?.codigo||'Sin código'}</div>
-          <div style="font-size:10px;color:var(--t2)">${sp?.propietario||'—'}</div>
-        </div>
-        <button onclick="_ss.napModalPhase='pole';renderStepPoste()" style="font-size:10px;color:var(--p);background:none;border:none;cursor:pointer;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid rgba(123,110,248,.3)">Cambiar</button>
+      <button class="bp" onclick="napGoToAccess()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px">Siguiente <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+
+  /* ── FASE 2: ACCESO A LA NAP ── */
+  } else if(ph==='access'){
+    const noAcc=_ss.napAcceso===false;
+    body=`${poleChip}
+      <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">¿Tienes acceso a la NAP? <span class="req">*</span></div>
+      <div class="relv-acc-row">
+        <button class="relv-acc-btn si${_ss.napAcceso===true?' sel':''}" onclick="_ss.napAcceso=true;renderStepPoste()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SÍ, TENGO ACCESO
+        </button>
+        <button class="relv-acc-btn no${noAcc?' sel':''}" onclick="_ss.napAcceso=false;renderStepPoste()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>NO, SIN ACCESO
+        </button>
       </div>
-      <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Buscar NAP existente</div>
-      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:0">
-        <div class="fl" style="margin-bottom:0;flex:1"><label>Código de la NAP</label><input type="text" id="sn-srch-code" placeholder="NAP-XXXXX / WN-230-XXXXX" value="${r?.nap_id||''}"></div>
-        <button class="bs" onclick="searchNap()" style="padding:9px 14px;font-size:11px;flex-shrink:0">Buscar</button>
+      ${noAcc?`<div style="margin-top:14px">
+        <div class="fl"><label>Motivo / Observación <span class="req">*</span></label><textarea id="sn-noacc-obs" rows="3" placeholder="Caja bloqueada, sin llave, acceso restringido, etc.">${_ss.napObs}</textarea></div>
+        <div class="relv-save-hint">Se registrará <code>nap_access = false</code> en <code>assignment_poles</code>. Se avanzará al cierre del relevamiento.</div>
+      </div>`:''}`;
+    if(_ss.napAcceso===true){
+      ftr=`${volver('pole')}<button class="bp" onclick="_ss.napModalPhase='search';renderStepPoste()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px">Buscar NAP <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+    } else if(noAcc){
+      ftr=`${volver('pole')}<button class="bp" onclick="saveNapNoAccess()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:6px;background:#F59E0B;border-color:#D97706"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Vincular sin acceso</button>`;
+    } else {
+      ftr=`${volver('pole')}<button disabled style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;opacity:.45;border-radius:8px;border:none;background:var(--bor);color:var(--t3);cursor:not-allowed">Selecciona una opción</button>`;
+    }
+
+  /* ── FASE 3: BÚSQUEDA POR CÓDIGO ── */
+  } else if(ph==='search'){
+    const expCode=r?.nap_id||'';
+    body=`${poleChip}
+      <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Buscar NAP por código</div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <div class="fl" style="margin-bottom:0;flex:1"><label>Código de la NAP <span class="req">*</span></label><input type="text" id="sn-srch-code" placeholder="WN-230-XXXXX o NAP-XXXXX" value="${expCode}" onkeydown="if(event.key==='Enter')searchNap()"></div>
+        <button class="bp" onclick="searchNap()" style="padding:9px 14px;font-size:11px;flex-shrink:0">Buscar</button>
       </div>
-      <div id="sn-search-result"></div>
-      <div style="margin-top:14px">
-        <div class="tsec">
-          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>Datos de la NAP</div>
-          <div class="fg2">
-            <div class="fl"><label>Código <span class="req">*</span></label><input type="text" id="sn-code" placeholder="NAP-XXXXX" value="${nd.code||r?.nap_id||''}"></div>
-            <div class="fl"><label>Tipo</label><input type="text" id="sn-tipo" placeholder="VERTICAL / EDIFICIO" value="${nd.tipo||''}"></div>
-            <div class="fl"><label>Total Puertos</label><input type="number" id="sn-ports" step="1" placeholder="16" value="${nd.total_ports||''}"></div>
-            <div class="fl"><label>Puertos Secuenciales</label><input type="number" id="sn-sport" step="1" placeholder="8" value="${nd.seq_ports||''}"></div>
-          </div>
+      <div class="relv-save-hint" style="margin-top:12px">El código de la NAP es único. Si existe en el inventario se mostrará su información. Si no existe, se habilitará el formulario de registro.</div>`;
+    ftr=`${volver('access')}<button class="bp" onclick="searchNap()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:5px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</button>`;
+
+  /* ── FASE 4: NAP ENCONTRADA ── */
+  } else if(ph==='found'){
+    wBox='660px';
+    const totalPorts=fn.total_ports||8;
+    const portGrid=Array.from({length:totalPorts},(_,i)=>`<div style="min-width:48px;padding:6px 10px;border-radius:8px;border:1px solid var(--bor);background:var(--bg);color:var(--t2);font-size:11px;font-weight:700;text-align:center;cursor:default">P${i+1}</div>`).join('');
+    const soloTag=`<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(16,185,129,.12);color:#10B981;margin-left:6px">Solo lectura</span>`;
+    const roFld=(l,v)=>`<div class="fl"><label>${l}</label><input readonly value="${v||'—'}" style="opacity:.75;cursor:default"></div>`;
+    const emplazMap={VERTICAL:'POSTE',EDIFICIO:'CÁMARA'};
+    body=`
+      <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><div style="font-size:13px;font-weight:800;color:var(--t1)">${fn.code}</div><div style="font-size:11px;color:var(--t2)">${fn.tipo||'—'} · ${fn.distrito||'—'}</div></div>
+        <button onclick="_ss.napModalPhase='search';renderStepPoste()" style="margin-left:auto;font-size:10px;color:var(--p);background:none;cursor:pointer;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid rgba(123,110,248,.3)">Buscar otra</button>
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Datos Geográficos y Estáticos ${soloTag}</div>
+        <div class="fg3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          ${roFld('LATITUD',parseFloat(fn.lat||0).toFixed(5))}${roFld('LONGITUD',parseFloat(fn.lng||0).toFixed(5))}${roFld('TIPO NAP',fn.tipo)}
+          ${roFld('CÓDIGO CAJA',fn.code)}${roFld('DISTRITO',fn.distrito)}${roFld('DEPARTAMENTO','LIMA')}
         </div>
-        <div class="tsec">
-          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS de la NAP <span class="req">*</span></div>
-          <div class="fg2">
-            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sn-lat" value="${nd.lat||''}" step="0.000001" placeholder="-12.0464"></div>
-            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sn-lng" value="${nd.lng||''}" step="0.000001" placeholder="-77.0428"></div>
-          </div>
-          ${_gpsBtnHtml('sn-gpsbtn',nd.lat,nd.lng,`captureGPS('sn-gpsbtn','sn-lat','sn-lng',${sp?.lat||'-12.0464'},${sp?.lng||'-77.0428'},'nap')`)}
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>Mapa de Puertos</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="background:rgba(16,185,129,.12);color:#10B981;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700">0/${totalPorts} OCUPADOS</span>
+          <span style="font-size:10px;color:var(--t3)">0% USO</span>
         </div>
-        <div class="tsec">
-          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Acceso a la NAP <span class="req">*</span></div>
-          <div class="relv-acc-row">
-            <button class="relv-acc-btn si${_ss.napAcceso===true?' sel':''}" onclick="_ss.napAcceso=true;this.parentElement.querySelectorAll('.relv-acc-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SÍ, TENGO ACCESO
-            </button>
-            <button class="relv-acc-btn no${_ss.napAcceso===false?' sel':''}" onclick="_ss.napAcceso=false;this.parentElement.querySelectorAll('.relv-acc-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>NO, SIN ACCESO
-            </button>
-          </div>
-          <div class="fl" style="margin-top:12px;margin-bottom:0"><label>Observaciones de la NAP</label><textarea id="sn-obs" rows="2" placeholder="Estado, puertos disponibles, etc.">${_ss.napObs}</textarea></div>
-        </div>
-        <div class="tsec">
-          <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotografías de la NAP</div>
-          <div class="fg2">
-            ${_pslot('sn-ph1',_ss.napPhotos[0],'sn-pinp1','Panorámica','handleNapPhoto(0,this)')}
-            ${_pslot('sn-ph2',_ss.napPhotos[1],'sn-pinp2','Puertos','handleNapPhoto(1,this)')}
-          </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${portGrid}</div>
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>Atributos Operativos ${soloTag}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          ${roFld('PUERTOS',totalPorts)}${roFld('TIPO EMPLAZAMIENTO',fn.emplaz||emplazMap[fn.tipo]||'—')}${roFld('PROPIETARIO POSTE',fn.prop_poste||sp?.propietario||'—')}
         </div>
       </div>`;
-    ftr=`<button class="bs" onclick="_ss.napModalPhase='pole';renderStepPoste()" style="padding:10px 14px;font-size:12px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Volver</button>
-      <button class="bp" onclick="saveNap()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:6px;background:#10B981;border-color:#059669"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Vincular NAP</button>`;
+    ftr=`${volver('search')}<button class="bp" onclick="saveNapExisting()" style="flex:2;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:6px;background:#10B981;border-color:#059669"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Vincular NAP con el poste</button>`;
+
+  /* ── FASE 5: NAP NUEVA ── */
+  } else if(ph==='new'){
+    wBox='660px';
+    const propOpts=DB.propietario.rows.filter(x=>x.status).map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+    body=`
+      <div style="background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(251,146,60,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F59E0B" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div><div style="font-size:12px;font-weight:800;color:var(--t1)">Nueva NAP</div><div style="font-size:11px;color:var(--t2)">No encontrada — completa el formulario</div></div>
+        <button onclick="_ss.napModalPhase='search';renderStepPoste()" style="margin-left:auto;font-size:10px;color:var(--t3);background:none;cursor:pointer;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--bor)">Buscar otra</button>
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Datos Geográficos y Estáticos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0">
+          <div class="fl"><label>LATITUD <span class="req">*</span></label><input type="number" id="sn-new-lat" step="0.000001" placeholder="-12.0464"></div>
+          <div class="fl"><label>LONGITUD <span class="req">*</span></label><input type="number" id="sn-new-lng" step="0.000001" placeholder="-77.0428"></div>
+          <div class="fl"><label>TIPO NAP</label><select id="sn-new-tipo"><option value="VERTICAL">VERTICAL</option><option value="EDIFICIO">EDIFICIO</option><option value="SUBTERRÁNEO">SUBTERRÁNEO</option></select></div>
+          <div class="fl" style="grid-column:span 2"><label>CÓDIGO CAJA <span class="req">*</span></label><input type="text" id="sn-new-code" placeholder="WN-230-XXXXX o NAP-XXXXX" style="text-transform:uppercase"></div>
+          <div class="fl"><label>DISTRITO</label><input type="text" id="sn-new-distrito" placeholder="San Isidro"></div>
+        </div>
+        ${_gpsBtnHtml('sn-new-gpsbtn',null,null,`captureGPS('sn-new-gpsbtn','sn-new-lat','sn-new-lng',${sp?.lat||'-12.0464'},${sp?.lng||'-77.0428'},'nap')`)}
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>Atributos Operativos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="fl"><label>PUERTOS</label><select id="sn-new-ports"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option><option value="32">32</option><option value="48">48</option><option value="96">96</option></select></div>
+          <div class="fl"><label>TIPO EMPLAZAMIENTO</label><select id="sn-new-emplaz"><option value="">Seleccionar...</option><option>CÁMARA</option><option>EDIFICIO</option><option>POSTE</option><option>CÁMARA SUMIDERO</option><option>AÉREO</option></select></div>
+          <div class="fl"><label>PROPIETARIO POSTE</label><select id="sn-new-propposte"><option value="">Seleccionar...</option>${propOpts}</select></div>
+        </div>
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Datos Adicionales</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="fl"><label>SPLITTER</label><select id="sn-new-splitter"><option value="">Seleccionar...</option><option>SÍ</option><option>NO</option></select></div>
+          <div class="fl"><label>ESTADO DE CAJA</label><select id="sn-new-estado"><option value="">Seleccionar...</option><option>BUENO</option><option>REGULAR</option><option>MALO</option></select></div>
+          <div class="fl"><label>UBICACIÓN</label><select id="sn-new-ubicacion"><option value="">Seleccionar...</option><option>AÉREO</option><option>SUBTERRÁNEO</option><option>EMPOTRADO</option><option>FACHADA</option></select></div>
+          <div class="fl"><label>CONECTOR</label><select id="sn-new-conector"><option value="">Seleccionar...</option><option>SC/APC</option><option>SC/UPC</option><option>LC/APC</option><option>FC/APC</option></select></div>
+          <div class="fl"><label>NORMALIZAR</label><select id="sn-new-normalizar"><option value="">Seleccionar...</option><option>SÍ</option><option>NO</option></select></div>
+          <div class="fl"><label>ENFRENTADOR (FRENTE CALLE)</label><select id="sn-new-enfrentador"><option value="NO">NO</option><option value="SÍ">SÍ</option></select></div>
+          <div class="fl" style="grid-column:span 3"><label>OBSERVACIONES</label><textarea id="sn-new-obs" rows="2" placeholder="Estado general, hallazgos, etc."></textarea></div>
+        </div>
+      </div>
+
+      <div class="tsec">
+        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Evidencia Fotográfica</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+          ${_pslot('sn-ph1',_ss.napPhotos[0],'sn-pinp1','Panorámica Poste','handleNapPhoto(0,this)')}
+          ${_pslot('sn-ph2',_ss.napPhotos[1],'sn-pinp2','Panorámica NAP','handleNapPhoto(1,this)')}
+          ${_pslot('sn-ph3',_ss.napPhotos[2],'sn-pinp3','Puertos','handleNapPhoto(2,this)')}
+          ${_pslot('sn-ph4',_ss.napPhotos[3],'sn-pinp4','Fibras Etiquetadas','handleNapPhoto(3,this)')}
+        </div>
+      </div>`;
+    ftr=`${volver('search')}<button class="bp" onclick="saveNapNew()" style="flex:2;padding:10px;font-size:12px;justify-content:center;display:flex;align-items:center;gap:6px;background:#10B981;border-color:#059669"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Guardar y vincular</button>`;
   }
+
   return `<div class="nap-mo">
     <div class="nap-mo-bg" onclick="closeNapModal()"></div>
-    <div class="nap-mo-box">
+    <div class="nap-mo-box" style="max-width:${wBox}">
       <div class="nap-mo-hdr">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--t1)">Sincronizar NAP</div>
-          ${phasePills}
+          ${pills}
         </div>
         <button onclick="closeNapModal()" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -4796,26 +4954,14 @@ function searchNap(){
   const code=document.getElementById('sn-srch-code')?.value.trim().toUpperCase();
   if(!code){showToast('⚠ Ingresa el código de la NAP','warning');return;}
   const found=NAPS_LIST.find(n=>n.code.toUpperCase()===code||n.code.toUpperCase().includes(code));
-  const res=document.getElementById('sn-search-result');
-  if(!res)return;
   if(found){
-    res.innerHTML=`<div class="relv-found-card">
-      <div style="font-size:11px;font-weight:700;color:#065F46;display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>NAP encontrada</div>
-      <div style="font-size:11px;color:var(--t2)"><strong style="color:var(--t1)">${found.code}</strong> · ${found.tipo} · ${found.distrito}</div>
-      <button class="bp" onclick="useFoundNap('${found.code}')" style="font-size:11px;padding:6px 12px;margin-top:8px">Usar esta NAP</button>
-    </div>`;
+    _ss.foundNap=found; _ss.napModalPhase='found';
+    renderStepPoste();
   } else {
-    res.innerHTML=`<div style="margin-top:8px;font-size:11px;color:var(--t3);font-style:italic">NAP no encontrada — completa el formulario</div>`;
+    _ss.foundNap=null; _ss.napModalPhase='new';
+    renderStepPoste();
+    showToast('NAP no encontrada — completa el formulario para registrarla','warning');
   }
-}
-
-function useFoundNap(code){
-  const n=NAPS_LIST.find(x=>x.code===code);
-  if(!n)return;
-  _ss.napData={code:n.code,tipo:n.tipo,lat:n.lat,lng:n.lng,total_ports:16,seq_ports:8};
-  _ss.napModalPhase='nap';
-  renderStepPoste();
-  showToast('✓ Datos de la NAP cargados','success');
 }
 
 function handleNapPhoto(n,inp){
