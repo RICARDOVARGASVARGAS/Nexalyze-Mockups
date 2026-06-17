@@ -486,6 +486,7 @@
     .relev-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.08);border-color:var(--p)}
     .relev-pend{border-left:4px solid #3B82F6}
     .relev-prog{border-left:4px solid #F97316}
+    .relev-done{border-left:4px solid #10B981}
     .rc-top{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 0}
     .rc-code{font-size:11px;font-weight:800;color:var(--p);letter-spacing:.04em}
     .rc-addr{padding:7px 14px 10px;font-size:12px;font-weight:600;color:var(--t1);line-height:1.45}
@@ -554,6 +555,20 @@
     .relv-det-sec{padding:4px 16px 14px}
     .relv-det-sec-hdr{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin:12px 0 8px;padding-top:4px;border-top:1px solid var(--bor)}
     .relv-det-sec-hdr:first-child{border-top:none;margin-top:0;padding-top:0}
+    /* Completed assignment route view */
+    .rc-map-wrap{border-radius:14px;overflow:hidden;height:340px;position:relative;background:var(--bg);border:1px solid var(--bor)}
+    .rc-stat-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+    .rc-stat{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:10px 14px;text-align:center}
+    .rc-stat-val{font-size:20px;font-weight:800;color:var(--t1);line-height:1.1}
+    .rc-stat-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:3px}
+    .rc-pole-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--bor);position:relative}
+    .rc-pole-row:last-child{border-bottom:none}
+    .rc-pole-spine{position:absolute;left:26px;top:0;bottom:-1px;width:2px;background:var(--bor);z-index:0}
+    .rc-pole-dot{width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1}
+    .rc-pole-dot.dom{background:#3B82F6}
+    .rc-pole-dot.nap{background:#10B981}
+    .rc-nap{display:inline-flex;padding:1px 7px;border-radius:20px;background:rgba(16,185,129,.12);color:#10B981;font-size:9px;font-weight:700;letter-spacing:.05em}
+    @media(max-width:768px){.rc-stat-bar{grid-template-columns:repeat(2,1fr)}}
     .relv-tip-wrap{position:relative;display:inline-flex;vertical-align:middle}
     .relv-tip-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--bor);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s;flex-shrink:0;padding:0}
     .relv-tip-btn:hover,.relv-tip-btn.open{border-color:var(--p);color:var(--p);background:var(--pb)}
@@ -2145,33 +2160,74 @@ const TECHNICIANS=[
 ];
 // client_id → {technician_id, status, assigned_at}
 const ASSIGNMENTS={
-  1: {technician_id:1, status:'completado',  assigned_at:'2025-01-10'},
+  1: {technician_id:1, status:'completado', assigned_at:'2025-01-10', started_at:'2025-01-11', closed_at:'2025-01-11', access:true, gpsLat:-12.09790, gpsLng:-77.02980, iea_km:2.4, attenuation_db:4.8, nap_found:'NAP-00001',
+      fachada:['https://picsum.photos/seed/fach1a/600/400','https://picsum.photos/seed/fach1b/600/400'],
+      poles:[
+        {seq_order:1,codigo:'POL-0003',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0920,lng:-77.0320,access:true,is_existing:true,nap_id:null,nap_access:null,nap_observation:null},
+        {seq_order:2,codigo:'POL-0007',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'OPERATIVO',lat:-12.0800,lng:-77.0370,access:true,is_existing:true,nap_id:null,nap_access:null,nap_observation:null},
+        {seq_order:3,codigo:'POL-0011',propietario:'WIN',  material:'MADERA',         condition:'REGULAR',lat:-12.0680,lng:-77.0410,access:true,is_existing:false,nap_id:'NAP-00001',nap_access:true,nap_observation:'NAP accesible, 8 puertos disponibles'},
+      ]},
   2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15', started_at:'2025-03-16', access:true, gpsLat:-12.1186, gpsLng:-77.0292, fachada:['https://picsum.photos/seed/fach2a/600/400','https://picsum.photos/seed/fach2b/600/400'], poles:[
     {pole_id:2,existingId:2,is_existing:true,seq_order:1,codigo:'POL-0002',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.0833,lng:-77.0353,access:true},
     {pole_id:17,existingId:17,is_existing:true,seq_order:2,codigo:'POL-0017',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.1271,lng:-77.0310,access:true},
   ]},
   5: {technician_id:4, status:'pendiente',   assigned_at:'2025-04-02'},
-  6: {technician_id:4, status:'completado',  assigned_at:'2025-02-28'},
+  6: {technician_id:4, status:'completado', assigned_at:'2025-02-28', started_at:'2025-02-28', closed_at:'2025-02-28', access:true, gpsLat:-12.11840, gpsLng:-77.02900, iea_km:1.8, attenuation_db:3.6, nap_found:'WN-230-2247119',
+      fachada:['https://picsum.photos/seed/fach6a/600/400',null],
+      poles:[
+        {seq_order:1,codigo:'POL-0005',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1130,lng:-77.0310,access:true,is_existing:true,nap_id:null,nap_access:null},
+        {seq_order:2,codigo:'POL-0012',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1060,lng:-77.0320,access:true,is_existing:true,nap_id:'WN-230-2247119',nap_access:true,nap_observation:'Puertos libres: 4'},
+      ]},
   7: {technician_id:3, status:'pendiente',   assigned_at:'2025-04-10'},
   9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18', started_at:'2025-04-19', access:true, gpsLat:-12.1299, gpsLng:-77.0065, fachada:['https://picsum.photos/seed/fach9a/600/400',null], poles:[
     {existingId:1,seq_order:1,codigo:'POL-0001',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1011,lng:-77.0398,has_nap:false},
     {existingId:9,seq_order:2,codigo:'POL-0009',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'REGULAR',lat:-12.0654,lng:-77.0484,has_nap:false},
     {existingId:15,seq_order:3,codigo:'POL-0015',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1256,lng:-77.0292,has_nap:false},
   ]},
-  11:{technician_id:3, status:'completado',  assigned_at:'2025-01-22'},
-  12:{technician_id:5, status:'fallido',     assigned_at:'2025-03-05'},
-  15:{technician_id:2, status:'completado',  assigned_at:'2025-02-10'},
-  18:{technician_id:3, status:'fallido',     assigned_at:'2025-03-20'},
+  11:{technician_id:3, status:'completado', assigned_at:'2025-01-22', started_at:'2025-01-23', closed_at:'2025-01-23', access:true, gpsLat:-12.10110, gpsLng:-77.00250, iea_km:3.1, attenuation_db:6.2, nap_found:'WN-230-2049378',
+      fachada:['https://picsum.photos/seed/fach11a/600/400','https://picsum.photos/seed/fach11b/600/400'],
+      poles:[
+        {seq_order:1,codigo:'POL-0020',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1040,lng:-77.0060,access:true,is_existing:true,nap_id:null,nap_access:null},
+        {seq_order:2,codigo:'POL-0021',propietario:'ENTEL',material:'MADERA',         condition:'REGULAR',lat:-12.1090,lng:-77.0150,access:true,is_existing:true,nap_id:null,nap_access:null},
+        {seq_order:3,codigo:'POL-0022',propietario:'WIN',  material:'CONCRETO ARMADO',condition:'OPERATIVO',lat:-12.1120,lng:-77.0250,access:true,is_existing:false,nap_id:'WN-230-2049378',nap_access:true,nap_observation:''},
+      ]},
+  12:{technician_id:5, status:'fallido',     assigned_at:'2025-03-05', access:false, failed_reason:'Domicilio cerrado, sin respuesta. Se intentó en 3 ocasiones.',gpsLat:-12.0780,gpsLng:-77.0850},
+  15:{technician_id:2, status:'completado', assigned_at:'2025-02-10', started_at:'2025-02-10', closed_at:'2025-02-10', access:true, gpsLat:-12.09590, gpsLng:-77.04254, iea_km:0.9, attenuation_db:1.8, nap_found:'WN-230-1303500',
+      fachada:['https://picsum.photos/seed/fach15/600/400',null],
+      poles:[
+        {seq_order:1,codigo:'POL-0030',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0980,lng:-77.0413,access:true,is_existing:true,nap_id:'WN-230-1303500',nap_access:true,nap_observation:''},
+      ]},
+  18:{technician_id:3, status:'fallido',     assigned_at:'2025-03-20', access:false, failed_reason:'Edificio con seguridad, no permitió el acceso.',gpsLat:-12.0650,gpsLng:-77.0300},
   20:{technician_id:1, status:'en_progreso', assigned_at:'2025-04-25', started_at:'2025-04-26', access:true, gpsLat:-12.1102, gpsLng:-77.0046, fachada:['https://picsum.photos/seed/fach20/600/400',null], poles:[
     {existingId:4,seq_order:1,codigo:'POL-0004',propietario:'LUZ DEL SUR',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1081,lng:-77.0147,has_nap:false},
   ]},
-  22:{technician_id:4, status:'completado',  assigned_at:'2025-01-30'},
+  22:{technician_id:4, status:'completado', assigned_at:'2025-01-30', started_at:'2025-01-31', closed_at:'2025-01-31', access:true, gpsLat:-12.09650, gpsLng:-77.02300, iea_km:1.5, attenuation_db:3.0, nap_found:'WN-20A-2208089',
+      fachada:['https://picsum.photos/seed/fach22/600/400',null],
+      poles:[
+        {seq_order:1,codigo:'POL-0040',propietario:'WIN',material:'CONCRETO ARMADO',condition:'OPERATIVO',lat:-12.0960,lng:-77.0240,access:true,is_existing:true,nap_id:null,nap_access:null},
+        {seq_order:2,codigo:'POL-0041',propietario:'WIN',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0955,lng:-77.0235,access:true,is_existing:true,nap_id:'WN-20A-2208089',nap_access:true,nap_observation:''},
+      ]},
   25:{technician_id:5, status:'pendiente',   assigned_at:'2025-04-12'},
   27:{technician_id:2, status:'en_progreso', assigned_at:'2025-04-20', started_at:'2025-04-21', access:true, gpsLat:-12.0016, gpsLng:-77.0064, fachada:['https://picsum.photos/seed/fach27/600/400',null], poles:[]},
-  30:{technician_id:1, status:'completado',  assigned_at:'2025-02-05'},
+  30:{technician_id:1, status:'completado', assigned_at:'2025-02-05', started_at:'2025-02-06', closed_at:'2025-02-06', access:true, gpsLat:-12.09233, gpsLng:-77.02761, iea_km:2.2, attenuation_db:4.4, nap_found:'WN-230-1495546',
+      fachada:['https://picsum.photos/seed/fach30a/600/400','https://picsum.photos/seed/fach30b/600/400'],
+      poles:[
+        {seq_order:1,codigo:'POL-0050',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0940,lng:-77.0280,access:true,is_existing:true,nap_id:null,nap_access:null},
+        {seq_order:2,codigo:'POL-0051',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0936,lng:-77.0278,access:true,is_existing:false,nap_id:'WN-230-1495546',nap_access:true,nap_observation:'8 puertos libres'},
+      ]},
   33:{technician_id:3, status:'fallido',     assigned_at:'2025-03-28'},
   34:{technician_id:5, status:'cancelado',   assigned_at:'2025-04-01'},
 };
+
+/* ── ROUTES (caché geográfico generado al cerrar el relevamiento) ── */
+function _buildRoutePoints(a,r){
+  const pts=[];
+  if(a.gpsLat&&a.gpsLng) pts.push([a.gpsLat,a.gpsLng]);
+  (a.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order).forEach(p=>{if(p.lat&&p.lng)pts.push([p.lat,p.lng]);});
+  const napCode=a.nap_found||(r?.nap_id);
+  if(napCode){const n=NAPS_LIST.find(x=>x.code===napCode);if(n)pts.push([n.lat,n.lng]);}
+  return pts;
+}
 
 /* ════════════════════════════════ STATE ═══ */
 let CV='inicio', CT=null, editId=null, delId=null, SQ='', CP=1, PS=15;
@@ -3633,14 +3689,17 @@ function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')rend
 /* ════════════════════════════════ RELEVAMIENTO ═══ */
 function renderRelevamiento(){
   const all=[...DB.clientes.rows];
-  const active=all.filter(c=>{const s=ASSIGNMENTS[c.id]?.status;return s==='pendiente'||s==='en_progreso';});
-  const pend=active.filter(c=>ASSIGNMENTS[c.id]?.status==='pendiente').length;
-  const prog=active.filter(c=>ASSIGNMENTS[c.id]?.status==='en_progreso').length;
+  const getS=c=>ASSIGNMENTS[c.id]?.status;
+  const withAssign=all.filter(c=>ASSIGNMENTS[c.id]);
+  const pend=withAssign.filter(c=>getS(c)==='pendiente').length;
+  const prog=withAssign.filter(c=>getS(c)==='en_progreso').length;
+  const comp=withAssign.filter(c=>getS(c)==='completado').length;
 
   let rows;
-  if(relvFilt==='pendiente')    rows=active.filter(c=>ASSIGNMENTS[c.id]?.status==='pendiente');
-  else if(relvFilt==='en_progreso') rows=active.filter(c=>ASSIGNMENTS[c.id]?.status==='en_progreso');
-  else rows=[...active];
+  if(relvFilt==='pendiente')     rows=withAssign.filter(c=>getS(c)==='pendiente');
+  else if(relvFilt==='en_progreso') rows=withAssign.filter(c=>getS(c)==='en_progreso');
+  else if(relvFilt==='completado')  rows=withAssign.filter(c=>getS(c)==='completado');
+  else rows=withAssign.filter(c=>['pendiente','en_progreso','completado'].includes(getS(c)));
 
   if(SQ){
     const q=SQ.toLowerCase();
@@ -3648,15 +3707,78 @@ function renderRelevamiento(){
   }
 
   const chips=[
-    {key:'all',        lbl:'Todos',       cnt:pend+prog},
-    {key:'pendiente',  lbl:'Pendiente',   cnt:pend},
-    {key:'en_progreso',lbl:'En Progreso', cnt:prog},
+    {key:'all',         lbl:'Todos',       cnt:pend+prog+comp},
+    {key:'pendiente',   lbl:'Pendiente',   cnt:pend},
+    {key:'en_progreso', lbl:'En Progreso', cnt:prog},
+    {key:'completado',  lbl:'Completado',  cnt:comp},
   ];
+
+  const mkCard=(r)=>{
+    const a=ASSIGNMENTS[r.id];
+    const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
+    const isP=a.status==='pendiente';
+    const isDone=a.status==='completado';
+    const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
+    const borderCls=isP?'relev-pend':isDone?'relev-done':'relev-prog';
+    const statCls=isP?'as-pend':isDone?'as-done':'as-prog';
+    const statLbl=isP?'Pendiente':isDone?'Completado':'En Progreso';
+    const avBg=isP?'#DBEAFE':isDone?'rgba(16,185,129,.15)':'#FFEDD5';
+    const avCol=isP?'#1D4ED8':isDone?'#10B981':'#C2410C';
+
+    const napRow=a.nap_found
+      ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${a.nap_found}</span></div>`
+      :r.nap_id
+        ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${r.nap_id}</span></div>`
+        :`<div class="rc-row" style="color:var(--t3);font-style:italic;font-size:10px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sin NAP asignada</div>`;
+
+    const doneMetrics=isDone?`<div style="display:flex;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(16,185,129,.2)">
+      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
+        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <strong style="color:var(--t1)">${a.iea_km!=null?a.iea_km.toFixed(1):'—'}</strong> km
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
+        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <strong style="color:var(--t1)">${a.attenuation_db!=null?a.attenuation_db.toFixed(1):'—'}</strong> dB
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
+        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><circle cx="12" cy="12" r="2"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+        <strong style="color:var(--t1)">${(a.poles||[]).length}</strong> postes
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#10B981;margin-left:auto">
+        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver ruta
+      </div>
+    </div>`:'';
+
+    return `<div class="relev-card ${borderCls}" onclick="openRelvDetail(${r.id})" style="cursor:pointer">
+      <div class="rc-top">
+        <span class="rc-code">${r.object_id}</span>
+        <span class="asign-stat ${statCls}">${statLbl}</span>
+      </div>
+      <div class="rc-addr">${r.address}</div>
+      <div class="rc-meta">
+        <div class="rc-row">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${r.district||'—'}
+        </div>
+        <div class="rc-row">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${tec?`<span style="font-weight:600;color:var(--t1)">${tec.name}</span> <span style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</span>`:'<span style="color:var(--t3);font-style:italic">Sin técnico</span>'}
+        </div>
+        ${napRow}
+      </div>
+      ${doneMetrics}
+      <div class="rc-footer">
+        <span class="rc-date">${isDone?'Cerrado: '+(a.closed_at||a.assigned_at):'Asignado: '+a.assigned_at}</span>
+        <div style="width:22px;height:22px;border-radius:50%;background:${avBg};color:${avCol};font-weight:800;font-size:8px;display:flex;align-items:center;justify-content:center">${ini}</div>
+      </div>
+    </div>`;
+  };
 
   document.getElementById('view-relevamiento').innerHTML=`
   <div class="stats">
     <div class="sc sv">
-      <div><div class="sc-num">${active.length}</div><div class="sc-lbl">Para Relevar</div><div class="sc-sub">Activos en campo</div></div>
+      <div><div class="sc-num">${pend+prog}</div><div class="sc-lbl">En Campo</div><div class="sc-sub">Pendiente + En progreso</div></div>
       <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
     </div>
     <div class="sc" style="border-left-color:#3B82F6">
@@ -3667,12 +3789,16 @@ function renderRelevamiento(){
       <div><div class="sc-num" style="color:#F97316">${prog}</div><div class="sc-lbl">En Progreso</div><div class="sc-sub">Ya iniciados</div></div>
       <div class="sc-ico" style="background:#FFF7ED;color:#F97316"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
     </div>
+    <div class="sc" style="border-left-color:#10B981">
+      <div><div class="sc-num" style="color:#10B981">${comp}</div><div class="sc-lbl">Completados</div><div class="sc-sub">Con ruta registrada</div></div>
+      <div class="sc-ico" style="background:#ECFDF5;color:#10B981"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+    </div>
   </div>
   <div class="card">
     <div class="card-hdr">
       <div class="card-hl">
         <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-        <div><div class="ctit">Relevamiento de Clientes</div><div class="csub">Asignaciones activas — pendiente y en progreso</div></div>
+        <div><div class="ctit">Relevamiento de Clientes</div><div class="csub">Pendientes, en progreso y completados</div></div>
       </div>
     </div>
     <div style="padding:12px 18px 14px;border-bottom:1px solid var(--bor)">
@@ -3692,42 +3818,11 @@ function renderRelevamiento(){
     </div>
     ${rows.length?`
     <div class="relev-grid">
-      ${rows.map(r=>{
-        const a=ASSIGNMENTS[r.id];
-        const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
-        const isP=a.status==='pendiente';
-        const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-        return `<div class="relev-card ${isP?'relev-pend':'relev-prog'}" onclick="openRelvDetail(${r.id})" style="cursor:pointer">
-          <div class="rc-top">
-            <span class="rc-code">${r.object_id}</span>
-            <span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>
-          </div>
-          <div class="rc-addr">${r.address}</div>
-          <div class="rc-meta">
-            <div class="rc-row">
-              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              ${r.district||'—'}
-            </div>
-            <div class="rc-row">
-              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              ${tec?`<span style="font-weight:600;color:var(--t1)">${tec.name}</span> <span style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</span>`:'<span style="color:var(--t3);font-style:italic">Sin técnico</span>'}
-            </div>
-            ${r.nap_id
-              ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${r.nap_id}</span></div>`
-              :`<div class="rc-row" style="color:var(--t3);font-style:italic;font-size:10px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sin NAP asignada</div>`}
-          </div>
-          <div class="rc-footer">
-            <span class="rc-date">Asignado: ${a.assigned_at}</span>
-            <div style="display:flex;align-items:center;gap:5px">
-              <div style="width:22px;height:22px;border-radius:50%;background:${isP?'#DBEAFE':'#FFEDD5'};color:${isP?'#1D4ED8':'#C2410C'};font-weight:800;font-size:8px;display:flex;align-items:center;justify-content:center">${ini}</div>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
+      ${rows.map(r=>mkCard(r)).join('')}
     </div>`:`
     <div style="text-align:center;padding:60px 20px">
       <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="var(--bor)" stroke-width="1.5" style="margin-bottom:12px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)">Sin asignaciones activas</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)">Sin resultados</div>
     </div>`}
   </div>`;
 }
@@ -3748,10 +3843,223 @@ function openRelvDetail(clientId){
   setTimeout(()=>renderRelvDetail(clientId),500);
 }
 
+function renderRelvComplete(clientId){
+  _relvClientId=clientId;
+  const r=DB.clientes.rows.find(x=>x.id===clientId);
+  const a=ASSIGNMENTS[clientId];
+  const tec=TECHNICIANS.find(t=>t.id===a?.technician_id);
+  const poles=(a?.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
+  const napCode=a?.nap_found||(r?.nap_id);
+  const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
+  const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
+  const vEl=document.getElementById('view-relev-detail');
+  if(!vEl)return;
+
+  const condBadge=(c)=>{
+    if(!c)return '';
+    const m={OPERATIVO:'#10B981',BUENO:'#3B82F6',REGULAR:'#F59E0B',CRÍTICO:'#EF4444',EXCELENTE:'#10B981'};
+    const col=m[c?.toUpperCase()]||'var(--t3)';
+    return `<span style="display:inline-flex;padding:1px 6px;border-radius:20px;font-size:8px;font-weight:700;background:${col}22;color:${col}">${c}</span>`;
+  };
+
+  const poleRow=(p,isLast)=>`
+    <div class="rc-pole-row">
+      ${!isLast?`<div class="rc-pole-spine"></div>`:''}
+      <div class="rc-pole-dot${p.nap_id?' nap':''}">${p.nap_id?'NAP':p.seq_order}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:700;color:var(--t1)">Poste #${p.seq_order}</span>
+          <span style="font-size:11px;color:var(--t2)">${p.codigo||'Sin código'}</span>
+          ${condBadge(p.condition)}
+          ${p.is_existing?'':'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:20px;background:rgba(251,146,60,.12);color:#C2410C">Nuevo</span>'}
+        </div>
+        <div style="font-size:10px;color:var(--t2);margin-top:2px">${p.propietario||'—'}${p.material?' · '+p.material:''}</div>
+        ${p.lat&&p.lng?`<div style="font-size:9px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(p.lat).toFixed(5)}, ${parseFloat(p.lng).toFixed(5)}</div>`:''}
+        ${p.nap_id?`<div style="margin-top:4px"><span class="rc-nap">${p.nap_id}</span>${p.nap_observation?`<span style="font-size:10px;color:var(--t2);margin-left:7px">${p.nap_observation}</span>`:''}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${p.access!==false?'<span style="font-size:9px;color:#10B981;font-weight:600">Con acceso</span>':'<span style="font-size:9px;color:#EF4444;font-weight:600">Sin acceso</span>'}
+      </div>
+    </div>`;
+
+  vEl.innerHTML=`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="bs" style="padding:5px 11px;font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0" onclick="navTo('relevamiento')">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Volver
+    </button>
+    <span style="font-size:11px;color:var(--t3)">Relevamiento /</span>
+    <span style="font-size:11px;font-weight:700;color:var(--t1)">${r.object_id}</span>
+    <span class="asign-stat as-done">Completado</span>
+    <span style="font-size:10px;color:var(--t3);margin-left:auto">${a?.closed_at?'Cerrado: '+a.closed_at:''}</span>
+  </div>
+
+  <!-- MAPA DE RUTA -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="padding:12px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Ruta del Relevamiento</div>
+        <div style="font-size:11px;color:var(--t3)">Domicilio → ${poles.length} poste${poles.length!==1?'s':''} → NAP · <code style="font-size:10px">${r.object_id}</code></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--t2)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#3B82F6;display:inline-block"></span>Domicilio</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#7B6EF8;display:inline-block"></span>Postes</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#10B981;display:inline-block"></span>NAP</span>
+      </div>
+    </div>
+    <div style="padding:14px 16px">
+      <div class="rc-map-wrap" id="rc-route-map"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="rc-stat-bar">
+    <div class="rc-stat">
+      <div class="rc-stat-val">${a?.iea_km!=null?a.iea_km.toFixed(1)+'<span style="font-size:13px;color:var(--t2)"> km</span>':'—'}</div>
+      <div class="rc-stat-lbl">Distancia IEA</div>
+    </div>
+    <div class="rc-stat">
+      <div class="rc-stat-val">${a?.attenuation_db!=null?a.attenuation_db.toFixed(1)+'<span style="font-size:13px;color:var(--t2)"> dB</span>':'—'}</div>
+      <div class="rc-stat-lbl">Atenuación</div>
+    </div>
+    <div class="rc-stat">
+      <div class="rc-stat-val">${poles.length}</div>
+      <div class="rc-stat-lbl">Postes relevados</div>
+    </div>
+    <div class="rc-stat">
+      <div class="rc-stat-val" style="font-size:14px">${napCode?`<span class="rc-nap" style="font-size:10px">${napCode}</span>`:'—'}</div>
+      <div class="rc-stat-lbl">NAP vinculada</div>
+    </div>
+  </div>
+
+  <!-- RECORRIDO + INFO -->
+  <div class="relv-det-grid">
+    <!-- Recorrido de postes -->
+    <div class="card">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">Recorrido de Postes</div>
+        <div style="font-size:11px;color:var(--t3)">Secuencia registrada en campo</div>
+      </div>
+      <div>
+        <!-- Domicilio row -->
+        <div class="rc-pole-row">
+          <div class="rc-pole-spine"></div>
+          <div class="rc-pole-dot dom">D</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--t1)">Domicilio</div>
+            <div style="font-size:10px;color:var(--t2)">${r.address||'—'}</div>
+            ${a.gpsLat&&a.gpsLng?`<div style="font-size:9px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</div>`:''}
+          </div>
+          <span style="font-size:9px;color:#10B981;font-weight:600">Con acceso</span>
+        </div>
+        <!-- Poles -->
+        ${poles.map((p,i)=>poleRow(p,i===poles.length-1&&!nap)).join('')}
+        <!-- NAP row -->
+        ${nap?`<div class="rc-pole-row">
+          <div class="rc-pole-dot nap">NAP</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--t1)">${nap.code}</div>
+            <div style="font-size:10px;color:var(--t2)">${nap.tipo||'—'} · ${nap.distrito||'—'}</div>
+            <div style="font-size:9px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(nap.lat).toFixed(5)}, ${parseFloat(nap.lng).toFixed(5)}</div>
+          </div>
+        </div>`:''}
+        ${!poles.length?`<div style="padding:16px;font-size:11px;color:var(--t3);font-style:italic;text-align:center">Sin postes registrados</div>`:''}
+      </div>
+    </div>
+
+    <!-- Info técnico + cliente -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Técnico -->
+      <div class="card">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Técnico de Campo</div>
+        </div>
+        <div style="padding:12px 16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);color:#10B981;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--t1)">${tec?tec.name:'—'}</div>
+              ${tec?`<div style="font-size:9px;color:var(--p);font-weight:700">${tec.code} · ${tec.zone}</div>`:''}
+            </div>
+          </div>
+          ${[
+            ['Asignado',a?.assigned_at||'—'],
+            ['Iniciado',a?.started_at||'—'],
+            ['Cerrado',a?.closed_at||'—'],
+            ['Acceso domicilio',a?.access!==false?'<span style="color:#10B981;font-weight:600">Con acceso</span>':'<span style="color:#EF4444;font-weight:600">Sin acceso</span>'],
+          ].map(([l,v])=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);min-width:90px;flex-shrink:0;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1)">${v}</span></div>`).join('')}
+        </div>
+      </div>
+      <!-- Cliente + fotos -->
+      <div class="card">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Cliente Relevado</div>
+        </div>
+        <div style="padding:12px 16px">
+          ${[
+            ['ID',r.object_id],
+            ['Dirección',r.address||'—'],
+            ['Distrito',r.district||'—'],
+          ].map(([l,v])=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);min-width:70px;flex-shrink:0;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1)">${v}</span></div>`).join('')}
+          ${(a?.fachada||[]).some(Boolean)?`
+          <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:12px 0 8px">Fotos de fachada</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            ${(a.fachada||[null,null]).map((src,i)=>src
+              ?`<div style="border-radius:8px;overflow:hidden;height:90px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+              :`<div style="height:90px;border-radius:8px;border:1px dashed var(--bor);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
+            ).join('')}
+          </div>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  /* ── Inicializar mapa Leaflet ── */
+  setTimeout(()=>{
+    const el=document.getElementById('rc-route-map');
+    if(!el)return;
+    if(el._leafletMap){el._leafletMap.remove();el._leafletMap=null;}
+    const pts=_buildRoutePoints(a,r);
+    if(!pts.length){el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:12px">Sin coordenadas registradas</div>';return;}
+    const map=L.map(el,{zoomControl:true,scrollWheelZoom:false});
+    el._leafletMap=map;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+
+    /* Polilínea principal */
+    const line=L.polyline(pts,{color:'#7B6EF8',weight:4,opacity:.9,dashArray:null}).addTo(map);
+
+    const mkIcon=(color,label,size=28)=>L.divIcon({className:'',iconAnchor:[size/2,size/2],iconSize:[size,size],
+      html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:${size<30?9:10}px;font-weight:800;line-height:1">${label}</div>`});
+
+    /* Domicilio */
+    L.marker(pts[0],{icon:mkIcon('#3B82F6','D',30)}).addTo(map).bindPopup(`<b>Domicilio</b><br>${r.address||''}`);
+
+    /* Postes */
+    poles.forEach((p,i)=>{
+      const coord=[p.lat,p.lng];
+      if(!p.lat||!p.lng)return;
+      const color=p.nap_id?'#10B981':'#7B6EF8';
+      L.marker(coord,{icon:mkIcon(color,p.nap_id?'NAP':p.seq_order,28)}).addTo(map)
+        .bindPopup(`<b>Poste #${p.seq_order}</b> ${p.codigo||''}<br>${p.propietario||''}${p.nap_id?'<br><b style="color:#10B981">'+p.nap_id+'</b>':''}`);
+    });
+
+    /* NAP */
+    if(nap&&nap.lat&&nap.lng){
+      L.marker([nap.lat,nap.lng],{icon:mkIcon('#10B981','NAP',32)}).addTo(map)
+        .bindPopup(`<b>NAP: ${nap.code}</b><br>${nap.tipo||''} · ${nap.distrito||''}`);
+    }
+
+    map.fitBounds(line.getBounds(),{padding:[24,24]});
+  },120);
+}
+
 function renderRelvDetail(clientId){
   _relvClientId=clientId;
   const r=DB.clientes.rows.find(x=>x.id===clientId);
   const a=ASSIGNMENTS[clientId];
+
+  /* Asignaciones completadas → vista con mapa */
+  if(a?.status==='completado'){renderRelvComplete(clientId);return;}
+
   const tec=TECHNICIANS.find(t=>t.id===a?.technician_id);
   const isP=a?.status==='pendiente';
   const inProg=a?.status==='en_progreso';
