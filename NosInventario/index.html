@@ -487,6 +487,7 @@
     .relev-pend{border-left:4px solid #3B82F6}
     .relev-prog{border-left:4px solid #F97316}
     .relev-done{border-left:4px solid #10B981}
+    .relev-fail{border-left:4px solid #EF4444}
     .rc-top{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 0}
     .rc-code{font-size:11px;font-weight:800;color:var(--p);letter-spacing:.04em}
     .rc-addr{padding:7px 14px 10px;font-size:12px;font-weight:600;color:var(--t1);line-height:1.45}
@@ -3694,12 +3695,14 @@ function renderRelevamiento(){
   const pend=withAssign.filter(c=>getS(c)==='pendiente').length;
   const prog=withAssign.filter(c=>getS(c)==='en_progreso').length;
   const comp=withAssign.filter(c=>getS(c)==='completado').length;
+  const fail=withAssign.filter(c=>getS(c)==='fallido').length;
 
   let rows;
-  if(relvFilt==='pendiente')     rows=withAssign.filter(c=>getS(c)==='pendiente');
+  if(relvFilt==='pendiente')       rows=withAssign.filter(c=>getS(c)==='pendiente');
   else if(relvFilt==='en_progreso') rows=withAssign.filter(c=>getS(c)==='en_progreso');
   else if(relvFilt==='completado')  rows=withAssign.filter(c=>getS(c)==='completado');
-  else rows=withAssign.filter(c=>['pendiente','en_progreso','completado'].includes(getS(c)));
+  else if(relvFilt==='fallido')     rows=withAssign.filter(c=>getS(c)==='fallido');
+  else rows=withAssign.filter(c=>['pendiente','en_progreso','completado','fallido'].includes(getS(c)));
 
   if(SQ){
     const q=SQ.toLowerCase();
@@ -3707,10 +3710,11 @@ function renderRelevamiento(){
   }
 
   const chips=[
-    {key:'all',         lbl:'Todos',       cnt:pend+prog+comp},
+    {key:'all',         lbl:'Todos',       cnt:pend+prog+comp+fail},
     {key:'pendiente',   lbl:'Pendiente',   cnt:pend},
     {key:'en_progreso', lbl:'En Progreso', cnt:prog},
     {key:'completado',  lbl:'Completado',  cnt:comp},
+    {key:'fallido',     lbl:'Fallido',     cnt:fail},
   ];
 
   const mkCard=(r)=>{
@@ -3718,12 +3722,13 @@ function renderRelevamiento(){
     const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
     const isP=a.status==='pendiente';
     const isDone=a.status==='completado';
+    const isFail=a.status==='fallido';
     const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-    const borderCls=isP?'relev-pend':isDone?'relev-done':'relev-prog';
-    const statCls=isP?'as-pend':isDone?'as-done':'as-prog';
-    const statLbl=isP?'Pendiente':isDone?'Completado':'En Progreso';
-    const avBg=isP?'#DBEAFE':isDone?'rgba(16,185,129,.15)':'#FFEDD5';
-    const avCol=isP?'#1D4ED8':isDone?'#10B981':'#C2410C';
+    const borderCls=isP?'relev-pend':isDone?'relev-done':isFail?'relev-fail':'relev-prog';
+    const statCls=isP?'as-pend':isDone?'as-done':isFail?'as-fail':'as-prog';
+    const statLbl=isP?'Pendiente':isDone?'Completado':isFail?'Fallido':'En Progreso';
+    const avBg=isP?'#DBEAFE':isDone?'rgba(16,185,129,.15)':isFail?'#FEE2E2':'#FFEDD5';
+    const avCol=isP?'#1D4ED8':isDone?'#10B981':isFail?'#B91C1C':'#C2410C';
 
     const napRow=a.nap_found
       ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${a.nap_found}</span></div>`
@@ -3731,7 +3736,7 @@ function renderRelevamiento(){
         ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${r.nap_id}</span></div>`
         :`<div class="rc-row" style="color:var(--t3);font-style:italic;font-size:10px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sin NAP asignada</div>`;
 
-    const doneMetrics=isDone?`<div style="display:flex;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(16,185,129,.2)">
+    const doneMetrics=isDone?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(16,185,129,.2)">
       <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
         <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <strong style="color:var(--t1)">${a.iea_km!=null?a.iea_km.toFixed(1):'—'}</strong> km
@@ -3750,6 +3755,11 @@ function renderRelevamiento(){
       </div>
     </div>`:'';
 
+    const failReason=isFail&&a.failed_reason?`<div style="display:flex;align-items:flex-start;gap:5px;margin-top:8px;padding:7px 10px;border-radius:7px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15)">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span style="font-size:10px;color:#B91C1C;line-height:1.4">${a.failed_reason}</span>
+    </div>`:'';
+
     return `<div class="relev-card ${borderCls}" onclick="openRelvDetail(${r.id})" style="cursor:pointer">
       <div class="rc-top">
         <span class="rc-code">${r.object_id}</span>
@@ -3765,11 +3775,12 @@ function renderRelevamiento(){
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ${tec?`<span style="font-weight:600;color:var(--t1)">${tec.name}</span> <span style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</span>`:'<span style="color:var(--t3);font-style:italic">Sin técnico</span>'}
         </div>
-        ${napRow}
+        ${!isFail?napRow:''}
       </div>
       ${doneMetrics}
+      ${failReason}
       <div class="rc-footer">
-        <span class="rc-date">${isDone?'Cerrado: '+(a.closed_at||a.assigned_at):'Asignado: '+a.assigned_at}</span>
+        <span class="rc-date">${isDone?'Cerrado: '+(a.closed_at||a.assigned_at):isFail?'Visitado: '+a.assigned_at:'Asignado: '+a.assigned_at}</span>
         <div style="width:22px;height:22px;border-radius:50%;background:${avBg};color:${avCol};font-weight:800;font-size:8px;display:flex;align-items:center;justify-content:center">${ini}</div>
       </div>
     </div>`;
@@ -3792,6 +3803,10 @@ function renderRelevamiento(){
     <div class="sc" style="border-left-color:#10B981">
       <div><div class="sc-num" style="color:#10B981">${comp}</div><div class="sc-lbl">Completados</div><div class="sc-sub">Con ruta registrada</div></div>
       <div class="sc-ico" style="background:#ECFDF5;color:#10B981"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+    </div>
+    <div class="sc" style="border-left-color:#EF4444">
+      <div><div class="sc-num" style="color:#EF4444">${fail}</div><div class="sc-lbl">Fallidos</div><div class="sc-sub">Sin acceso al domicilio</div></div>
+      <div class="sc-ico" style="background:#FEF2F2;color:#EF4444"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
     </div>
   </div>
   <div class="card">
@@ -4537,7 +4552,7 @@ function openNapModal(){
   if(!_ss.poles.length){showToast('⚠ Registra al menos un poste antes de sincronizar la NAP','warning');return;}
   if(_ss.napPoleIdx==null) _ss.napPoleIdx=_ss.poles.length-1;
   _ss.napModalOpen=true;
-  _ss.napModalPhase='pole';
+  _ss.napModalPhase='access';
   _ss.napAcceso=null; _ss.napObs=''; _ss.foundNap=null; _ss.napData=null;
   _ss.addFormOpen=false;
   renderStepPoste();
@@ -5411,8 +5426,9 @@ function closeRelevamiento(km,db){
   a.nap_found=_ss.napData?.code||null;
   const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
   if(_ss.napData?.code && !r.nap_id) r.nap_id=_ss.napData.code;
+  const clientId=_ss.clientId;
   showToast(`✓ Relevamiento completado — ${km} km · ${db} dB`,'success');
-  navTo('relevamiento');
+  openRelvDetail(clientId);
 }
 
 /* ════════════════════════════════ MOBILE MENU ═══ */
