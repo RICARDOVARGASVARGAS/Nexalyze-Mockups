@@ -404,12 +404,17 @@
     .as-done{background:#DCFCE7;color:#15803D}.as-done::before{background:#22C55E}
     .as-fail{background:#FEE2E2;color:#B91C1C}.as-fail::before{background:#EF4444}
     .as-canc{background:#F9F9F9;color:#9CA3AF}.as-canc::before{background:#D1D5DB}
+    .as-obs{background:#FEE2E2;color:#B91C1C}.as-obs::before{background:#EF4444}
     body.dark .as-libre{background:rgba(107,114,128,.15);color:#9CA3AF}
     body.dark .as-pend{background:rgba(29,78,216,.15);color:#93C5FD}
     body.dark .as-prog{background:rgba(194,65,12,.15);color:#FDB077}
     body.dark .as-done{background:rgba(21,128,61,.15);color:#86EFAC}
     body.dark .as-fail{background:rgba(185,28,28,.15);color:#FCA5A5}
     body.dark .as-canc{background:rgba(107,114,128,.12);color:#6B7280}
+    body.dark .as-obs{background:rgba(185,28,28,.15);color:#FCA5A5}
+    .obs-chip{padding:4px 10px;border-radius:20px;border:1.5px solid var(--bor);background:var(--sur);color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .obs-chip:hover{border-color:#EF4444;color:#B91C1C}
+    .obs-chip.sel{border-color:#EF4444;background:#FEE2E2;color:#B91C1C}
     /* ─── Dispatch Modal ─── */
     .mc-dispatch{max-width:720px;max-height:88vh;display:flex;flex-direction:column}
     .dp-body{overflow-y:auto;flex:1;min-height:0}
@@ -488,6 +493,7 @@
     .relev-prog{border-left:4px solid #F97316}
     .relev-done{border-left:4px solid #10B981}
     .relev-fail{border-left:4px solid #EF4444}
+    .relev-obs{border-left:4px solid #EF4444}
     .rc-top{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 0}
     .rc-code{font-size:11px;font-weight:800;color:var(--p);letter-spacing:.04em}
     .rc-addr{padding:7px 14px 10px;font-size:12px;font-weight:600;color:var(--t1);line-height:1.45}
@@ -974,6 +980,137 @@
         <button class="br" onclick="doCancelAsign()" style="gap:6px">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           Confirmar Cancelacion
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: OBSERVAR ASIGNACION ══ -->
+<div class="mo" id="mo-observar-asign">
+  <div class="mc" style="max-width:460px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#FEE2E2">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#DC2626" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Marcar como Observado</div>
+          <div class="msub">Indica al técnico qué debe corregir</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-observar-asign')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:14px">
+      <div id="moa-client-info" style="background:var(--bg);border-radius:10px;padding:14px 16px"></div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Motivos frecuentes</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          <button class="obs-chip" onclick="selectObsChip(this,'Corregir foto de poste')">Corregir foto de poste</button>
+          <button class="obs-chip" onclick="selectObsChip(this,'NAP no está bien documentada')">NAP no documentada</button>
+          <button class="obs-chip" onclick="selectObsChip(this,'Información incorrecta en el poste')">Info incorrecta en poste</button>
+          <button class="obs-chip" onclick="selectObsChip(this,'GPS del poste incorrecto')">GPS incorrecto</button>
+          <button class="obs-chip" onclick="selectObsChip(this,'Falta foto de fachada')">Falta foto fachada</button>
+          <button class="obs-chip" onclick="selectObsChip(this,'Operador externo sin registrar')">Operador sin registrar</button>
+        </div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Observación <span style="color:#EF4444">*</span></div>
+        <textarea id="moa-obs-txt" rows="3" placeholder="Ej: La NAP no está bien documentada. Revisar poste #2 y agregar número de puertos." style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--bor);background:var(--sur);color:var(--t1);font-size:12px;resize:vertical;outline:none;box-sizing:border-box;transition:border-color .15s" onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+      </div>
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:10px 14px;font-size:11px;color:#991B1B;display:flex;align-items:flex-start;gap:8px">
+        <svg style="flex-shrink:0;margin-top:1px" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>La asignación pasará a <strong>Observado</strong>. El técnico verá este mensaje al abrir el relevamiento y deberá corregirlo.</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="bs" onclick="closeMo('mo-observar-asign')">Cancelar</button>
+        <button onclick="doObservarAsign()" style="display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:none;background:#EF4444;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Marcar Observado
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: CONFIRMAR QUITAR POSTE ══ -->
+<div class="mo" id="mo-confirm-remove-pole">
+  <div class="mc" style="max-width:400px">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1)">¿Quitar poste de la ruta?</div>
+        <div style="font-size:11px;color:var(--t3)" id="mo-remove-pole-sub">Este poste será eliminado del recorrido.</div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-confirm-remove-pole')" style="margin-left:auto">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px">El poste será eliminado del recorrido de relevamiento. Esta acción no se puede deshacer y deberás buscarlo nuevamente si necesitas agregarlo.</p>
+      <div style="display:flex;gap:10px">
+        <button class="bs" onclick="closeMo('mo-confirm-remove-pole')" style="flex:1;justify-content:center">Cancelar</button>
+        <button id="mo-remove-pole-btn" onclick="" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;background:#EF4444;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Quitar poste
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: CONFIRMAR EDITAR POSTE ══ -->
+<div class="mo" id="mo-confirm-edit-pole">
+  <div class="mc" style="max-width:400px">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(123,110,248,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1)">Editar datos del poste</div>
+        <div style="font-size:11px;color:var(--t3)" id="mo-edit-pole-sub">Se abrirá el formulario de edición.</div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-confirm-edit-pole')" style="margin-left:auto">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px">Los cambios que realices se actualizarán en el inventario y se aplicarán a este poste en el recorrido actual.</p>
+      <div style="display:flex;gap:10px">
+        <button class="bs" onclick="closeMo('mo-confirm-edit-pole')" style="flex:1;justify-content:center">Cancelar</button>
+        <button id="mo-edit-pole-btn" onclick="" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;background:var(--p);color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Ir a editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: CONFIRMAR GUARDAR POSTE ══ -->
+<div class="mo" id="mo-confirm-save-pole">
+  <div class="mc" style="max-width:400px">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1)">¿Guardar los cambios?</div>
+        <div style="font-size:11px;color:var(--t3)">Los datos del poste serán actualizados.</div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-confirm-save-pole')" style="margin-left:auto">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 20px">
+      <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px">Los cambios se guardarán en el inventario y actualizarán la información de este poste en el recorrido actual. ¿Deseas continuar?</p>
+      <div style="display:flex;gap:10px">
+        <button class="bs" onclick="closeMo('mo-confirm-save-pole')" style="flex:1;justify-content:center">Cancelar</button>
+        <button onclick="closeMo('mo-confirm-save-pole');saveEditPoste()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;background:#10B981;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Guardar cambios
         </button>
       </div>
     </div>
@@ -2088,21 +2225,21 @@ const GEO_DISTS={
 
 /* ════════════════════════════════ NAPS LIST ═══ */
 const NAPS_LIST=[
-  {code:'WN-230-2247119',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918},
-  {code:'NAP-00001',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
-  {code:'WN-230-2049378',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10846,lng:-77.04209},
-  {code:'WN-230-1624765',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10006,lng:-77.03996},
-  {code:'WN-230-2247122',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918},
-  {code:'WN-230-1495546',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09233,lng:-77.02761},
-  {code:'WN-20A-2208089',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023},
-  {code:'NAP-00005',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
-  {code:'NAP-00006',     tipo:'EDIFICIO', distrito:'CHACHAPOYAS',     lat:-12.0464, lng:-77.0428},
-  {code:'WN-230-1303500',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
-  {code:'WN-230-1118303',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10005,lng:-77.04017},
-  {code:'WN-230-2218676',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10898,lng:-77.04186},
-  {code:'WN-230-1303495',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
-  {code:'WN-230-1303498',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09959,lng:-77.04254},
-  {code:'WN-20A-2208090',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023},
+  {code:'WN-230-2247119',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918, building:'EDIFICIO PLAZA CENTRO',  tower_block:'BLOQUE B', box_code:'CAJA-002', floor_location:'PISO 2', total_ports:8,  used_ports_percentage:75, inventory_status:'INGRESADO', facing_address:false},
+  {code:'NAP-00001',     tipo:'AÉREA',    distrito:'MIRAFLORES',      lat:-12.0464, lng:-77.0428,  building:null,                    tower_block:null,        box_code:'CAJA-NAP-001', floor_location:null,    total_ports:16, used_ports_percentage:50, inventory_status:'INGRESADO', facing_address:true},
+  {code:'WN-230-2049378',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10846,lng:-77.04209, building:'TORRE RESIDENCIAL NORTE',tower_block:'BLOQUE A', box_code:'CAJA-003', floor_location:'PISO 1', total_ports:8,  used_ports_percentage:63, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-1624765',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10006,lng:-77.03996, building:'EDIFICIO LOS PINOS',    tower_block:null,        box_code:'CAJA-004', floor_location:'PISO 3', total_ports:8,  used_ports_percentage:25, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-2247122',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.1002, lng:-77.03918, building:'EDIFICIO PLAZA CENTRO',  tower_block:'BLOQUE C', box_code:'CAJA-005', floor_location:'PISO 1', total_ports:8,  used_ports_percentage:88, inventory_status:'EN_REVISION', facing_address:false},
+  {code:'WN-230-1495546',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09233,lng:-77.02761, building:'RESIDENCIAL AURORA',    tower_block:null,        box_code:'CAJA-006', floor_location:'SÓTANO 1',total_ports:16, used_ports_percentage:38, inventory_status:'INGRESADO', facing_address:true},
+  {code:'WN-20A-2208089',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023,   building:'EDIFICIO CENTRAL NORTE',tower_block:'BLOQUE A', box_code:'CAJA-007', floor_location:'PISO 4', total_ports:8,  used_ports_percentage:100,inventory_status:'INGRESADO', facing_address:false},
+  {code:'NAP-00005',     tipo:'AÉREA',    distrito:'MIRAFLORES',      lat:-12.0464, lng:-77.0428,  building:null,                    tower_block:null,        box_code:'CAJA-NAP-005',floor_location:null,    total_ports:8,  used_ports_percentage:0,  inventory_status:'PENDIENTE', facing_address:false},
+  {code:'NAP-00006',     tipo:'AÉREA',    distrito:'BARRANCO',        lat:-12.0464, lng:-77.0428,  building:null,                    tower_block:null,        box_code:'CAJA-NAP-006',floor_location:null,    total_ports:8,  used_ports_percentage:13, inventory_status:'INGRESADO', facing_address:true},
+  {code:'WN-230-1303500',tipo:'VERTICAL', distrito:'LIMA',            lat:-12.09959,lng:-77.04254, building:'COND. LAS GARDENIAS',  tower_block:'BLOQUE D', box_code:'CAJA-010', floor_location:'PISO 2', total_ports:16, used_ports_percentage:44, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-1118303',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10005,lng:-77.04017, building:'EDIFICIO SAN RAFAEL',   tower_block:null,        box_code:'CAJA-011', floor_location:'PISO 1', total_ports:8,  used_ports_percentage:63, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-2218676',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.10898,lng:-77.04186, building:'RESIDENCIAL DEL PARQUE',tower_block:'BLOQUE B', box_code:'CAJA-012', floor_location:'PISO 3', total_ports:8,  used_ports_percentage:88, inventory_status:'EN_REVISION', facing_address:false},
+  {code:'WN-230-1303495',tipo:'VERTICAL', distrito:'LIMA',            lat:-12.09959,lng:-77.04254, building:'COND. LAS GARDENIAS',  tower_block:'BLOQUE A', box_code:'CAJA-013', floor_location:'PISO 1', total_ports:8,  used_ports_percentage:75, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-1303498',tipo:'VERTICAL', distrito:'LIMA',            lat:-12.09959,lng:-77.04254, building:'COND. LAS GARDENIAS',  tower_block:'BLOQUE C', box_code:'CAJA-014', floor_location:'PISO 2', total_ports:16, used_ports_percentage:56, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-20A-2208090',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023,   building:'EDIFICIO CENTRAL NORTE',tower_block:'BLOQUE B', box_code:'CAJA-015', floor_location:'PISO 2', total_ports:8,  used_ports_percentage:38, inventory_status:'INGRESADO', facing_address:false},
 ];
 
 /* ════════════════════════════════ DB: CLIENTES ═══ */
@@ -2169,8 +2306,9 @@ const ASSIGNMENTS={
         {seq_order:3,codigo:'POL-0011',propietario:'WIN',  material:'MADERA',         condition:'REGULAR',lat:-12.0680,lng:-77.0410,access:true,is_existing:false,nap_id:'NAP-00001',nap_access:true,nap_observation:'NAP accesible, 8 puertos disponibles'},
       ]},
   2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15', started_at:'2025-03-16', access:true, gpsLat:-12.1186, gpsLng:-77.0292, fachada:['https://picsum.photos/seed/fach2a/600/400','https://picsum.photos/seed/fach2b/600/400'], poles:[
-    {pole_id:2,existingId:2,is_existing:true,seq_order:1,codigo:'POL-0002',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.0833,lng:-77.0353,access:true},
-    {pole_id:17,existingId:17,is_existing:true,seq_order:2,codigo:'POL-0017',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',lat:-12.1271,lng:-77.0310,access:true},
+    {pole_id:2,existingId:2,is_existing:true,seq_order:1,codigo:'POL-0002',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'FIBRA ÓPTICA MONOMODO (SM)',lat:-12.0833,lng:-77.0353,access:true,photos:['https://picsum.photos/seed/pole2pan/400/300','https://picsum.photos/seed/pole2cod/400/300']},
+    {pole_id:17,existingId:17,is_existing:true,seq_order:2,codigo:'POL-0017',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',lat:-12.1271,lng:-77.0310,access:true,observation:'Poste en buen estado, sin obstrucciones en el área.',photos:['https://picsum.photos/seed/pole17pan/400/300','https://picsum.photos/seed/pole17cod/400/300']},
+    {pole_id:8,existingId:8,is_existing:true,seq_order:3,codigo:'POL-0008',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',lat:-12.1140,lng:-77.0298,access:true,observation:'NAP accesible desde la calle, sin obstrucciones.',photos:['https://picsum.photos/seed/pole8pan/400/300','https://picsum.photos/seed/pole8cod/400/300'],nap_id:'WN-230-2247119',nap_access:true,nap_observation:'NAP en buen estado. 2 puertos disponibles. Acceso con escalera de 3 metros.',napPhotos:['https://picsum.photos/seed/nap2p1/400/300','https://picsum.photos/seed/nap2p2/400/300','https://picsum.photos/seed/nap2p3/400/300','https://picsum.photos/seed/nap2p4/400/300']},
   ]},
   5: {technician_id:4, status:'pendiente',   assigned_at:'2025-04-02'},
   6: {technician_id:4, status:'completado', assigned_at:'2025-02-28', started_at:'2025-02-28', closed_at:'2025-02-28', access:true, gpsLat:-12.11840, gpsLng:-77.02900, iea_km:1.8, attenuation_db:3.6, nap_found:'WN-230-2247119',
@@ -2181,9 +2319,9 @@ const ASSIGNMENTS={
       ]},
   7: {technician_id:3, status:'pendiente',   assigned_at:'2025-04-10'},
   9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18', started_at:'2025-04-19', access:true, gpsLat:-12.1299, gpsLng:-77.0065, fachada:['https://picsum.photos/seed/fach9a/600/400',null], poles:[
-    {existingId:1,seq_order:1,codigo:'POL-0001',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1011,lng:-77.0398,has_nap:false},
-    {existingId:9,seq_order:2,codigo:'POL-0009',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'REGULAR',lat:-12.0654,lng:-77.0484,has_nap:false},
-    {existingId:15,seq_order:3,codigo:'POL-0015',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1256,lng:-77.0292,has_nap:false},
+    {existingId:1,seq_order:1,codigo:'POL-0001',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',tension:'BAJA TENSIÓN — BT (< 1 kV)',lat:-12.1011,lng:-77.0398,access:true,photos:['https://picsum.photos/seed/pole1pan/400/300','https://picsum.photos/seed/pole1cod/400/300']},
+    {existingId:9,seq_order:2,codigo:'POL-0009',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'REGULAR',tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)',lat:-12.0654,lng:-77.0484,access:true,observation:'Cables en mal estado en el sector superior. Requiere revisión.',photos:['https://picsum.photos/seed/pole9pan/400/300',null]},
+    {existingId:15,seq_order:3,codigo:'POL-0015',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1256,lng:-77.0292,access:true,photos:['https://picsum.photos/seed/pole15pan/400/300','https://picsum.photos/seed/pole15cod/400/300'],nap_id:'WN-230-2049378',nap_access:true,nap_observation:'NAP ACCESIBLE. Todos los puertos en buen estado. Etiquetado correcto.',napPhotos:['https://picsum.photos/seed/nap9p1/400/300','https://picsum.photos/seed/nap9p2/400/300','https://picsum.photos/seed/nap9p3/400/300','https://picsum.photos/seed/nap9p4/400/300']},
   ]},
   11:{technician_id:3, status:'completado', assigned_at:'2025-01-22', started_at:'2025-01-23', closed_at:'2025-01-23', access:true, gpsLat:-12.10110, gpsLng:-77.00250, iea_km:3.1, attenuation_db:6.2, nap_found:'WN-230-2049378',
       fachada:['https://picsum.photos/seed/fach11a/600/400','https://picsum.photos/seed/fach11b/600/400'],
@@ -2192,13 +2330,13 @@ const ASSIGNMENTS={
         {seq_order:2,codigo:'POL-0021',propietario:'ENTEL',material:'MADERA',         condition:'REGULAR',lat:-12.1090,lng:-77.0150,access:true,is_existing:true,nap_id:null,nap_access:null},
         {seq_order:3,codigo:'POL-0022',propietario:'WIN',  material:'CONCRETO ARMADO',condition:'OPERATIVO',lat:-12.1120,lng:-77.0250,access:true,is_existing:false,nap_id:'WN-230-2049378',nap_access:true,nap_observation:''},
       ]},
-  12:{technician_id:5, status:'fallido',     assigned_at:'2025-03-05', access:false, failed_reason:'Domicilio cerrado, sin respuesta. Se intentó en 3 ocasiones.',gpsLat:-12.0780,gpsLng:-77.0850},
+  12:{technician_id:5, status:'observado',   assigned_at:'2025-03-05', access:false, failed_reason:'Domicilio cerrado, sin respuesta. Se intentó en 3 ocasiones.',gpsLat:-12.0780,gpsLng:-77.0850},
   15:{technician_id:2, status:'completado', assigned_at:'2025-02-10', started_at:'2025-02-10', closed_at:'2025-02-10', access:true, gpsLat:-12.09590, gpsLng:-77.04254, iea_km:0.9, attenuation_db:1.8, nap_found:'WN-230-1303500',
       fachada:['https://picsum.photos/seed/fach15/600/400',null],
       poles:[
         {seq_order:1,codigo:'POL-0030',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0980,lng:-77.0413,access:true,is_existing:true,nap_id:'WN-230-1303500',nap_access:true,nap_observation:''},
       ]},
-  18:{technician_id:3, status:'fallido',     assigned_at:'2025-03-20', access:false, failed_reason:'Edificio con seguridad, no permitió el acceso.',gpsLat:-12.0650,gpsLng:-77.0300},
+  18:{technician_id:3, status:'observado',   assigned_at:'2025-03-20', access:false, failed_reason:'Edificio con seguridad, no permitió el acceso.',gpsLat:-12.0650,gpsLng:-77.0300},
   20:{technician_id:1, status:'en_progreso', assigned_at:'2025-04-25', started_at:'2025-04-26', access:true, gpsLat:-12.1102, gpsLng:-77.0046, fachada:['https://picsum.photos/seed/fach20/600/400',null], poles:[
     {existingId:4,seq_order:1,codigo:'POL-0004',propietario:'LUZ DEL SUR',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1081,lng:-77.0147,has_nap:false},
   ]},
@@ -2216,8 +2354,9 @@ const ASSIGNMENTS={
         {seq_order:1,codigo:'POL-0050',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0940,lng:-77.0280,access:true,is_existing:true,nap_id:null,nap_access:null},
         {seq_order:2,codigo:'POL-0051',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0936,lng:-77.0278,access:true,is_existing:false,nap_id:'WN-230-1495546',nap_access:true,nap_observation:'8 puertos libres'},
       ]},
-  33:{technician_id:3, status:'fallido',     assigned_at:'2025-03-28'},
+  33:{technician_id:3, status:'observado',   assigned_at:'2025-03-28'},
   34:{technician_id:5, status:'cancelado',   assigned_at:'2025-04-01'},
+  35:{technician_id:2, status:'pendiente',   assigned_at:'2025-05-10'},
 };
 
 /* ── ROUTES (caché geográfico generado al cerrar el relevamiento) ── */
@@ -2235,10 +2374,11 @@ let CV='inicio', CT=null, editId=null, delId=null, SQ='', CP=1, PS=15;
 let asignFilt='all';
 let afDept='',afProv='',afDist='',afTec='';
 let relvFilt='all';
+let relvCP=1, relvPS=10, relvSQ='';
 let _relvClientId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
-const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole'};
+const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole',editingFoundPoste:false,editPoleIdx:null,editPolePhotos:[null,null],editPoleExtOps:[]};
 const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
 
 /* ════════════════════════════════ NAV ═══ */
@@ -2835,9 +2975,10 @@ function asignBadge(status){
   const map={
     libre:      {cls:'as-libre',lbl:'Sin Asignar'},
     pendiente:  {cls:'as-pend', lbl:'Pendiente'},
-    en_progreso:{cls:'as-prog', lbl:'En Progreso'},
+    en_progreso:{cls:'as-prog', lbl:'En Proceso'},
     completado: {cls:'as-done', lbl:'Completado'},
     fallido:    {cls:'as-fail', lbl:'Fallido'},
+    observado:  {cls:'as-obs',  lbl:'Observado'},
     cancelado:  {cls:'as-canc', lbl:'Cancelado'},
   };
   const s=map[status]||map.libre;
@@ -2868,16 +3009,15 @@ function renderAsignaciones(){
   const pages=Math.max(1,Math.ceil(total/PS));
   if(CP>pages) CP=pages;
   const slice=rows.slice((CP-1)*PS,CP*PS);
-  const sinAsignar=all.filter(c=>!ASSIGNMENTS[c.id]).length;
-  const asignados=all.filter(c=>!!ASSIGNMENTS[c.id]).length;
+  const cntPend=all.filter(c=>getStatus(c)==='pendiente').length;
+  const cntProg=all.filter(c=>getStatus(c)==='en_progreso').length;
+  const cntObs=all.filter(c=>getStatus(c)==='observado').length;
+  const cntTotal=cntPend+cntProg+cntObs;
   const chips=[
-    {key:'all',        lbl:'Todos',       cnt:all.length},
-    {key:'libre',      lbl:'Sin Asignar', cnt:sinAsignar},
-    {key:'pendiente',  lbl:'Pendiente',   cnt:all.filter(c=>getStatus(c)==='pendiente').length},
-    {key:'en_progreso',lbl:'En Progreso', cnt:all.filter(c=>getStatus(c)==='en_progreso').length},
-    {key:'completado', lbl:'Completado',  cnt:all.filter(c=>getStatus(c)==='completado').length},
-    {key:'fallido',    lbl:'Fallido',     cnt:all.filter(c=>getStatus(c)==='fallido').length},
-    {key:'cancelado',  lbl:'Cancelado',   cnt:all.filter(c=>getStatus(c)==='cancelado').length},
+    {key:'all',         lbl:'Todos',      cnt:cntTotal},
+    {key:'pendiente',   lbl:'Pendiente',  cnt:cntPend},
+    {key:'en_progreso', lbl:'En Proceso', cnt:cntProg},
+    {key:'observado',   lbl:'Observado',  cnt:cntObs},
   ];
   const depts=[...new Set(all.map(c=>c.department).filter(Boolean))].sort();
   const provs=afDept?[...new Set(all.filter(c=>c.department===afDept).map(c=>c.province).filter(Boolean))].sort():[];
@@ -2886,16 +3026,20 @@ function renderAsignaciones(){
   document.getElementById('view-asignaciones').innerHTML=`
   <div class="stats">
     <div class="sc sv">
-      <div><div class="sc-num">${all.length}</div><div class="sc-lbl">Total Clientes</div><div class="sc-sub">Registrados en el sistema</div></div>
+      <div><div class="sc-num">${cntTotal}</div><div class="sc-lbl">Total</div><div class="sc-sub">Pendiente + En Proceso + Observado</div></div>
       <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
     </div>
-    <div class="sc sr">
-      <div><div class="sc-num">${sinAsignar}</div><div class="sc-lbl">Sin Asignar</div><div class="sc-sub">Sin tecnico asignado</div></div>
-      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <div class="sc" style="border-left-color:#3B82F6">
+      <div><div class="sc-num" style="color:#3B82F6">${cntPend}</div><div class="sc-lbl">Pendiente</div><div class="sc-sub">Sin iniciar</div></div>
+      <div class="sc-ico" style="background:#EFF6FF;color:#3B82F6"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
     </div>
-    <div class="sc sg">
-      <div><div class="sc-num">${asignados}</div><div class="sc-lbl">Con Tecnico</div><div class="sc-sub">Con tecnico asignado</div></div>
-      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div class="sc" style="border-left-color:#F97316">
+      <div><div class="sc-num" style="color:#F97316">${cntProg}</div><div class="sc-lbl">En Proceso</div><div class="sc-sub">Ya iniciados</div></div>
+      <div class="sc-ico" style="background:#FFF7ED;color:#F97316"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    </div>
+    <div class="sc" style="border-left-color:#EF4444">
+      <div><div class="sc-num" style="color:#EF4444">${cntObs}</div><div class="sc-lbl">Observado</div><div class="sc-sub">Con observaciones</div></div>
+      <div class="sc-ico" style="background:#FEE2E2;color:#EF4444"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
     </div>
   </div>
   <div class="card">
@@ -3006,6 +3150,9 @@ function renderAsignaciones(){
               <td style="white-space:nowrap">${[
                   getStatus(r)==='pendiente'
                     ?`<button class="act-btn" title="Reasignar / Liberar" onclick="openReassignModal(${r.id})" style="color:#C2410C"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>`
+                    :'',
+                  ['pendiente','en_progreso'].includes(getStatus(r))
+                    ?`<button class="act-btn" title="Marcar como Observado" onclick="openObservarAsign(${r.id})" style="color:#B91C1C"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></button>`
                     :'',
                   ['pendiente','en_progreso'].includes(getStatus(r))
                     ?`<button class="act-btn" title="Cancelar asignacion" onclick="openCancelAsign(${r.id})" style="color:#DC2626"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>`
@@ -3419,6 +3566,7 @@ function confirmLiberar(){
 
 /* ════════════════════════════════ CANCELAR ASIGNACION ═══════ */
 let _cancelAsignId=null;
+let _observarAsignId=null;
 function openCancelAsign(clientId){
   _cancelAsignId=clientId;
   const c=DB.clientes.rows.find(x=>x.id===clientId);
@@ -3450,6 +3598,53 @@ function doCancelAsign(){
   showAsignLoading(()=>{
     renderAsignaciones();
     showToast('Asignacion cancelada','warning');
+  });
+}
+
+function openObservarAsign(clientId){
+  _observarAsignId=clientId;
+  const c=DB.clientes.rows.find(x=>x.id===clientId);
+  const a=ASSIGNMENTS[clientId];
+  const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
+  const info=document.getElementById('moa-client-info');
+  if(info&&c&&a){
+    info.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700;font-size:13px;color:var(--t1)">${c.object_id}</div>
+          ${asignBadge(a.status)}
+        </div>
+        <div style="font-size:11px;color:var(--t2)">${c.address||''}</div>
+        ${tec?`<div style="font-size:10px;color:var(--t2);display:flex;align-items:center;gap:5px">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          ${tec.name} <span style="color:var(--p);font-weight:700">${tec.code}</span>
+        </div>`:''}
+      </div>`;
+  }
+  const txt=document.getElementById('moa-obs-txt');
+  if(txt) txt.value='';
+  document.querySelectorAll('.obs-chip').forEach(c=>c.classList.remove('sel'));
+  openMo('mo-observar-asign');
+}
+function selectObsChip(el,text){
+  document.querySelectorAll('.obs-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const txt=document.getElementById('moa-obs-txt');
+  if(txt) txt.value=text;
+  txt?.focus();
+}
+function doObservarAsign(){
+  if(!_observarAsignId)return;
+  const obs=(document.getElementById('moa-obs-txt')?.value||'').trim();
+  if(!obs){showToast('⚠ Ingresa la observación antes de continuar','warning');return;}
+  ASSIGNMENTS[_observarAsignId].status='observado';
+  ASSIGNMENTS[_observarAsignId].failed_reason=obs;
+  const id=_observarAsignId;
+  _observarAsignId=null;
+  closeMo('mo-observar-asign');
+  showAsignLoading(()=>{
+    renderAsignaciones();
+    showToast('Asignación marcada como Observada','warning');
   });
 }
 
@@ -3694,41 +3889,42 @@ function renderRelevamiento(){
   const withAssign=all.filter(c=>ASSIGNMENTS[c.id]);
   const pend=withAssign.filter(c=>getS(c)==='pendiente').length;
   const prog=withAssign.filter(c=>getS(c)==='en_progreso').length;
-  const comp=withAssign.filter(c=>getS(c)==='completado').length;
-  const fail=withAssign.filter(c=>getS(c)==='fallido').length;
+  const obs=withAssign.filter(c=>getS(c)==='observado').length;
+  const total=pend+prog+obs;
 
   let rows;
-  if(relvFilt==='pendiente')       rows=withAssign.filter(c=>getS(c)==='pendiente');
+  if(relvFilt==='pendiente')        rows=withAssign.filter(c=>getS(c)==='pendiente');
   else if(relvFilt==='en_progreso') rows=withAssign.filter(c=>getS(c)==='en_progreso');
-  else if(relvFilt==='completado')  rows=withAssign.filter(c=>getS(c)==='completado');
-  else if(relvFilt==='fallido')     rows=withAssign.filter(c=>getS(c)==='fallido');
-  else rows=withAssign.filter(c=>['pendiente','en_progreso','completado','fallido'].includes(getS(c)));
+  else if(relvFilt==='observado')   rows=withAssign.filter(c=>getS(c)==='observado');
+  else rows=withAssign.filter(c=>['pendiente','en_progreso','observado'].includes(getS(c)));
 
-  if(SQ){
-    const q=SQ.toLowerCase();
+  if(relvSQ){
+    const q=relvSQ.toLowerCase();
     rows=rows.filter(r=>(r.object_id||'').toLowerCase().includes(q)||(r.address||'').toLowerCase().includes(q)||(r.district||'').toLowerCase().includes(q));
   }
 
   const chips=[
-    {key:'all',         lbl:'Todos',       cnt:pend+prog+comp+fail},
-    {key:'pendiente',   lbl:'Pendiente',   cnt:pend},
-    {key:'en_progreso', lbl:'En Progreso', cnt:prog},
-    {key:'completado',  lbl:'Completado',  cnt:comp},
-    {key:'fallido',     lbl:'Fallido',     cnt:fail},
+    {key:'all',         lbl:'Todos',      cnt:total},
+    {key:'pendiente',   lbl:'Pendiente',  cnt:pend},
+    {key:'en_progreso', lbl:'En Proceso', cnt:prog},
+    {key:'observado',   lbl:'Observado',  cnt:obs},
   ];
+
+  const relvPages=Math.max(1,Math.ceil(rows.length/relvPS));
+  if(relvCP>relvPages) relvCP=relvPages;
+  const pageRows=rows.slice((relvCP-1)*relvPS,relvCP*relvPS);
 
   const mkCard=(r)=>{
     const a=ASSIGNMENTS[r.id];
     const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
     const isP=a.status==='pendiente';
-    const isDone=a.status==='completado';
-    const isFail=a.status==='fallido';
+    const isObs=a.status==='observado';
     const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-    const borderCls=isP?'relev-pend':isDone?'relev-done':isFail?'relev-fail':'relev-prog';
-    const statCls=isP?'as-pend':isDone?'as-done':isFail?'as-fail':'as-prog';
-    const statLbl=isP?'Pendiente':isDone?'Completado':isFail?'Fallido':'En Progreso';
-    const avBg=isP?'#DBEAFE':isDone?'rgba(16,185,129,.15)':isFail?'#FEE2E2':'#FFEDD5';
-    const avCol=isP?'#1D4ED8':isDone?'#10B981':isFail?'#B91C1C':'#C2410C';
+    const borderCls=isP?'relev-pend':isObs?'relev-obs':'relev-prog';
+    const statCls=isP?'as-pend':isObs?'as-obs':'as-prog';
+    const statLbl=isP?'Pendiente':isObs?'Observado':'En Proceso';
+    const avBg=isP?'#DBEAFE':isObs?'#FEE2E2':'#FFEDD5';
+    const avCol=isP?'#1D4ED8':isObs?'#B91C1C':'#C2410C';
 
     const napRow=a.nap_found
       ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${a.nap_found}</span></div>`
@@ -3736,26 +3932,7 @@ function renderRelevamiento(){
         ?`<div class="rc-row"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg><span class="rc-nap">${r.nap_id}</span></div>`
         :`<div class="rc-row" style="color:var(--t3);font-style:italic;font-size:10px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sin NAP asignada</div>`;
 
-    const doneMetrics=isDone?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid rgba(16,185,129,.2)">
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
-        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <strong style="color:var(--t1)">${a.iea_km!=null?a.iea_km.toFixed(1):'—'}</strong> km
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
-        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <strong style="color:var(--t1)">${a.attenuation_db!=null?a.attenuation_db.toFixed(1):'—'}</strong> dB
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)">
-        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2.5"><circle cx="12" cy="12" r="2"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
-        <strong style="color:var(--t1)">${(a.poles||[]).length}</strong> postes
-      </div>
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#10B981;margin-left:auto">
-        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Ver ruta
-      </div>
-    </div>`:'';
-
-    const failReason=isFail&&a.failed_reason?`<div style="display:flex;align-items:flex-start;gap:5px;margin-top:8px;padding:7px 10px;border-radius:7px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15)">
+    const obsReason=isObs&&a.failed_reason?`<div style="display:flex;align-items:flex-start;gap:5px;margin-top:8px;padding:7px 10px;border-radius:7px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.15)">
       <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span style="font-size:10px;color:#B91C1C;line-height:1.4">${a.failed_reason}</span>
     </div>`:'';
@@ -3775,21 +3952,28 @@ function renderRelevamiento(){
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           ${tec?`<span style="font-weight:600;color:var(--t1)">${tec.name}</span> <span style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</span>`:'<span style="color:var(--t3);font-style:italic">Sin técnico</span>'}
         </div>
-        ${!isFail?napRow:''}
+        ${!isObs?napRow:''}
       </div>
-      ${doneMetrics}
-      ${failReason}
+      ${obsReason}
       <div class="rc-footer">
-        <span class="rc-date">${isDone?'Cerrado: '+(a.closed_at||a.assigned_at):isFail?'Visitado: '+a.assigned_at:'Asignado: '+a.assigned_at}</span>
+        <span class="rc-date">${isObs?'Visitado: '+a.assigned_at:'Asignado: '+a.assigned_at}</span>
         <div style="width:22px;height:22px;border-radius:50%;background:${avBg};color:${avCol};font-weight:800;font-size:8px;display:flex;align-items:center;justify-content:center">${ini}</div>
       </div>
     </div>`;
   };
 
+  const pgn=`<div class="pgn">
+    <span class="pg-inf">${rows.length===0?'0':(relvCP-1)*relvPS+1}–${Math.min(relvCP*relvPS,rows.length)} de ${rows.length}</span>
+    <button class="pg-btn" onclick="relvGoP(1)"              ${relvCP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+    <button class="pg-btn" onclick="relvGoP(${relvCP-1})"   ${relvCP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="pg-btn" onclick="relvGoP(${relvCP+1})"   ${relvCP===relvPages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <button class="pg-btn" onclick="relvGoP(${relvPages})"  ${relvCP===relvPages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+  </div>`;
+
   document.getElementById('view-relevamiento').innerHTML=`
   <div class="stats">
     <div class="sc sv">
-      <div><div class="sc-num">${pend+prog}</div><div class="sc-lbl">En Campo</div><div class="sc-sub">Pendiente + En progreso</div></div>
+      <div><div class="sc-num">${total}</div><div class="sc-lbl">Total</div><div class="sc-sub">Pendiente + En Proceso + Observado</div></div>
       <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
     </div>
     <div class="sc" style="border-left-color:#3B82F6">
@@ -3797,23 +3981,19 @@ function renderRelevamiento(){
       <div class="sc-ico" style="background:#EFF6FF;color:#3B82F6"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
     </div>
     <div class="sc" style="border-left-color:#F97316">
-      <div><div class="sc-num" style="color:#F97316">${prog}</div><div class="sc-lbl">En Progreso</div><div class="sc-sub">Ya iniciados</div></div>
+      <div><div class="sc-num" style="color:#F97316">${prog}</div><div class="sc-lbl">En Proceso</div><div class="sc-sub">Ya iniciados</div></div>
       <div class="sc-ico" style="background:#FFF7ED;color:#F97316"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
     </div>
-    <div class="sc" style="border-left-color:#10B981">
-      <div><div class="sc-num" style="color:#10B981">${comp}</div><div class="sc-lbl">Completados</div><div class="sc-sub">Con ruta registrada</div></div>
-      <div class="sc-ico" style="background:#ECFDF5;color:#10B981"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
-    </div>
     <div class="sc" style="border-left-color:#EF4444">
-      <div><div class="sc-num" style="color:#EF4444">${fail}</div><div class="sc-lbl">Fallidos</div><div class="sc-sub">Sin acceso al domicilio</div></div>
-      <div class="sc-ico" style="background:#FEF2F2;color:#EF4444"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+      <div><div class="sc-num" style="color:#EF4444">${obs}</div><div class="sc-lbl">Observado</div><div class="sc-sub">Con observaciones</div></div>
+      <div class="sc-ico" style="background:#FEE2E2;color:#EF4444"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
     </div>
   </div>
   <div class="card">
     <div class="card-hdr">
       <div class="card-hl">
         <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-        <div><div class="ctit">Relevamiento de Clientes</div><div class="csub">Pendientes, en progreso y completados</div></div>
+        <div><div class="ctit">Relevamiento de Clientes</div><div class="csub">Pendientes, en proceso y observados</div></div>
       </div>
     </div>
     <div style="padding:12px 18px 14px;border-bottom:1px solid var(--bor)">
@@ -3824,25 +4004,24 @@ function renderRelevamiento(){
     <div class="srch-wrap">
       <div class="srch-inner">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Buscar cliente, dirección, distrito..." value="${SQ}" oninput="onRelvSearch(this.value)">
+        <input id="relv-sq-inp" type="text" placeholder="Buscar cliente, dirección, distrito..." value="${relvSQ}" onkeydown="if(event.key==='Enter')relvDoSearch()">
       </div>
-      <div class="srch-cnt">
-        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-        ${rows.length} resultado${rows.length!==1?'s':''}
-      </div>
+      <button class="bp" onclick="relvDoSearch()" style="padding:7px 14px;font-size:11px;white-space:nowrap">Buscar</button>
     </div>
-    ${rows.length?`
+    ${pageRows.length?`
     <div class="relev-grid">
-      ${rows.map(r=>mkCard(r)).join('')}
-    </div>`:`
+      ${pageRows.map(r=>mkCard(r)).join('')}
+    </div>
+    ${pgn}`:`
     <div style="text-align:center;padding:60px 20px">
       <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="var(--bor)" stroke-width="1.5" style="margin-bottom:12px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)">Sin resultados</div>
     </div>`}
   </div>`;
 }
-function setRelvFilt(f){relvFilt=f;renderRelevamiento();}
-function onRelvSearch(q){SQ=q;renderRelevamiento();}
+function setRelvFilt(f){relvFilt=f;relvCP=1;renderRelevamiento();}
+function relvDoSearch(){relvSQ=(document.getElementById('relv-sq-inp')?.value||'').trim();relvCP=1;renderRelevamiento();}
+function relvGoP(p){relvCP=p;renderRelevamiento();}
 
 /* ════════════════════════════════ RELEVAMIENTO DETAIL ═══ */
 function openRelvDetail(clientId){
@@ -3877,25 +4056,130 @@ function renderRelvComplete(clientId){
     return `<span style="display:inline-flex;padding:1px 6px;border-radius:20px;font-size:8px;font-weight:700;background:${col}22;color:${col}">${c}</span>`;
   };
 
-  const poleRow=(p,isLast)=>`
-    <div class="rc-pole-row">
-      ${!isLast?`<div class="rc-pole-spine"></div>`:''}
-      <div class="rc-pole-dot${p.nap_id?' nap':''}">${p.nap_id?'NAP':p.seq_order}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:700;color:var(--t1)">Poste #${p.seq_order}</span>
-          <span style="font-size:11px;color:var(--t2)">${p.codigo||'Sin código'}</span>
-          ${condBadge(p.condition)}
-          ${p.is_existing?'':'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:20px;background:rgba(251,146,60,.12);color:#C2410C">Nuevo</span>'}
+  const cpPhoto=(src,lbl,h=110)=>`
+    <div>
+      ${src
+        ?`<div style="border-radius:8px;overflow:hidden;height:${h}px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+        :`<div style="height:${h}px;border-radius:8px;border:1.5px dashed var(--bor);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bg)">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span style="font-size:9px;color:var(--t3)">Sin foto</span>
+          </div>`}
+      <div style="font-size:9px;font-weight:600;color:var(--t3);text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${lbl}</div>
+    </div>`;
+
+  const cpRow=(lbl,val)=>`
+    <div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--bor)">
+      <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:80px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">${lbl}</span>
+      <span style="font-size:11px;font-weight:600;color:var(--t1);line-height:1.4">${val}</span>
+    </div>`;
+
+  const cpPortBar=(n)=>{
+    if(n?.total_ports==null)return '';
+    const pct=n.used_ports_percentage??0;
+    const used=Math.round(pct/100*n.total_ports);
+    const col=pct>=80?'#EF4444':pct>=50?'#F59E0B':'#10B981';
+    return `<div style="margin-top:4px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px"><span>${used}/${n.total_ports} usados</span><span>${pct}%</span></div><div style="height:5px;border-radius:3px;background:var(--bor)"><div style="height:100%;border-radius:3px;width:${pct}%;background:${col}"></div></div></div>`;
+  };
+
+  const poleRow=(p,isLast)=>{
+    const pCode  = p.pole?.code || p.codigo || 'Sin código';
+    const pLat   = p.pole?.lat  || p.lat;
+    const pLng   = p.pole?.lng  || p.lng;
+    const pDB    = DB.postes?.rows?.find(r=>r.codigo===pCode)||{};
+    const pProp  = p.propietario || p.pole?.propietario || pDB.propietario;
+    const pMat   = p.material    || p.pole?.material    || pDB.material;
+    const pCond  = p.condition   || p.pole?.condition   || pDB.condicion;
+    const pTens  = p.tension     || pDB.tension;
+    const pCable = p.tipocable   || pDB.tipocable;
+    const pHgt   = p.altura      || pDB.height;
+    const ph0  = p.pole?.photos?.find(x=>x.type==='pole_vista_general')?.signed_url || p.photos?.[0] || null;
+    const ph1  = p.pole?.photos?.find(x=>x.type==='pole_vista_detalle')?.signed_url  || p.photos?.[1] || null;
+    const hasNap  = !!(p.nap || p.nap_id);
+    const napObj  = p.nap || (p.nap_id ? NAPS_LIST.find(n=>n.code===p.nap_id) : null);
+    const napCode = napObj?.code || p.nap_id;
+    const np0 = p.nap?.files?.find(x=>x.type==='POSTE_PANORAMICA')?.signed_url  || p.napPhotos?.[0] || null;
+    const np1 = p.nap?.files?.find(x=>x.type==='NAP_PANORAMICA')?.signed_url     || p.napPhotos?.[1] || null;
+    const np2 = p.nap?.files?.find(x=>x.type==='PUERTOS')?.signed_url            || p.napPhotos?.[2] || null;
+    const np3 = p.nap?.files?.find(x=>x.type==='FIBRAS_ETIQUETADAS')?.signed_url || p.napPhotos?.[3] || null;
+    const obsText = p.observation || p.observations || '';
+    return `<div class="rc-pole-row" style="align-items:flex-start">
+      ${!isLast?`<div class="rc-pole-spine" style="min-height:60px"></div>`:''}
+      <div class="rc-pole-dot${hasNap?' nap':''}">${p.seq_order}</div>
+      <div style="flex:1;min-width:0;padding-bottom:16px">
+        <div style="border:1.5px solid var(--bor);border-radius:13px;overflow:hidden;background:var(--sur)">
+          <div style="padding:10px 13px;background:var(--bg);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span style="font-size:13px;font-weight:700;color:var(--t1)">Poste #${p.seq_order}</span>
+                <span style="font-size:11px;font-weight:700;color:var(--p);font-family:monospace">${pCode}</span>
+                ${p.is_existing||p.existingId?'<span style="font-size:8px;font-weight:700;background:rgba(123,110,248,.12);color:var(--p);padding:2px 7px;border-radius:20px">Inventario</span>':'<span style="font-size:8px;font-weight:700;background:rgba(251,146,60,.12);color:#C2410C;padding:2px 7px;border-radius:20px">Nuevo</span>'}
+              </div>
+            </div>
+            ${p.access!==false?'<span style="font-size:9px;font-weight:700;color:#10B981;background:rgba(16,185,129,.1);padding:3px 9px;border-radius:20px;flex-shrink:0">✓ Con acceso</span>':'<span style="font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);padding:3px 9px;border-radius:20px;flex-shrink:0">✕ Sin acceso</span>'}
+          </div>
+          <div style="padding:12px 13px;display:flex;flex-direction:column;gap:11px">
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">Datos del Poste</div>
+              <div style="background:var(--bg);border-radius:9px;padding:3px 9px">
+                ${cpRow('Código',`<span style="font-family:monospace;font-weight:700;color:var(--p)">${pCode}</span>`)}
+                ${pProp?cpRow('Propietario',pProp):''}
+                ${pMat?cpRow('Material',pMat):''}
+                ${pCond?cpRow('Condición',pCond):''}
+                ${pTens?cpRow('Tensión',pTens):''}
+                ${pCable?cpRow('Tipo cable',pCable):''}
+                ${pHgt?cpRow('Altura',pHgt+' m'):''}
+                ${pLat&&pLng?`<div style="display:flex;gap:8px;padding:4px 0"><span style="font-size:10px;color:var(--t3);font-weight:600;min-width:80px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">GPS</span><span style="font-size:11px;font-weight:600;color:var(--t1);font-family:monospace;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${parseFloat(pLat).toFixed(5)}, ${parseFloat(pLng).toFixed(5)}</span></div>`:''}
+              </div>
+            </div>
+            ${obsText?`<div style="display:flex;gap:8px;padding:8px 10px;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:9px">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#F97316" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><div style="font-size:9px;font-weight:700;color:#C2410C;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">Observación del Poste</div><div style="font-size:11px;color:var(--t1);line-height:1.5">${obsText}</div></div>
+            </div>`:''}
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Fotos del Poste</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${cpPhoto(ph0,'Panorámica')}${cpPhoto(ph1,'Código de Poste')}</div>
+            </div>
+            ${hasNap?`
+            <div style="border:1.5px solid rgba(16,185,129,.35);border-radius:11px;overflow:hidden">
+              <div style="padding:9px 12px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <div style="width:22px;height:22px;border-radius:6px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg></div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;font-weight:700;color:#065F46;font-family:monospace">${napCode}</div>
+                  ${napObj?.tipo||napObj?.distrito?`<div style="font-size:10px;color:rgba(5,150,105,.8)">${[napObj?.tipo,napObj?.distrito].filter(Boolean).join(' · ')}</div>`:''}
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+                  ${napObj?.inventory_status?`<span style="font-size:8px;font-weight:700;color:#065F46;background:rgba(16,185,129,.1);padding:2px 7px;border-radius:20px">${napObj.inventory_status}</span>`:''}
+                  ${p.nap_access!=null?(p.nap_access?'<span style="font-size:9px;font-weight:700;color:#10B981;background:rgba(16,185,129,.12);padding:2px 8px;border-radius:20px">✓ Accesible</span>':'<span style="font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);padding:2px 8px;border-radius:20px">✕ Sin acceso</span>'):''}
+                </div>
+              </div>
+              <div style="padding:10px 12px;display:flex;flex-direction:column;gap:9px">
+                ${napObj?.building||napObj?.box_code||napObj?.total_ports!=null?`
+                <div>
+                  <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Datos de la NAP</div>
+                  <div style="background:var(--bg);border-radius:9px;padding:3px 9px">
+                    ${napObj?.building?cpRow('Edificio',napObj.building):''}
+                    ${napObj?.tower_block?cpRow('Bloque',napObj.tower_block):''}
+                    ${napObj?.box_code?cpRow('Código caja',napObj.box_code):''}
+                    ${napObj?.floor_location?cpRow('Piso',napObj.floor_location):''}
+                    ${napObj?.total_ports!=null?`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);font-weight:600;min-width:80px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">Puertos</span><div style="flex:1"><span style="font-size:11px;font-weight:600;color:var(--t1)">${napObj.total_ports} totales${napObj.used_ports_percentage!=null?' · '+napObj.used_ports_percentage+'% usado':''}</span>${cpPortBar(napObj)}</div></div>`:''}
+                    ${napObj?.latitude||napObj?.lat?`<div style="display:flex;gap:8px;padding:4px 0"><span style="font-size:10px;color:var(--t3);font-weight:600;min-width:80px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">GPS NAP</span><span style="font-size:11px;font-weight:600;color:var(--t1);font-family:monospace;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${parseFloat(napObj.latitude||napObj.lat).toFixed(5)}, ${parseFloat(napObj.longitude||napObj.lng).toFixed(5)}</span></div>`:''}
+                  </div>
+                </div>`:''}
+                ${p.nap_observation?`<div style="display:flex;gap:7px;padding:7px 9px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:8px">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div><div style="font-size:9px;font-weight:700;color:#065F46;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">Observación de la NAP</div><div style="font-size:11px;color:var(--t1);line-height:1.5">${p.nap_observation}</div></div>
+                </div>`:''}
+                <div>
+                  <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">Fotos de la NAP</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">${cpPhoto(np0,'Poste panorámica',90)}${cpPhoto(np1,'NAP panorámica',90)}${cpPhoto(np2,'Puertos',90)}${cpPhoto(np3,'Fibras etiquetadas',90)}</div>
+                </div>
+              </div>
+            </div>`:''}
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--t2);margin-top:2px">${p.propietario||'—'}${p.material?' · '+p.material:''}</div>
-        ${p.lat&&p.lng?`<div style="font-size:9px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(p.lat).toFixed(5)}, ${parseFloat(p.lng).toFixed(5)}</div>`:''}
-        ${p.nap_id?`<div style="margin-top:4px"><span class="rc-nap">${p.nap_id}</span>${p.nap_observation?`<span style="font-size:10px;color:var(--t2);margin-left:7px">${p.nap_observation}</span>`:''}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        ${p.access!==false?'<span style="font-size:9px;color:#10B981;font-weight:600">Con acceso</span>':'<span style="font-size:9px;color:#EF4444;font-weight:600">Sin acceso</span>'}
       </div>
     </div>`;
+  };
 
   vEl.innerHTML=`
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -4015,14 +4299,9 @@ function renderRelvComplete(clientId){
             ['Dirección',r.address||'—'],
             ['Distrito',r.district||'—'],
           ].map(([l,v])=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);min-width:70px;flex-shrink:0;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1)">${v}</span></div>`).join('')}
-          ${(a?.fachada||[]).some(Boolean)?`
-          <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:12px 0 8px">Fotos de fachada</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            ${(a.fachada||[null,null]).map((src,i)=>src
-              ?`<div style="border-radius:8px;overflow:hidden;height:90px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
-              :`<div style="height:90px;border-radius:8px;border:1px dashed var(--bor);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`
-            ).join('')}
-          </div>`:''}
+          ${a?.fachada?.[0]?`
+          <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:12px 0 7px">Foto · Fachada de Casa</div>
+          <div style="border-radius:8px;overflow:hidden;height:110px"><img src="${a.fachada[0]}" style="width:100%;height:100%;object-fit:cover"></div>`:''}
         </div>
       </div>
     </div>
@@ -4078,17 +4357,18 @@ function renderRelvDetail(clientId){
   const tec=TECHNICIANS.find(t=>t.id===a?.technician_id);
   const isP=a?.status==='pendiente';
   const inProg=a?.status==='en_progreso';
+  const isObs=a?.status==='observado';
   const vEl=document.getElementById('view-relev-detail');
   if(!vEl)return;
   const nap=r.nap_id?NAPS_LIST.find(n=>n.code===r.nap_id):null;
   const napLabel=nap?`${nap.tipo} · ${nap.distrito}`:'';
-  const p1=r.photos?.general, p2=r.photos?.extra;
+  const fachadaSrc=a?.fachada?.[0]||null;
   const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
   const poles=a?.poles||[];
-  const hasProgress=inProg&&(a?.started_at||poles.length>0);
+  const hasProgress=(inProg||isObs)&&(a?.started_at||poles.length>0);
 
   const photoThumb=(src,lbl)=>src
-    ?`<div style="border-radius:8px;overflow:hidden;height:120px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+    ?`<div style="border-radius:8px;overflow:hidden;height:110px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
     :`<div style="height:100px;border-radius:8px;border:1px dashed var(--bor);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg)">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <span style="font-size:9px;color:var(--t3)">${lbl}</span>
@@ -4100,6 +4380,161 @@ function renderRelvDetail(clientId){
       <span style="font-size:12px;font-weight:600;color:var(--t1);line-height:1.4">${val}</span>
     </div>`;
 
+  /* ── helpers for progress section ── */
+  const pPhoto=(src,lbl,h=110)=>`
+    <div>
+      ${src
+        ?`<div style="border-radius:8px;overflow:hidden;height:${h}px"><img src="${src}" style="width:100%;height:100%;object-fit:cover"></div>`
+        :`<div style="height:${h}px;border-radius:8px;border:1.5px dashed var(--bor);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bg)">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span style="font-size:9px;color:var(--t3)">Sin foto</span>
+          </div>`}
+      <div style="font-size:9px;font-weight:600;color:var(--t3);text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:.04em">${lbl}</div>
+    </div>`;
+
+  const pNapPortBar=(n)=>{
+    if(n?.total_ports==null)return '';
+    const pct=n.used_ports_percentage??0;
+    const used=Math.round(pct/100*n.total_ports);
+    const col=pct>=80?'#EF4444':pct>=50?'#F59E0B':'#10B981';
+    return `<div style="margin-top:5px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:3px"><span>${used}/${n.total_ports} usados</span><span>${pct}%</span></div>
+      <div style="height:5px;border-radius:3px;background:var(--bor)"><div style="height:100%;border-radius:3px;width:${pct}%;background:${col};transition:width .3s"></div></div>
+    </div>`;
+  };
+
+  const pInfoRow=(lbl,val)=>`
+    <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)">
+      <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">${lbl}</span>
+      <span style="font-size:11px;font-weight:600;color:var(--t1);line-height:1.4">${val}</span>
+    </div>`;
+
+  const mkPoleProgressCard=(p)=>{
+    // Normalize: real API uses p.pole.code/lat/lng/photos; mock uses p.codigo/lat/lng/photos[]
+    const pCode  = p.pole?.code || p.codigo || 'Sin código';
+    const pLat   = p.pole?.lat  || p.lat;
+    const pLng   = p.pole?.lng  || p.lng;
+    // Extra pole fields: look up DB record if available
+    const pDB    = DB.postes?.rows?.find(r=>r.codigo===pCode)||{};
+    const pProp  = p.propietario || p.pole?.propietario || pDB.propietario;
+    const pMat   = p.material    || p.pole?.material    || pDB.material;
+    const pCond  = p.condition   || p.pole?.condition   || pDB.condicion;
+    const pTens  = p.tension     || pDB.tension;
+    const pCable = p.tipocable   || pDB.tipocable;
+    const pHgt   = p.altura      || pDB.height;
+    // Pole photos: API returns typed array; mock uses positional array
+    const ph0 = p.pole?.photos?.find(x=>x.type==='pole_vista_general')?.signed_url || p.photos?.[0] || null;
+    const ph1 = p.pole?.photos?.find(x=>x.type==='pole_vista_detalle')?.signed_url  || p.photos?.[1] || null;
+    // NAP
+    const hasNap  = !!(p.nap || p.nap_id);
+    const napObj  = p.nap || (p.nap_id ? NAPS_LIST.find(n=>n.code===p.nap_id) : null);
+    const napCode = napObj?.code || p.nap_id;
+    // NAP photos: API returns typed files[]; mock uses napPhotos[]
+    const np0 = p.nap?.files?.find(x=>x.type==='POSTE_PANORAMICA')?.signed_url  || p.napPhotos?.[0] || null;
+    const np1 = p.nap?.files?.find(x=>x.type==='NAP_PANORAMICA')?.signed_url     || p.napPhotos?.[1] || null;
+    const np2 = p.nap?.files?.find(x=>x.type==='PUERTOS')?.signed_url            || p.napPhotos?.[2] || null;
+    const np3 = p.nap?.files?.find(x=>x.type==='FIBRAS_ETIQUETADAS')?.signed_url || p.napPhotos?.[3] || null;
+    const obsText = p.observation || p.observations || '';
+    return `<div style="border:1.5px solid var(--bor);border-radius:14px;overflow:hidden;margin-bottom:12px;background:var(--sur)">
+      <!-- Header -->
+      <div style="padding:11px 15px;display:flex;align-items:center;gap:10px;background:var(--bg);border-bottom:1px solid var(--bor)">
+        <div class="relv-tl-dot${hasNap?' nap':''}" style="width:30px;height:30px;font-size:11px;font-weight:800;flex-shrink:0">${p.seq_order}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:var(--t1)">Poste #${p.seq_order}</span>
+            <span style="font-size:11px;font-weight:700;color:var(--p);font-family:monospace">${pCode}</span>
+            ${p.is_existing||p.existingId?'<span style="font-size:9px;font-weight:700;background:rgba(123,110,248,.12);color:var(--p);padding:2px 8px;border-radius:20px">Inventario</span>':'<span style="font-size:9px;font-weight:700;background:rgba(251,146,60,.12);color:#C2410C;padding:2px 8px;border-radius:20px">Nuevo</span>'}
+          </div>
+        </div>
+        ${p.access!==false?'<span style="font-size:9px;font-weight:700;color:#10B981;background:rgba(16,185,129,.1);padding:3px 10px;border-radius:20px;flex-shrink:0">✓ Con acceso</span>':'<span style="font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);padding:3px 10px;border-radius:20px;flex-shrink:0">✕ Sin acceso</span>'}
+      </div>
+      <div style="padding:14px 15px;display:flex;flex-direction:column;gap:12px">
+        <!-- Pole data -->
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">Datos del Poste</div>
+          <div style="background:var(--bg);border-radius:10px;padding:3px 10px">
+            ${pInfoRow('Código', `<span style="font-family:monospace;font-weight:700;color:var(--p)">${pCode}</span>`)}
+            ${pProp?pInfoRow('Propietario',pProp):''}
+            ${pMat?pInfoRow('Material',pMat):''}
+            ${pCond?pInfoRow('Condición',pCond):''}
+            ${pTens?pInfoRow('Tensión',pTens):''}
+            ${pCable?pInfoRow('Tipo cable',pCable):''}
+            ${pHgt?pInfoRow('Altura',pHgt+' m'):''}
+            ${pLat&&pLng?`<div style="display:flex;gap:8px;padding:5px 0">
+              <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">GPS</span>
+              <span style="font-size:11px;font-weight:600;color:var(--t1);font-family:monospace;display:flex;align-items:center;gap:4px">
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${parseFloat(pLat).toFixed(5)}, ${parseFloat(pLng).toFixed(5)}
+              </span></div>`:''}
+          </div>
+        </div>
+        <!-- Observation -->
+        ${obsText?`<div style="display:flex;gap:8px;padding:9px 11px;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:9px">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#F97316" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><div style="font-size:9px;font-weight:700;color:#C2410C;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">Observación del Poste</div>
+          <div style="font-size:11px;color:var(--t1);line-height:1.5">${obsText}</div></div>
+        </div>`:''}
+        <!-- Pole photos -->
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Fotos del Poste</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pPhoto(ph0,'Panorámica')}${pPhoto(ph1,'Código de Poste')}</div>
+        </div>
+        <!-- NAP -->
+        ${hasNap?`
+        <div style="border:1.5px solid rgba(16,185,129,.35);border-radius:11px;overflow:hidden">
+          <div style="padding:10px 13px;background:rgba(16,185,129,.06);border-bottom:1px solid rgba(16,185,129,.2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="width:26px;height:26px;border-radius:7px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;color:#065F46;font-family:monospace">${napCode}</div>
+              ${napObj?.tipo||napObj?.distrito?`<div style="font-size:10px;color:rgba(5,150,105,.8)">${[napObj?.tipo,napObj?.distrito].filter(Boolean).join(' · ')}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+              ${napObj?.inventory_status?`<span style="font-size:8px;font-weight:700;color:#065F46;background:rgba(16,185,129,.1);padding:2px 7px;border-radius:20px">${napObj.inventory_status}</span>`:''}
+              ${p.nap_access!=null?(p.nap_access?'<span style="font-size:9px;font-weight:700;color:#10B981;background:rgba(16,185,129,.12);padding:2px 9px;border-radius:20px">✓ Accesible</span>':'<span style="font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);padding:2px 9px;border-radius:20px">✕ Sin acceso</span>'):''}
+            </div>
+          </div>
+          <div style="padding:11px 13px;display:flex;flex-direction:column;gap:10px">
+            <!-- NAP data grid -->
+            ${napObj?.building||napObj?.box_code||napObj?.total_ports!=null?`
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">Datos de la NAP</div>
+              <div style="background:var(--bg);border-radius:9px;padding:3px 10px">
+                ${napObj?.building?pInfoRow('Edificio',napObj.building):''}
+                ${napObj?.tower_block?pInfoRow('Bloque',napObj.tower_block):''}
+                ${napObj?.box_code?pInfoRow('Código caja',napObj.box_code):''}
+                ${napObj?.floor_location?pInfoRow('Piso',napObj.floor_location):''}
+                ${napObj?.total_ports!=null?`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)">
+                  <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">Puertos</span>
+                  <div style="flex:1"><span style="font-size:11px;font-weight:600;color:var(--t1)">${napObj.total_ports} totales${napObj.used_ports_percentage!=null?' · '+napObj.used_ports_percentage+'% usado':''}</span>${pNapPortBar(napObj)}</div>
+                </div>`:''}
+                ${napObj?.latitude||napObj?.lat?`<div style="display:flex;gap:8px;padding:5px 0">
+                  <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">GPS NAP</span>
+                  <span style="font-size:11px;font-weight:600;color:var(--t1);font-family:monospace;display:flex;align-items:center;gap:4px">
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    ${parseFloat(napObj.latitude||napObj.lat).toFixed(5)}, ${parseFloat(napObj.longitude||napObj.lng).toFixed(5)}
+                  </span>
+                </div>`:''}
+              </div>
+            </div>`:''}
+            <!-- NAP observation -->
+            ${p.nap_observation?`<div style="display:flex;gap:7px;padding:8px 10px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:8px">
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><div style="font-size:9px;font-weight:700;color:#065F46;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">Observación de la NAP</div>
+              <div style="font-size:11px;color:var(--t1);line-height:1.5">${p.nap_observation}</div></div>
+            </div>`:''}
+            <!-- NAP photos -->
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Fotos de la NAP</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">${pPhoto(np0,'Poste panorámica',90)}${pPhoto(np1,'NAP panorámica',90)}${pPhoto(np2,'Puertos',90)}${pPhoto(np3,'Fibras etiquetadas',90)}</div>
+            </div>
+          </div>
+        </div>`:''}
+      </div>
+    </div>`;
+  };
+
   const progressSection=hasProgress?`
   <div class="card" style="margin-bottom:12px">
     <div style="padding:12px 16px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -4107,36 +4542,47 @@ function renderRelvDetail(clientId){
         <div style="font-size:13px;font-weight:700;color:var(--t1)">Avance del Relevamiento</div>
         <div style="font-size:11px;color:var(--t3)">${poles.length} poste${poles.length!==1?'s':''} registrado${poles.length!==1?'s':''}${a.started_at?' · Iniciado '+a.started_at:''}</div>
       </div>
-      <span class="asign-stat as-prog">En Progreso</span>
+      <span class="asign-stat ${isObs?'as-obs':'as-prog'}">${isObs?'Observado':'En Proceso'}</span>
     </div>
-    <div class="relv-det-sec">
+    <div style="padding:14px 16px">
+      <!-- Domicilio block -->
       ${a.gpsLat&&a.gpsLng?`
-      <div class="relv-seq-item">
-        <div class="relv-seq-num" style="background:#3B82F6">D</div>
-        <div style="flex:1">
-          <div style="font-size:11px;font-weight:700;color:var(--t1)">Domicilio verificado</div>
-          <div style="font-size:10px;color:var(--t3);font-family:monospace">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</div>
-          <div style="font-size:10px;color:var(--t2);margin-top:2px">${a.access===true?'Con acceso':'Sin acceso'}</div>
+      <div style="border:1.5px solid rgba(59,130,246,.3);border-radius:14px;overflow:hidden;margin-bottom:12px;background:var(--sur)">
+        <div style="padding:11px 15px;background:rgba(59,130,246,.05);border-bottom:1px solid rgba(59,130,246,.15);display:flex;align-items:center;gap:10px">
+          <div style="width:30px;height:30px;border-radius:50%;background:#3B82F6;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">D</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--t1)">Verificación de Domicilio</div>
+            <div style="font-size:10px;color:var(--t2);margin-top:1px">${r.address||'—'}</div>
+          </div>
+          ${a.access!==false
+            ?'<span style="font-size:9px;font-weight:700;color:#10B981;background:rgba(16,185,129,.1);padding:3px 10px;border-radius:20px;flex-shrink:0">✓ Con acceso</span>'
+            :'<span style="font-size:9px;font-weight:700;color:#EF4444;background:rgba(239,68,68,.1);padding:3px 10px;border-radius:20px;flex-shrink:0">✕ Sin acceso</span>'}
+        </div>
+        <div style="padding:12px 15px;display:flex;flex-direction:column;gap:11px">
+          <!-- Info -->
+          <div style="background:var(--bg);border-radius:10px;padding:4px 10px">
+            ${pInfoRow('Dirección', r.address||'<span style="color:var(--t3);font-style:italic">Sin dato</span>')}
+            ${r.district?pInfoRow('Distrito', r.district):''}
+            ${[r.department,r.province].filter(Boolean).length?pInfoRow('Ubicación',[r.department,r.province].filter(Boolean).join(', ')):''}
+            <div style="display:flex;gap:8px;padding:5px 0">
+              <span style="font-size:10px;color:var(--t3);font-weight:600;min-width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.03em">GPS</span>
+              <span style="font-size:11px;font-weight:600;color:var(--t1);font-family:monospace;display:flex;align-items:center;gap:4px">
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#3B82F6" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}
+              </span>
+            </div>
+          </div>
+          <!-- Fachada photo -->
+          ${a.fachada?.[0]?`
+          <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Foto · Fachada de Casa</div>
+            <div style="border-radius:10px;overflow:hidden;aspect-ratio:16/7"><img src="${a.fachada[0]}" style="width:100%;height:100%;object-fit:cover"></div>
+          </div>`:''}
         </div>
       </div>`:''}
-        ${poles.map(p=>`
-      <div class="relv-seq-item">
-        <div class="relv-seq-num${p.nap_id?' relv-nap-num':''}">${p.nap_id?'N':p.seq_order}</div>
-        <div style="flex:1">
-          <div style="font-size:11px;font-weight:700;color:var(--t1)">Poste #${p.seq_order} · ${p.codigo||'Sin código'}</div>
-          <div style="font-size:10px;color:var(--t2)">${p.propietario||'—'}${p.material?' · '+p.material:''}${p.condition?' · '+p.condition:''}</div>
-          ${p.lat&&p.lng?`<div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:2px">${parseFloat(p.lat).toFixed(5)}, ${parseFloat(p.lng).toFixed(5)}</div>`:''}
-          ${p.nap_id?`<div style="font-size:10px;margin-top:3px"><span class="rc-nap" style="font-size:8px">${p.nap_id}</span></div>`:''}
-        </div>
-        ${p.is_existing||p.existingId?`<span class="badge-act" style="font-size:9px;flex-shrink:0">Inventario</span>`:''}
-      </div>`).join('')}
-      ${!poles.length?`<div style="font-size:11px;color:var(--t3);font-style:italic;padding:8px 0">Domicilio registrado — pendiente primer poste</div>`:''}
-      ${(a.fachada||[]).some(Boolean)?`
-      <div class="relv-det-sec-hdr">Fotos de fachada (campo)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${photoThumb(a.fachada[0],'Sin foto principal')}
-        ${photoThumb(a.fachada[1],'Sin foto adicional')}
-      </div>`:''}
+      <!-- Poles -->
+      ${poles.length?poles.map(p=>mkPoleProgressCard(p)).join('')
+        :`<div style="font-size:11px;color:var(--t3);font-style:italic;padding:8px 0;text-align:center">Domicilio registrado — pendiente primer poste</div>`}
     </div>
   </div>`:''
 
@@ -4148,7 +4594,7 @@ function renderRelvDetail(clientId){
     </button>
     <span style="font-size:11px;color:var(--t3)">Relevamiento /</span>
     <span style="font-size:11px;font-weight:700;color:var(--t1)">${r.object_id}</span>
-    <span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>
+    <span class="asign-stat ${isP?'as-pend':isObs?'as-obs':'as-prog'}">${isP?'Pendiente':isObs?'Observado':'En Proceso'}</span>
   </div>
 
   <div class="relv-det-grid">
@@ -4177,11 +4623,8 @@ function renderRelvDetail(clientId){
         ${r.nap_id
           ? infoRow('NAP asignada', `<span class="rc-nap" style="font-size:9px">${r.nap_id}</span><span style="font-size:11px;color:var(--t2);margin-left:7px">${napLabel}</span>`)
           : infoRow('NAP asignada','<span style="color:var(--t3);font-style:italic;font-size:11px">Sin NAP asignada</span>')}
-        <div class="relv-det-sec-hdr">Fotografías del cliente</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          ${photoThumb(p1,'Foto principal')}
-          ${photoThumb(p2,'Foto adicional')}
-        </div>
+        <div class="relv-det-sec-hdr">Foto · Fachada de Casa</div>
+        ${photoThumb(fachadaSrc,'Sin foto de fachada')}
       </div>
     </div>
 
@@ -4193,26 +4636,35 @@ function renderRelvDetail(clientId){
       </div>
       <div class="relv-det-sec">
         <div style="display:flex;align-items:center;gap:10px;padding:8px 0 12px;border-bottom:1px solid var(--bor);margin-bottom:4px">
-          <div style="width:36px;height:36px;border-radius:50%;background:${isP?'#DBEAFE':'#FFEDD5'};color:${isP?'#1D4ED8':'#C2410C'};font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:${isP?'#DBEAFE':isObs?'#FEE2E2':'#FFEDD5'};color:${isP?'#1D4ED8':isObs?'#B91C1C':'#C2410C'};font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--t1)">${tec?tec.name:'Sin técnico'}</div>
             ${tec?`<div style="font-size:9px;color:var(--p);font-weight:700">${tec.code} · ${tec.zone}</div>`:'<div style="font-size:10px;color:var(--t3);font-style:italic">Sin técnico asignado</div>'}
           </div>
         </div>
-        ${infoRow('Estado', `<span class="asign-stat ${isP?'as-pend':'as-prog'}">${isP?'Pendiente':'En Progreso'}</span>`)}
+        ${infoRow('Estado', `<span class="asign-stat ${isP?'as-pend':isObs?'as-obs':'as-prog'}">${isP?'Pendiente':isObs?'Observado':'En Proceso'}</span>`)}
         ${infoRow('Fecha asignación', a?.assigned_at||'—')}
         ${a?.started_at?infoRow('Inicio relevamiento', a.started_at):''}
-        ${inProg&&a?.gpsLat?infoRow('GPS domicilio', `<span style="font-family:monospace;font-size:11px">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</span>`):''}
-        ${inProg&&a?.access!=null?infoRow('Acceso domicilio', a.access?'<span class="badge-act">Con acceso</span>':'<span class="badge-ina">Sin acceso</span>'):''}
+        ${(inProg||isObs)&&a?.gpsLat?infoRow('GPS domicilio', `<span style="font-family:monospace;font-size:11px">${parseFloat(a.gpsLat).toFixed(5)}, ${parseFloat(a.gpsLng).toFixed(5)}</span>`):''}
+        ${(inProg||isObs)&&a?.access!=null?infoRow('Acceso domicilio', a.access?'<span class="badge-act">Con acceso</span>':'<span class="badge-ina">Sin acceso</span>'):''}
         ${r.nap_id?infoRow('NAP objetivo', `<span class="rc-nap" style="font-size:9px">${r.nap_id}</span> <span style="font-size:11px;color:var(--t2)">${napLabel}</span>`):infoRow('NAP objetivo','<span style="color:var(--t3);font-style:italic;font-size:11px">Por determinar en campo</span>')}
-        ${inProg?infoRow('Postes relevados', `<strong>${poles.length}</strong>`):''}
+        ${(inProg||isObs)?infoRow('Postes relevados', `<strong>${poles.length}</strong>`):''}
       </div>
     </div>
   </div>
 
   ${progressSection}
 
-  <button onclick="startRelvFlow(${clientId})" class="bp" style="width:100%;padding:14px;font-size:13px;font-weight:700;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:${isP?'#3B82F6':'#F97316'};border-color:${isP?'#2563EB':'#EA580C'}">
+  ${isObs&&a?.failed_reason?`
+  <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:12px;background:rgba(239,68,68,.06);border:1.5px solid rgba(239,68,68,.2);margin-bottom:12px">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#B91C1C;margin-bottom:3px">Observación registrada</div>
+      <div style="font-size:12px;color:var(--t1);line-height:1.5">${a.failed_reason}</div>
+    </div>
+  </div>`:''}
+
+  <button onclick="startRelvFlow(${clientId})" class="bp" style="width:100%;padding:14px;font-size:13px;font-weight:700;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:${isP?'#3B82F6':isObs?'#EF4444':'#F97316'};border-color:${isP?'#2563EB':isObs?'#DC2626':'#EA580C'}">
     ${isP
       ?`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar Relevamiento`
       :`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg> Continuar Relevamiento`}
@@ -4420,8 +4872,8 @@ function renderStepDomicilio(){
         </div>`:''}
         ${_ss.acceso===false?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Motivo del fallo <span class="req">*</span></div>
           <div class="fl" style="margin-bottom:0"><label>Describe el motivo</label><textarea id="sd-motivo" rows="3" placeholder="Ej. No había nadie en el domicilio. El portero negó el acceso." oninput="_ss.motivo=this.value">${_ss.motivo}</textarea></div></div>`:''}
-        ${_ss.acceso===true?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotos de la Fachada</div>
-          <div class="fg2">${_pslot('sd-ph1',_ss.fachada[0],'sd-finp1','Fachada principal','handleFachadaPhoto(0,this)')} ${_pslot('sd-ph2',_ss.fachada[1],'sd-finp2','Fachada adicional','handleFachadaPhoto(1,this)')}</div></div>`:''}
+        ${_ss.acceso===true?`<div class="tsec" style="margin-bottom:0"><div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Foto de la Fachada</div>
+          <div>${_pslot('sd-ph1',_ss.fachada[0],'sd-finp1','Fachada principal','handleFachadaPhoto(0,this)')}</div></div>`:''}
       </div>
       <div class="mf" style="border-top:1px solid var(--bor);padding:14px 18px;display:flex;gap:10px">
         ${_ss.acceso===false?`<button class="br" onclick="confirmSaveDomicilioFallo()" style="flex:1;justify-content:center;display:flex;align-items:center;gap:6px"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Registrar como Sin Acceso</button>`:''}
@@ -4535,16 +4987,147 @@ function toggleAddForm(){
   renderStepPoste();
   if(_ss.addFormOpen) setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
-function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;renderStepPoste();}
+function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;_ss.editingFoundPoste=false;renderStepPoste();}
 function _openAddConfirm(){_ss.addConfirm=true;renderStepPoste();}
+function _saveFoundPosteEdit(){
+  const p=_ss.foundPoste; if(!p)return;
+  p.material=document.getElementById('ef-material')?.value||p.material;
+  p.condicion=document.getElementById('ef-cond')?.value||p.condicion;
+  p.tension=document.getElementById('ef-tension')?.value||p.tension;
+  p.tipocable=document.getElementById('ef-cable')?.value||p.tipocable;
+  p.height=parseFloat(document.getElementById('ef-height')?.value)||p.height;
+  p.load=parseFloat(document.getElementById('ef-load')?.value)||p.load;
+  p.has_retainer=document.getElementById('ef-ret')?.checked??p.has_retainer;
+  p.lat=parseFloat(document.getElementById('ef-lat')?.value)||p.lat;
+  p.lng=parseFloat(document.getElementById('ef-lng')?.value)||p.lng;
+  p.observations=document.getElementById('ef-obs')?.value??p.observations;
+  p.external_operators=[..._ss.editPoleExtOps];
+  const inv=DB.postes.rows.find(x=>x.id===p.id);
+  if(inv){Object.assign(inv,{material:p.material,condicion:p.condicion,tension:p.tension,tipocable:p.tipocable,height:p.height,load:p.load,has_retainer:p.has_retainer,lat:p.lat,lng:p.lng,observations:p.observations,external_operators:p.external_operators});}
+  _ss.editingFoundPoste=false;
+  showToast('✓ Datos del poste actualizados','success');
+  renderStepPoste();
+}
 function _closeAnyConfirm(){_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;renderStepPoste();}
 
+function confirmRemovePoste(i){
+  const p=_ss.poles[i];
+  const lbl=p?(` Poste #${p.seq_order} · ${p.pole?.code||p.codigo||'Sin código'}`): '';
+  document.getElementById('mo-remove-pole-sub').textContent=`${lbl} será eliminado del recorrido.`;
+  document.getElementById('mo-remove-pole-btn').onclick=()=>{closeMo('mo-confirm-remove-pole');removePoste(i);};
+  openMo('mo-confirm-remove-pole');
+}
+function confirmEditPoste(i){
+  const p=_ss.poles[i];
+  const lbl=p?`Poste #${p.seq_order} · ${p.pole?.code||p.codigo||'Sin código'}`:'';
+  document.getElementById('mo-edit-pole-sub').textContent=lbl?`Editando: ${lbl}`:'Se abrirá el formulario de edición.';
+  document.getElementById('mo-edit-pole-btn').onclick=()=>{closeMo('mo-confirm-edit-pole');openEditPoste(i);};
+  openMo('mo-confirm-edit-pole');
+}
 function removePoste(i){
   _ss.poles.splice(i,1);
   _ss.poles.forEach((p,idx)=>{p.seq_order=idx+1;});
   if(_ss.napPoleIdx>=_ss.poles.length) _ss.napPoleIdx=_ss.poles.length?_ss.poles.length-1:null;
+  if(_ss.editPoleIdx===i) _ss.editPoleIdx=null;
   const a=ASSIGNMENTS[_ss.clientId];
   if(a) a.poles=[..._ss.poles];
+  renderStepPoste();
+}
+
+function openEditPoste(i){
+  _ss.editPoleIdx=i;
+  _ss.addFormOpen=false;
+  const p=_ss.poles[i];
+  _ss.editPoleExtOps=[...(p.external_operators||[])];
+  _ss.editPolePhotos=[p.photos?.[0]||null,p.photos?.[1]||null];
+  renderStepPoste();
+  setTimeout(()=>document.querySelector('.relv-edit-pole-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+
+function _renderEditPolePanel(){
+  const i=_ss.editPoleIdx; if(i==null||!_ss.poles[i])return '';
+  const p=_ss.poles[i];
+  const mkOptE=(rows,cur)=>rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${cur===r.name?' selected':''}>${r.name}</option>`).join('');
+  const extOpsHtml=(_ss.editPoleExtOps||[]).map((e,ei)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+      <select style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid var(--bor);background:var(--sur);font-size:11px;color:var(--t1)" onchange="_ss.editPoleExtOps[${ei}].operator=this.value">
+        <option value="">Operador...</option>${DB.propietario.rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${e.operator===r.name?' selected':''}>${r.name}</option>`).join('')}
+      </select>
+      <input type="number" min="1" value="${e.cable_count||1}" style="width:60px;padding:6px 8px;border-radius:6px;border:1px solid var(--bor);background:var(--sur);font-size:11px;color:var(--t1)" onchange="_ss.editPoleExtOps[${ei}].cable_count=parseInt(this.value)||1">
+      <button onclick="_ss.editPoleExtOps.splice(${ei},1);renderStepPoste()" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'"><svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`).join('');
+
+  return `<div class="relv-add-panel relv-edit-pole-panel" style="border-color:var(--p)">
+    <div style="padding:11px 16px;border-bottom:1px dashed rgba(123,110,248,.3);display:flex;align-items:center;gap:8px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.seq_order}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--t1)">Editando Poste #${p.seq_order}</div>
+        <div style="font-size:10px;color:var(--t3)">${p.propietario||'—'} · ${p.codigo||'Sin código'} — Propietario y código no editables</div>
+      </div>
+      <button onclick="_ss.editPoleIdx=null;renderStepPoste()" title="Cerrar" style="width:26px;height:26px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:16px">
+      <div class="tsec">
+        <div class="tsec-hdr">Características</div>
+        <div class="fg2">
+          <div class="fl"><label>Material</label><select id="ep-material"><option value="">—</option>${mkOptE(DB.material.rows,p.material||p.condition)}</select></div>
+          <div class="fl"><label>Condición</label><select id="ep-cond"><option value="">—</option>${mkOptE(DB.condicion.rows,p.condition)}</select></div>
+          <div class="fl"><label>Tensión</label><select id="ep-tension"><option value="">—</option>${mkOptE(DB.tension.rows,p.tension)}</select></div>
+          <div class="fl"><label>Tipo de Cable</label><select id="ep-cable"><option value="">—</option>${mkOptE(DB.tipocable.rows,p.cable_type)}</select></div>
+          <div class="fl"><label>Altura (m)</label><input type="number" id="ep-height" step="0.1" value="${p.height||''}"></div>
+          <div class="fl"><label>Carga (kg)</label><input type="number" id="ep-load" step="1" value="${p.load||''}"></div>
+        </div>
+        <div class="bool-card ${p.has_retainer?'on':'off'} fc2" id="ep-ret-card" onclick="toggleBoolCard('ep-ret','ep-ret-card')">
+          <div class="bool-card-l"><div class="blbl">Retenida instalada</div></div>
+          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="ep-ret"${p.has_retainer?' checked':''} onchange="syncBoolCard('ep-ret','ep-ret-card')"><span class="tgl-sl"></span></label>
+        </div>
+      </div>
+      <div class="tsec">
+        <div class="tsec-hdr">GPS del Poste</div>
+        <div class="fg2">
+          <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="ep-lat" step="0.000001" value="${p.lat||''}"></div>
+          <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="ep-lng" step="0.000001" value="${p.lng||''}"></div>
+        </div>
+        ${_gpsBtnHtml('ep-gpsbtn',p.lat,p.lng,`captureGPS('ep-gpsbtn','ep-lat','ep-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
+      </div>
+      <div class="tsec">
+        <div class="tsec-hdr">Operadores Externos</div>
+        <div id="ep-extops-list">${extOpsHtml}</div>
+        <button class="bs" onclick="_ss.editPoleExtOps.push({operator:'',cable_count:1});renderStepPoste()" style="font-size:11px;padding:6px 12px;margin-top:8px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar operador</button>
+      </div>
+      <div class="tsec">
+        <div class="tsec-hdr">Observaciones</div>
+        <div class="fl"><label>Hallazgos</label><textarea id="ep-findings" rows="2">${p.findings||p.observation||''}</textarea></div>
+        <div class="fl" style="margin-bottom:0"><label>Observaciones</label><textarea id="ep-obs" rows="2">${p.observations||p.observation||''}</textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="_ss.editPoleIdx=null;renderStepPoste()" class="bs" style="flex:1;justify-content:center;display:flex;align-items:center;gap:5px;font-size:12px">Cancelar</button>
+        <button onclick="openMo('mo-confirm-save-pole')" class="bp" style="flex:2;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveEditPoste(){
+  const i=_ss.editPoleIdx; if(i==null)return;
+  const p=_ss.poles[i];
+  p.material=document.getElementById('ep-material')?.value||p.material;
+  p.condition=document.getElementById('ep-cond')?.value||p.condition;
+  p.tension=document.getElementById('ep-tension')?.value||p.tension;
+  p.cable_type=document.getElementById('ep-cable')?.value||p.cable_type;
+  p.height=parseFloat(document.getElementById('ep-height')?.value)||p.height;
+  p.load=parseFloat(document.getElementById('ep-load')?.value)||p.load;
+  p.has_retainer=document.getElementById('ep-ret')?.checked??p.has_retainer;
+  p.lat=parseFloat(document.getElementById('ep-lat')?.value)||p.lat;
+  p.lng=parseFloat(document.getElementById('ep-lng')?.value)||p.lng;
+  p.findings=document.getElementById('ep-findings')?.value??p.findings;
+  p.observations=document.getElementById('ep-obs')?.value??p.observations;
+  p.external_operators=[..._ss.editPoleExtOps];
+  const a=ASSIGNMENTS[_ss.clientId]; if(a) a.poles=[..._ss.poles];
+  _ss.editPoleIdx=null;
+  showToast(`✓ Poste #${p.seq_order} actualizado`,'success');
   renderStepPoste();
 }
 
@@ -4654,11 +5237,18 @@ function _renderPoleTimeline(){
             <div style="font-size:11px;color:var(--t2)">${p.propietario||'—'} · ${p.material||'—'} · ${p.condition||'—'}</div>
             <div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:1px">${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}</div>
           </div>
-          <button onclick="removePoste(${i})" title="Quitar del recorrido"
-            style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s"
-            onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'">
-            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button onclick="confirmEditPoste(${i})" title="Editar poste"
+              style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:all .15s"
+              onmouseenter="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button onclick="confirmRemovePoste(${i})" title="Quitar del recorrido"
+              style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:all .15s"
+              onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'">
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -4704,37 +5294,100 @@ function _renderAddPoleForm(){
     const p=_ss.foundPoste;
     if(!p) return `<div class="relv-add-panel">${hdr}</div>`;
     const extOps=(p.external_operators||[]);
-    const infoRow=(l,v)=>v?`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:11px;color:var(--t3);min-width:110px;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1);font-weight:700">${v}</span></div>`:'';
-    const confirmArea=`<button class="bp" onclick="_openAddConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:14px">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar este poste a la ruta
-        </button>`;
+    const infoRow=(l,v)=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:11px;color:var(--t3);min-width:110px;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1);font-weight:700">${v||'—'}</span></div>`;
+
+    /* ── Vista de sólo lectura ── */
+    if(!_ss.editingFoundPoste){
+      return `<div class="relv-add-panel">
+        ${hdr}
+        <div style="padding:14px 16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:800;color:var(--t1)">${p.codigo||'Sin código'}</div>
+              <div style="font-size:12px;color:var(--t2)">${p.propietario}</div>
+            </div>
+            <span class="rc-nap" style="background:rgba(123,110,248,.12);color:var(--p)">Inventario</span>
+          </div>
+          <div style="border:1px solid var(--bor);border-radius:8px;overflow:hidden;margin-bottom:14px">
+            ${infoRow('Material',p.material)}
+            ${infoRow('Condición',p.condicion)}
+            ${infoRow('Tensión',p.tension)}
+            ${infoRow('Tipo Cable',p.tipocable)}
+            ${infoRow('Altura',p.height?(p.height+'m'):null)}
+            ${infoRow('Carga',p.load?(p.load+'kg'):null)}
+            ${infoRow('Retenida',p.has_retainer?'Sí':'No')}
+            ${infoRow('GPS',`${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}`)}
+            ${extOps.length?infoRow('Operadores ext.',extOps.map(e=>`${e.operator} (${e.cable_count} cables)`).join(' · ')):''}
+            ${infoRow('Observaciones',p.observations)}
+          </div>
+          <button class="bp" onclick="_openAddConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar este poste a la ruta
+          </button>
+        </div>
+      </div>`;
+    }
+
+    /* ── Vista de edición inline ── */
+    const mkOptF=(rows,cur)=>rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${cur===r.name?' selected':''}>${r.name}</option>`).join('');
+    const extOpsEdit=_ss.editPoleExtOps||[];
+    const extOpsHtml=extOpsEdit.map((e,i)=>`
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+        <select style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid var(--bor);background:var(--sur);font-size:11px;color:var(--t1)" onchange="_ss.editPoleExtOps[${i}].operator=this.value">
+          <option value="">Operador...</option>${DB.propietario.rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${e.operator===r.name?' selected':''}>${r.name}</option>`).join('')}
+        </select>
+        <input type="number" min="1" value="${e.cable_count||1}" style="width:60px;padding:6px 8px;border-radius:6px;border:1px solid var(--bor);background:var(--sur);font-size:11px;color:var(--t1)" onchange="_ss.editPoleExtOps[${i}].cable_count=parseInt(this.value)||1" placeholder="Cables">
+        <button onclick="_ss.editPoleExtOps.splice(${i},1);renderStepPoste()" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'"><svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>`).join('');
+
     return `<div class="relv-add-panel">
       ${hdr}
       <div style="padding:14px 16px">
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          ${_pslot('sp-ph1-view',null,'sp-pinp1-view','Panorámica','')}
-          ${_pslot('sp-ph2-view',null,'sp-pinp2-view','Detalle','')}
+        <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="font-size:10px;color:var(--t3)">Propietario y código no son editables — identifican el poste en inventario</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div>
-            <div style="font-size:15px;font-weight:800;color:var(--t1)">${p.codigo||'Sin código'}</div>
-            <div style="font-size:12px;color:var(--t2)">${p.propietario}</div>
+        <div style="display:flex;gap:10px;margin-bottom:14px">
+          <div style="flex:1"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px">Propietario</div><div style="font-size:13px;font-weight:700;color:var(--t1)">${p.propietario}</div></div>
+          <div style="flex:1"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px">Código</div><div style="font-size:13px;font-weight:700;color:var(--t1)">${p.codigo||'—'}</div></div>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">Características del Poste</div>
+          <div class="fg2">
+            <div class="fl"><label>Material</label><select id="ef-material"><option value="">—</option>${mkOptF(DB.material.rows,p.material)}</select></div>
+            <div class="fl"><label>Condición</label><select id="ef-cond"><option value="">—</option>${mkOptF(DB.condicion.rows,p.condicion)}</select></div>
+            <div class="fl"><label>Tensión</label><select id="ef-tension"><option value="">—</option>${mkOptF(DB.tension.rows,p.tension)}</select></div>
+            <div class="fl"><label>Tipo de Cable</label><select id="ef-cable"><option value="">—</option>${mkOptF(DB.tipocable.rows,p.tipocable)}</select></div>
+            <div class="fl"><label>Altura (m)</label><input type="number" id="ef-height" step="0.1" value="${p.height||''}"></div>
+            <div class="fl"><label>Carga (kg)</label><input type="number" id="ef-load" step="1" value="${p.load||''}"></div>
           </div>
-          <span class="rc-nap" style="background:rgba(123,110,248,.12);color:var(--p);margin-left:auto">Inventario</span>
+          <div class="bool-card ${p.has_retainer?'on':'off'} fc2" id="ef-ret-card" onclick="toggleBoolCard('ef-ret','ef-ret-card')">
+            <div class="bool-card-l"><div class="blbl">Retenida instalada</div><div class="bsub">¿El poste tiene cable de retenida?</div></div>
+            <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="ef-ret"${p.has_retainer?' checked':''} onchange="syncBoolCard('ef-ret','ef-ret-card')"><span class="tgl-sl"></span></label>
+          </div>
         </div>
-        <div style="border:1px solid var(--bor);border-radius:8px;overflow:hidden;margin-bottom:2px">
-          ${infoRow('Material',p.material)}
-          ${infoRow('Condición',p.condicion)}
-          ${infoRow('Tensión',p.tension)}
-          ${infoRow('Tipo Cable',p.tipocable)}
-          ${infoRow('Altura',p.height?(p.height+'m'):'—')}
-          ${infoRow('Carga',p.load?(p.load+'kg'):'—')}
-          ${infoRow('Retenida',p.has_retainer?'Sí':'No')}
-          ${infoRow('GPS',`${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}`)}
-          ${extOps.length?infoRow('Operadores ext.',extOps.map(e=>`${e.operator} (${e.cable_count} cables)`).join(' · ')):''}
-          ${infoRow('Observaciones',p.observations||'—')}
+        <div class="tsec">
+          <div class="tsec-hdr">GPS del Poste</div>
+          <div class="fg2">
+            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="ef-lat" step="0.000001" value="${p.lat||''}"></div>
+            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="ef-lng" step="0.000001" value="${p.lng||''}"></div>
+          </div>
+          ${_gpsBtnHtml('ef-gpsbtn',p.lat,p.lng,`captureGPS('ef-gpsbtn','ef-lat','ef-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
         </div>
-        ${confirmArea}
+        <div class="tsec">
+          <div class="tsec-hdr">Operadores Externos</div>
+          <div id="ef-extops-list">${extOpsHtml}</div>
+          <button class="bs" onclick="_ss.editPoleExtOps.push({operator:'',cable_count:1});renderStepPoste()" style="font-size:11px;padding:6px 12px;margin-top:8px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar operador</button>
+        </div>
+        <div class="tsec">
+          <div class="tsec-hdr">Observaciones</div>
+          <div class="fl"><label>Observaciones</label><textarea id="ef-obs" rows="2">${p.observations||''}</textarea></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button onclick="_ss.editingFoundPoste=false;renderStepPoste()" class="bs" style="flex:1;justify-content:center;display:flex;align-items:center;gap:5px;font-size:12px">Cancelar</button>
+          <button onclick="_saveFoundPosteEdit()" class="bp" style="flex:2;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Guardar cambios
+          </button>
+        </div>
       </div>
     </div>`;
   }
@@ -5109,6 +5762,7 @@ function renderStepPoste(){
   const napModalHTML=_ss.napModalOpen?_renderNapModal():'';
   const existingConfirmHTML=_ss.addConfirm?_renderExistingPoleConfirmModal():'';
   const newPoleConfirmHTML=_ss.newPoleConfirmOpen?_renderNewPoleConfirmModal():'';
+  const editPoleHTML=_ss.editPoleIdx!=null?_renderEditPolePanel():'';
 
   vEl.innerHTML=`<div>
     ${_stepsBar('poste')}
@@ -5135,6 +5789,7 @@ function renderStepPoste(){
         </div>
       </div>
 
+      ${editPoleHTML}
       ${addFormHTML}
 
     </div>
