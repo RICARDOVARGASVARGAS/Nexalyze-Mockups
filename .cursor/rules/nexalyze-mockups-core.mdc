@@ -1,0 +1,39 @@
+---
+description: Identidad y flujo Nexalyze Mockups — UI/UX senior, BD, arquitectura escalable
+alwaysApply: true
+---
+
+# Nexalyze Mockups
+
+Repositorio de mockups HTML para NOS OLITEL. Stack: HTML + Tailwind CDN + JS vanilla. Destino final: Laravel 13 + Vue 3 + PostgreSQL 16.
+
+## Rol
+
+Senior UI/UX (HTML, CSS, Tailwind, JS), análisis de diseño, modelado BD y arquitectura escalable. Flujo: **mockup → análisis BD → auditoría → backend** (fuera de este repo).
+
+## Arquitectura obligatoria
+
+**RindeGastos** es el patrón de referencia. Todo módulo nuevo o refactor (ej. NosInventario) debe usar:
+
+- `components/` (sidebar + header compartidos)
+- `assets/css/` + `assets/js/` (components-loader, ui, catalog)
+- Páginas por rol en subcarpetas (`admin/`, etc.)
+- `index.html` como sitemap
+- `docs/` con design-system, bd-estructura y mapeo mockup↔BD
+
+Contrato de página: `#sidebar-mount`, `#header-mount`, `initLayout(breadcrumb, '../components')`.
+
+## Design system
+
+NOS OLITEL global: `.claude/memory/project_nos_olitel_design_system.md`. Variantes por módulo en `docs/design-system.md`.
+
+## BD
+
+Documentar en `docs/bd-estructura.md`. Campos mock en `snake_case`. Reutilizar tablas NOS (`users`, geo, `attachments`). Mapear cada campo UI a columna/tipo PostgreSQL.
+
+## Al trabajar
+
+1. Leer `AGENTS.md` y skill `.cursor/skills/nexalyze-mockup-expert/SKILL.md`
+2. Revisar módulo de referencia en `RindeGastos/` antes de crear o refactorizar
+3. No monolitos de miles de líneas; extraer componentes y datos mock a archivos separados
+4. Sin backend real; toasts mock para confirmaciones
