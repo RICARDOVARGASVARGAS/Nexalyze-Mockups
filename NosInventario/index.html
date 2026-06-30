@@ -422,6 +422,8 @@
     body.dark .ht-fail{background:rgba(185,28,28,.15);color:#FCA5A5}
     body.dark .ht-canc{background:rgba(245,158,11,.15);color:#FCD34D}
     body.dark .ht-pend{background:rgba(29,78,216,.15);color:#93C5FD}
+    .ht-rev{background:#EDE9FE;color:#5B21B6}
+    body.dark .ht-rev{background:rgba(123,110,248,.15);color:#C4B5FD}
     /* ─── Location Cell ─── */
     .loc-cell{display:flex;flex-direction:column;gap:1px}
     .loc-top{font-size:9px;font-weight:600;color:var(--t3);letter-spacing:.04em;text-transform:uppercase}
@@ -440,6 +442,7 @@
     .as-fail{background:#FEE2E2;color:#B91C1C}.as-fail::before{background:#EF4444}
     .as-canc{background:#F9F9F9;color:#9CA3AF}.as-canc::before{background:#D1D5DB}
     .as-obs{background:#FEE2E2;color:#B91C1C}.as-obs::before{background:#EF4444}
+    .as-rev{background:#EDE9FE;color:#5B21B6}.as-rev::before{background:#7B6EF8}
     body.dark .as-libre{background:rgba(107,114,128,.15);color:#9CA3AF}
     body.dark .as-pend{background:rgba(29,78,216,.15);color:#93C5FD}
     body.dark .as-prog{background:rgba(194,65,12,.15);color:#FDB077}
@@ -447,6 +450,20 @@
     body.dark .as-fail{background:rgba(185,28,28,.15);color:#FCA5A5}
     body.dark .as-canc{background:rgba(107,114,128,.12);color:#6B7280}
     body.dark .as-obs{background:rgba(185,28,28,.15);color:#FCA5A5}
+    body.dark .as-rev{background:rgba(123,110,248,.15);color:#C4B5FD}
+    /* ─── Revisión: barra de acciones ─── */
+    .rev-action-bar{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 18px}
+    .rev-act-btn{width:100%;justify-content:center;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.07em;border-radius:10px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,transform .1s}
+    .rev-act-btn:active{transform:scale(.98)}
+    .rev-act-reject{background:#FEF2F2;color:#B91C1C;border:1.5px solid #FECACA}
+    .rev-act-reject:hover{background:#FEE2E2;border-color:#F87171}
+    .rev-act-approve{background:#10B981;color:#fff;border:none;box-shadow:0 4px 14px rgba(16,185,129,.28)}
+    .rev-act-approve:hover{background:#059669}
+    body.dark .rev-act-reject{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:#FCA5A5}
+    body.dark .rev-act-reject:hover{background:rgba(239,68,68,.22)}
+    body.dark .rev-act-approve{background:#059669}
+    .rev-mo-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+    .rev-mo-actions .rev-act-btn{padding:11px 14px}
     .obs-chip{padding:4px 10px;border-radius:20px;border:1.5px solid var(--bor);background:var(--sur);color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
     .obs-chip:hover{border-color:#EF4444;color:#B91C1C}
     .obs-chip.sel{border-color:#EF4444;background:#FEE2E2;color:#B91C1C}
@@ -735,6 +752,10 @@
         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         Relevamiento
       </div>
+      <div class="sbsi" id="nav-revision" onclick="navTo('revision')">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Revisión
+      </div>
     </div>
 
     <!-- Tablas Generales -->
@@ -1017,6 +1038,78 @@
         <button class="br" onclick="doCancelAsign()" style="gap:6px">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
           Confirmar Cancelacion
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: APROBAR REVISIÓN ══ -->
+<div class="mo" id="mo-rev-approve">
+  <div class="mc" style="max-width:460px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#DCFCE7">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#15803D" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Aprobar Asignación</div>
+          <div class="msub">La asignación pasará a completado</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-rev-approve')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:14px">
+      <div id="mra-client-info" style="background:var(--bg);border-radius:10px;padding:14px 16px"></div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:9px;padding:11px 14px;font-size:11px;color:#166534;display:flex;align-items:flex-start;gap:8px">
+        <svg style="flex-shrink:0;margin-top:1px" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>¿Confirmas que la asignación cumple con todos los requisitos y puede marcarse como <strong>completada</strong>?</span>
+      </div>
+      <div class="rev-mo-actions">
+        <button class="rev-act-btn rev-act-reject" onclick="closeMo('mo-rev-approve')">Cancelar</button>
+        <button class="rev-act-btn rev-act-approve" onclick="doRevApprove()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirmar Aprobación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL: RECHAZAR REVISIÓN ══ -->
+<div class="mo" id="mo-rev-reject">
+  <div class="mc" style="max-width:460px">
+    <div class="mh">
+      <div class="mh-l">
+        <div class="m-ico" style="background:#FEE2E2">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#DC2626" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div>
+          <div class="mtit">Rechazar Asignación</div>
+          <div class="msub">Indica qué debe corregir el técnico</div>
+        </div>
+      </div>
+      <button class="mx" onclick="closeMo('mo-rev-reject')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:14px">
+      <div id="mrr-client-info" style="background:var(--bg);border-radius:10px;padding:14px 16px"></div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Comentario <span style="color:#EF4444">*</span></label>
+        <textarea id="mrr-comment" rows="4" placeholder="Describe la observación que debe corregir el técnico..." style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--bor);background:var(--sur);color:var(--t1);font-size:12px;resize:vertical;outline:none;box-sizing:border-box" onfocus="this.style.borderColor='var(--p)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+      </div>
+      <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:11px 14px;font-size:11px;color:#991B1B;display:flex;align-items:flex-start;gap:8px">
+        <svg style="flex-shrink:0;margin-top:1px" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>El técnico recibirá la observación y la asignación quedará como <strong>observada</strong>.</span>
+      </div>
+      <div class="rev-mo-actions">
+        <button class="rev-act-btn rev-act-reject" onclick="closeMo('mo-rev-reject')">Cancelar</button>
+        <button class="rev-act-btn rev-act-approve" style="background:#EF4444;box-shadow:0 4px 14px rgba(239,68,68,.25)" onclick="doRevReject()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Confirmar Rechazo
         </button>
       </div>
     </div>
@@ -2277,6 +2370,7 @@ const NAPS_LIST=[
   {code:'WN-230-1303495',tipo:'VERTICAL', distrito:'LIMA',            lat:-12.09959,lng:-77.04254, building:'COND. LAS GARDENIAS',  tower_block:'BLOQUE A', box_code:'CAJA-013', floor_location:'PISO 1', total_ports:8,  used_ports_percentage:75, inventory_status:'INGRESADO', facing_address:false},
   {code:'WN-230-1303498',tipo:'VERTICAL', distrito:'LIMA',            lat:-12.09959,lng:-77.04254, building:'COND. LAS GARDENIAS',  tower_block:'BLOQUE C', box_code:'CAJA-014', floor_location:'PISO 2', total_ports:16, used_ports_percentage:56, inventory_status:'INGRESADO', facing_address:false},
   {code:'WN-20A-2208090',tipo:'VERTICAL', distrito:'SAN ISIDRO',     lat:-12.09654,lng:-77.023,   building:'EDIFICIO CENTRAL NORTE',tower_block:'BLOQUE B', box_code:'CAJA-015', floor_location:'PISO 2', total_ports:8,  used_ports_percentage:38, inventory_status:'INGRESADO', facing_address:false},
+  {code:'WN-230-2049379',tipo:'VERTICAL', distrito:'LA MOLINA',       lat:-12.0842, lng:-76.9540, building:'RESIDENCIAL FONTANA',   tower_block:'BLOQUE A', box_code:'CAJA-020', floor_location:'PISO 5', total_ports:8,  used_ports_percentage:50, inventory_status:'INGRESADO', facing_address:false},
 ];
 
 /* ════════════════════════════════ DB: CLIENTES ═══ */
@@ -2342,7 +2436,7 @@ const ASSIGNMENTS={
         {seq_order:2,codigo:'POL-0007',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'OPERATIVO',lat:-12.0800,lng:-77.0370,access:true,is_existing:true,nap_id:null,nap_access:null,nap_observation:null},
         {seq_order:3,codigo:'POL-0011',propietario:'WIN',  material:'MADERA',         condition:'REGULAR',lat:-12.0680,lng:-77.0410,access:true,is_existing:false,nap_id:'NAP-00001',nap_access:true,nap_observation:'NAP accesible, 8 puertos disponibles'},
       ]},
-  2: {technician_id:1, status:'en_progreso', assigned_at:'2025-03-15', started_at:'2025-03-16', access:true, gpsLat:-12.1186, gpsLng:-77.0292, fachada:['https://picsum.photos/seed/fach2a/600/400','https://picsum.photos/seed/fach2b/600/400'], poles:[
+  2: {technician_id:1, status:'en_revision', assigned_at:'2025-03-15', started_at:'2025-03-16', submitted_at:'2025-04-28', access:true, gpsLat:-12.1186, gpsLng:-77.0292, iea_km:2.1, attenuation_db:4.2, nap_found:'WN-230-2247119', fachada:['https://picsum.photos/seed/fach2a/600/400','https://picsum.photos/seed/fach2b/600/400'], poles:[
     {pole_id:2,existingId:2,is_existing:true,seq_order:1,codigo:'POL-0002',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'FIBRA ÓPTICA MONOMODO (SM)',lat:-12.0833,lng:-77.0353,access:true,photos:['https://picsum.photos/seed/pole2pan/400/300','https://picsum.photos/seed/pole2cod/400/300']},
     {pole_id:17,existingId:17,is_existing:true,seq_order:2,codigo:'POL-0017',propietario:'MOVISTAR',material:'CONCRETO ARMADO',condition:'EXCELENTE',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',lat:-12.1271,lng:-77.0310,access:true,observation:'Poste en buen estado, sin obstrucciones en el área.',photos:['https://picsum.photos/seed/pole17pan/400/300','https://picsum.photos/seed/pole17cod/400/300']},
     {pole_id:8,existingId:8,is_existing:true,seq_order:3,codigo:'POL-0008',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',tension:'BAJA TENSIÓN — BT (< 1 kV)',tipocable:'CABLE DROP ÓPTICO AUTOSOPORTADO',lat:-12.1140,lng:-77.0298,access:true,observation:'NAP accesible desde la calle, sin obstrucciones.',photos:['https://picsum.photos/seed/pole8pan/400/300','https://picsum.photos/seed/pole8cod/400/300'],nap_id:'WN-230-2247119',nap_access:true,nap_observation:'NAP en buen estado. 2 puertos disponibles. Acceso con escalera de 3 metros.',napPhotos:['https://picsum.photos/seed/nap2p1/400/300','https://picsum.photos/seed/nap2p2/400/300','https://picsum.photos/seed/nap2p3/400/300','https://picsum.photos/seed/nap2p4/400/300']},
@@ -2355,7 +2449,7 @@ const ASSIGNMENTS={
         {seq_order:2,codigo:'POL-0012',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1060,lng:-77.0320,access:true,is_existing:true,nap_id:'WN-230-2247119',nap_access:true,nap_observation:'Puertos libres: 4'},
       ]},
   7: {technician_id:3, status:'pendiente',   assigned_at:'2025-04-10'},
-  9: {technician_id:2, status:'en_progreso', assigned_at:'2025-04-18', started_at:'2025-04-19', access:true, gpsLat:-12.1299, gpsLng:-77.0065, fachada:['https://picsum.photos/seed/fach9a/600/400',null], poles:[
+  9: {technician_id:2, status:'en_revision', assigned_at:'2025-04-18', started_at:'2025-04-19', submitted_at:'2025-04-29', access:true, gpsLat:-12.1299, gpsLng:-77.0065, iea_km:1.9, attenuation_db:3.8, nap_found:'WN-230-2049378', fachada:['https://picsum.photos/seed/fach9a/600/400',null], poles:[
     {existingId:1,seq_order:1,codigo:'POL-0001',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'BUENO',tension:'BAJA TENSIÓN — BT (< 1 kV)',lat:-12.1011,lng:-77.0398,access:true,photos:['https://picsum.photos/seed/pole1pan/400/300','https://picsum.photos/seed/pole1cod/400/300']},
     {existingId:9,seq_order:2,codigo:'POL-0009',propietario:'CLARO',material:'CONCRETO ARMADO',condition:'REGULAR',tension:'MEDIA TENSIÓN — MT (1 kV – 60 kV)',lat:-12.0654,lng:-77.0484,access:true,observation:'Cables en mal estado en el sector superior. Requiere revisión.',photos:['https://picsum.photos/seed/pole9pan/400/300',null]},
     {existingId:15,seq_order:3,codigo:'POL-0015',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.1256,lng:-77.0292,access:true,photos:['https://picsum.photos/seed/pole15pan/400/300','https://picsum.photos/seed/pole15cod/400/300'],nap_id:'WN-230-2049378',nap_access:true,nap_observation:'NAP ACCESIBLE. Todos los puertos en buen estado. Etiquetado correcto.',napPhotos:['https://picsum.photos/seed/nap9p1/400/300','https://picsum.photos/seed/nap9p2/400/300','https://picsum.photos/seed/nap9p3/400/300','https://picsum.photos/seed/nap9p4/400/300']},
@@ -2407,10 +2501,78 @@ const ASSIGNMENTS={
   17:{technician_id:4, status:'cancelado', assigned_at:'2025-03-25'},
   29:{technician_id:3, status:'cancelado', assigned_at:'2025-04-20'},
   // Clientes COMPLETADO adicionales (con historial previo)
-  23:{technician_id:1, status:'completado', assigned_at:'2025-03-05', started_at:'2025-03-06', closed_at:'2025-03-06', access:true, gpsLat:-12.0842, gpsLng:-76.9540, iea_km:1.6, attenuation_db:3.2, nap_found:'WN-230-2049379', fachada:[null,null], poles:[{seq_order:1,codigo:'POL-0060',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0845,lng:-76.9545,access:true,is_existing:true,nap_id:'WN-230-2049379',nap_access:true,nap_observation:''}]},
+  23:{technician_id:1, status:'en_revision', assigned_at:'2025-03-05', started_at:'2025-03-06', submitted_at:'2025-04-27', access:true, gpsLat:-12.0842, gpsLng:-76.9540, iea_km:1.6, attenuation_db:3.2, nap_found:'WN-230-2049379', fachada:[null,null], poles:[{existingId:60,seq_order:1,codigo:'POL-0060',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',tension:'BAJA TENSIÓN — BT (< 1 kV)',lat:-12.0845,lng:-76.9545,access:true,photos:[null,'https://picsum.photos/seed/pole60cod/400/300'],nap_id:'WN-230-2049379',nap_access:true,nap_observation:'NAP con etiquetado parcial',napPhotos:['https://picsum.photos/seed/nap23p1/400/300',null,'https://picsum.photos/seed/nap23p3/400/300',null]}]},
   24:{technician_id:5, status:'completado', assigned_at:'2025-02-20', started_at:'2025-02-20', closed_at:'2025-02-20', access:true, gpsLat:-12.0528, gpsLng:-77.0341, iea_km:0.9, attenuation_db:1.8, nap_found:null, fachada:[null,null], poles:[]},
   26:{technician_id:3, status:'completado', assigned_at:'2025-03-12', started_at:'2025-03-12', closed_at:'2025-03-12', access:true, gpsLat:-12.1196, gpsLng:-77.0296, iea_km:1.3, attenuation_db:2.6, nap_found:null, fachada:[null,null], poles:[]},
 };
+
+/* ── Listado de asignaciones para módulo Revisión (por asignación, no por cliente) ── */
+const ASSIGNMENTS_LIST=(()=>{
+  const obsReasons=[
+    'Fotos de poste borrosas o con poca luz',
+    'NAP sin etiquetado visible en foto de fibras',
+    'Fachada ilegible o parcialmente recortada',
+    'Recorrido GPS incompleto respecto al domicilio',
+    'Coordenadas del domicilio no coinciden con la dirección',
+    'Faltan fotos de puertos en la NAP',
+    'Código de poste no visible en la fotografía',
+    'Observación de NAP insuficiente para validar acceso',
+    'Secuencia de postes no coincide con la ruta esperada',
+    'Foto panorámica de NAP con ángulo incorrecto',
+  ];
+  const statusSeq=[
+    ...Array(11).fill('en_revision'),
+    ...Array(10).fill('observado'),
+    ...Array(9).fill('completado'),
+  ];
+  return statusSeq.map((status,i)=>{
+    const c=DB.clientes.rows[i%DB.clientes.rows.length];
+    const tec=TECHNICIANS[i%TECHNICIANS.length];
+    const legacy=ASSIGNMENTS[c.id]||{};
+    const m=String((i%12)+1).padStart(2,'0');
+    const d=String((i%28)+1).padStart(2,'0');
+    const assigned=`2025-${m}-${d}`;
+    const subDay=Math.min(28,parseInt(d,10)+2+(i%4));
+    const submitted=`2025-${m}-${String(subDay).padStart(2,'0')}`;
+    const poles=legacy.poles?legacy.poles.map(p=>({...p})):[];
+    if(!poles.length&&status!=='observado'){
+      poles.push({seq_order:1,codigo:`POL-${String(100+i).padStart(4,'0')}`,propietario:['ENTEL','CLARO','WIN','MOVISTAR'][i%4],material:'CONCRETO ARMADO',condition:'BUENO',lat:c.lat_ref,lng:c.lng_ref,access:true,photos:[`https://picsum.photos/seed/asg${i}a/400/300`,`https://picsum.photos/seed/asg${i}b/400/300`]});
+    }
+    return {
+      id:i+1,
+      object_id:`ASG-${String(i+1).padStart(6,'0')}`,
+      client_id:c.id,
+      technician_id:tec.id,
+      status,
+      assigned_at:assigned,
+      started_at:legacy.started_at||assigned,
+      submitted_at:submitted,
+      closed_at:status==='completado'?submitted:null,
+      reviewed_at:status!=='en_revision'?submitted:null,
+      failed_reason:status==='observado'?obsReasons[i%obsReasons.length]:null,
+      access:legacy.access!==false,
+      gpsLat:legacy.gpsLat??c.lat_ref,
+      gpsLng:legacy.gpsLng??c.lng_ref,
+      iea_km:legacy.iea_km??(1.1+(i%12)*0.25),
+      attenuation_db:legacy.attenuation_db??(1.8+(i%10)*0.4),
+      nap_found:legacy.nap_found||c.nap_id||null,
+      fachada:legacy.fachada||[c.photos?.general||`https://picsum.photos/seed/fach${i}/600/400`,null],
+      poles,
+    };
+  });
+})();
+
+function getAssignmentById(id){return ASSIGNMENTS_LIST.find(a=>a.id===id)||null;}
+function getClientForAssignment(a){return a?DB.clientes.rows.find(c=>c.id===a.client_id):null;}
+function resolveAssignContext(ref,opts={}){
+  if(opts.fromList){
+    const a=getAssignmentById(ref);
+    return {a,r:getClientForAssignment(a),assignId:ref};
+  }
+  const r=DB.clientes.rows.find(x=>x.id===ref);
+  const a=ASSIGNMENTS[ref];
+  return {a,r,assignId:ref};
+}
 
 /* ── HISTORIAL DE ASIGNACIONES POR CLIENTE (del más antiguo al más reciente) ── */
 const CLIENT_HISTORY={
@@ -2489,6 +2651,9 @@ let afDept='',afProv='',afDist='',afTec='';
 let relvFilt='all';
 let relvCP=1, relvPS=10, relvSQ='';
 let _relvClientId=null;
+let revFilt='en_revision', revCP=1, revPS=10, revSQ='';
+let rfDept='',rfProv='',rfDist='',rfTec='';
+let _revAssignId=null, _revRejectId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
 const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole',editingFoundPoste:false,editPoleIdx:null,editPolePhotos:[null,null],editPoleExtOps:[]};
@@ -2526,6 +2691,17 @@ function navTo(v){
     vEl.classList.add('act');
     vEl.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt">Obteniendo información...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
     setTimeout(()=>renderAsignaciones(),950);
+    return;
+  }
+  if(v==='revision'){
+    CV='revision'; revSQ=''; revCP=1; revFilt='en_revision';
+    setBC(['Postes','Revisión']);
+    let vEl=document.getElementById('view-revision');
+    if(!vEl){vEl=document.createElement('div');vEl.id='view-revision';vEl.className='view';document.getElementById('cnt').appendChild(vEl);}
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
+    vEl.classList.add('act');
+    vEl.innerHTML=`<div class="ld-wrap"><div class="ld-card"><div class="ld-txt">Obteniendo información...</div><div class="ld-track"><div class="ld-bar"></div></div></div></div>`;
+    setTimeout(()=>renderRevision(),950);
     return;
   }
   if(!DB[v]) return;
@@ -3092,6 +3268,7 @@ function asignBadge(status){
     completado: {cls:'as-done', lbl:'Completado'},
     fallido:    {cls:'as-fail', lbl:'Fallido'},
     observado:  {cls:'as-obs',  lbl:'Observado'},
+    en_revision:{cls:'as-rev',  lbl:'En Revisión'},
     cancelado:  {cls:'as-canc', lbl:'Cancelado'},
   };
   const s=map[status]||map.libre;
@@ -3114,6 +3291,7 @@ const HT_MAP={
   fallido:    {cls:'ht-fail',  lbl:'Fallido'},
   cancelado:  {cls:'ht-canc',  lbl:'Cancelado'},
   observado:  {cls:'ht-obs',   lbl:'Observado'},
+  en_revision:{cls:'ht-rev',   lbl:'En Revisión'},
 };
 function htBadge(status){
   const m=HT_MAP[status]||HT_MAP.libre;
@@ -3367,6 +3545,238 @@ function afSetProv(v){afProv=v;afDist='';CP=1;renderAsignaciones();}
 function afSetDist(v){afDist=v;CP=1;renderAsignaciones();}
 function afSetTec(v){afTec=v;CP=1;renderAsignaciones();}
 function afClear(){afDept='';afProv='';afDist='';afTec='';SQ='';CP=1;renderAsignaciones();}
+
+/* ════════════════════════════════ REVISIÓN ═══ */
+function _revCollectWarnings(a, r, poles){
+  const w=[];
+  const fachada=a?.fachada?.[0]||r?.photos?.general;
+  if(!fachada) w.push('Sin foto de fachada del domicilio');
+  poles.forEach(p=>{
+    const code=p.codigo||('Poste #'+p.seq_order);
+    const ph0=p.photos?.[0];
+    const ph1=p.photos?.[1];
+    if(!ph0) w.push(`${code}: sin foto panorámica del poste`);
+    if(!ph1) w.push(`${code}: sin foto de código del poste`);
+    if(p.nap_id){
+      const labels=['poste panorámica','NAP panorámica','puertos','fibras etiquetadas'];
+      const nps=p.napPhotos||[];
+      labels.forEach((lbl,i)=>{if(!nps[i]) w.push(`NAP ${p.nap_id} (${code}): sin foto de ${lbl}`);});
+    }
+  });
+  return w;
+}
+function setRevFilt(f){revFilt=f;revCP=1;renderRevision();}
+function rfSetDept(v){rfDept=v;rfProv='';rfDist='';revCP=1;renderRevision();}
+function rfSetProv(v){rfProv=v;rfDist='';revCP=1;renderRevision();}
+function rfSetDist(v){rfDist=v;revCP=1;renderRevision();}
+function rfSetTec(v){rfTec=v;revCP=1;renderRevision();}
+function rfClear(){rfDept='';rfProv='';rfDist='';rfTec='';revSQ='';revCP=1;renderRevision();}
+function onRevSearch(v){revSQ=v;revCP=1;renderRevision();}
+function revGoP(p){revCP=p;renderRevision();}
+function changeRevPS(v){revPS=parseInt(v);revCP=1;renderRevision();}
+
+function renderRevision(){
+  const revPool=ASSIGNMENTS_LIST.filter(a=>['en_revision','observado','completado'].includes(a.status));
+  const cntRev=revPool.filter(a=>a.status==='en_revision').length;
+  const cntObs=revPool.filter(a=>a.status==='observado').length;
+  const cntDone=revPool.filter(a=>a.status==='completado').length;
+  const q=revSQ.toLowerCase();
+  let rows=revPool.filter(a=>{
+    if(revFilt!=='all'&&a.status!==revFilt) return false;
+    const r=getClientForAssignment(a);
+    if(!r) return false;
+    if(q&&!a.object_id.toLowerCase().includes(q)&&!r.object_id.toLowerCase().includes(q)&&!(r.address||'').toLowerCase().includes(q)&&!(r.district||'').toLowerCase().includes(q)&&!(a.nap_found||r.nap_id||'').toLowerCase().includes(q)) return false;
+    if(rfDept&&r.department!==rfDept) return false;
+    if(rfProv&&r.province!==rfProv) return false;
+    if(rfDist&&r.district!==rfDist) return false;
+    if(rfTec&&a.technician_id!==parseInt(rfTec)) return false;
+    return true;
+  });
+  const sorted=[...rows].sort((a,b)=>b.id-a.id);
+  const depts=[...new Set(revPool.map(a=>getClientForAssignment(a)?.department).filter(Boolean))].sort();
+  const provs=rfDept?[...new Set(revPool.filter(a=>getClientForAssignment(a)?.department===rfDept).map(a=>getClientForAssignment(a)?.province).filter(Boolean))].sort():[];
+  const dists=rfProv?[...new Set(revPool.filter(a=>{const r=getClientForAssignment(a);return r?.department===rfDept&&r?.province===rfProv;}).map(a=>getClientForAssignment(a)?.district).filter(Boolean))].sort():[];
+  const hasRF=rfDept||rfProv||rfDist||rfTec||revSQ;
+  const chips=[
+    {key:'en_revision',lbl:'En Revisión',cnt:cntRev},
+    {key:'observado',lbl:'Observados',cnt:cntObs},
+    {key:'completado',lbl:'Completado',cnt:cntDone},
+  ];
+  const total=sorted.length;
+  const pages=Math.max(1,Math.ceil(total/revPS));
+  if(revCP>pages) revCP=pages;
+  const slice=sorted.slice((revCP-1)*revPS,revCP*revPS);
+
+  document.getElementById('view-revision').innerHTML=`
+  <div class="stats">
+    <div class="sc sv">
+      <div><div class="sc-num">${cntRev}</div><div class="sc-lbl">En Revisión</div><div class="sc-sub">Pendientes de aprobación</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+    </div>
+    <div class="sc" style="border-left-color:#EF4444">
+      <div><div class="sc-num" style="color:#EF4444">${cntObs}</div><div class="sc-lbl">Observados</div><div class="sc-sub">Rechazados con observación</div></div>
+      <div class="sc-ico" style="background:#FEE2E2;color:#EF4444"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    </div>
+    <div class="sc sg">
+      <div><div class="sc-num">${cntDone}</div><div class="sc-lbl">Completado</div><div class="sc-sub">Aprobados en revisión</div></div>
+      <div class="sc-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><div class="ctit">Revisión de Asignaciones</div><div class="csub">Listado por asignación enviada por técnicos</div></div>
+      </div>
+    </div>
+    <div style="padding:12px 18px 14px;border-bottom:1px solid var(--bor)">
+      <div class="fchip-row">
+        ${chips.map(f=>`<div class="fchip${revFilt===f.key?' act':''}" onclick="setRevFilt('${f.key}')">${f.lbl}<span class="fc-cnt">${f.cnt}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="af-panel">
+      <div><div class="af-lbl">Departamento</div><select class="af-sel" onchange="rfSetDept(this.value)"><option value="">Todos</option>${depts.map(d=>`<option value="${d}"${rfDept===d?' selected':''}>${d}</option>`).join('')}</select></div>
+      <div><div class="af-lbl">Provincia</div><select class="af-sel" onchange="rfSetProv(this.value)"${!rfDept?' disabled':''}><option value="">Todas</option>${provs.map(p=>`<option value="${p}"${rfProv===p?' selected':''}>${p}</option>`).join('')}</select></div>
+      <div><div class="af-lbl">Distrito</div><select class="af-sel" onchange="rfSetDist(this.value)"${!rfProv?' disabled':''}><option value="">Todos</option>${dists.map(d=>`<option value="${d}"${rfDist===d?' selected':''}>${d}</option>`).join('')}</select></div>
+      <div><div class="af-lbl">Técnico</div><select class="af-sel" onchange="rfSetTec(this.value)"><option value="">Todos</option>${TECHNICIANS.map(t=>`<option value="${t.id}"${rfTec===String(t.id)?' selected':''}>${t.name}</option>`).join('')}</select></div>
+      <div style="align-self:flex-end"><button class="bs" onclick="rfClear()" style="font-size:10px;padding:7px 14px;white-space:nowrap${hasRF?';border-color:var(--p);color:var(--p)':''}">${hasRF?'<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ':''}Limpiar</button></div>
+    </div>
+    <div class="srch-wrap">
+      <div class="srch-inner">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#A0A0B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar por código asignación, cliente, dirección, NAP..." value="${revSQ}" oninput="onRevSearch(this.value)">
+      </div>
+      <div class="srch-cnt"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>${total} resultado${total!==1?'s':''}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" style="border-bottom:1px solid var(--bor)">
+      <div class="card-hl">
+        <div class="cico"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7B6EF8" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div class="ctit">Listado de Asignaciones</div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      ${slice.length===0?`<div style="text-align:center;padding:40px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">No hay asignaciones para el filtro seleccionado</div>`:`<table>
+        <thead><tr>
+          <th style="width:125px">Cód. Asignación</th>
+          <th style="width:120px">Cód. Cliente</th>
+          <th>Dirección</th>
+          <th style="width:145px">Ubicación</th>
+          <th style="width:145px">NAP</th>
+          <th style="width:155px">Técnico</th>
+          <th style="width:115px">Estado</th>
+          <th style="width:75px">Acciones</th>
+        </tr></thead>
+        <tbody>
+          ${slice.map(a=>{
+            const r=getClientForAssignment(a);
+            const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
+            const nap=a.nap_found||r?.nap_id;
+            return `<tr>
+              <td><span style="display:inline-block;background:#EDE9FE;color:#5B21B6;border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${a.object_id}</span></td>
+              <td><span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r?.object_id||'—'}</span></td>
+              <td class="td-name" style="font-size:11px">${r?.address||'—'}</td>
+              <td>${r?locCell(r):'—'}</td>
+              <td>${nap?`<span class="nap-code">${nap}</span>`:'<span style="font-size:10px;color:var(--t3)">—</span>'}</td>
+              <td>${tec?`<div style="display:flex;align-items:center;gap:7px"><div style="width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${tec.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--t1);font-size:11px">${tec.name}</div><div style="font-size:9px;color:var(--p);font-weight:700">${tec.code}</div></div></div>`:'<span style="font-size:10px;color:var(--t3)">—</span>'}</td>
+              <td>${asignBadge(a.status)}</td>
+              <td><button class="act-btn" title="Ver detalle" onclick="openRevDetail(${a.id})" style="color:var(--p)"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+            </tr>`;}).join('')}
+        </tbody></table>`}
+    </div>
+    <div class="pgn">
+      <span class="pg-lbl">Elementos por página:</span>
+      <select class="pg-sel" onchange="changeRevPS(this.value)">
+        <option value="10" ${revPS===10?'selected':''}>10</option>
+        <option value="15" ${revPS===15?'selected':''}>15</option>
+        <option value="25" ${revPS===25?'selected':''}>25</option>
+      </select>
+      <span class="pg-inf">${total===0?'0':(revCP-1)*revPS+1}–${Math.min(revCP*revPS,total)} de ${total}</span>
+      <button class="pg-btn" onclick="revGoP(1)" ${revCP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button>
+      <button class="pg-btn" onclick="revGoP(${revCP-1})" ${revCP===1?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="pg-btn" onclick="revGoP(${revCP+1})" ${revCP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="pg-btn" onclick="revGoP(${pages})" ${revCP===pages?'disabled':''}><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg></button>
+    </div>
+  </div>`;
+}
+
+function openRevDetail(assignId){
+  _revAssignId=assignId;
+  CV='revision-detail';
+  setBC(['Postes','Revisión','Detalle']);
+  document.querySelectorAll('.sbsi').forEach(e=>e.classList.remove('act'));
+  const nav=document.getElementById('nav-revision');
+  if(nav) nav.classList.add('act');
+  let vEl=document.getElementById('view-revision-detail');
+  if(!vEl){vEl=document.createElement('div');vEl.id='view-revision-detail';vEl.className='view';document.getElementById('cnt').appendChild(vEl);}
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('act'));
+  vEl.classList.add('act');
+  vEl.innerHTML=`<div class="ld-wrap"><div class="ld-sp"></div></div>`;
+  setTimeout(()=>renderRevDetail(assignId),400);
+}
+function renderRevDetail(assignId){
+  if(!assignId) return;
+  const a=getAssignmentById(assignId);
+  if(!a){navTo('revision');return;}
+  renderRelvComplete(assignId,{mode:'revision',viewId:'view-revision-detail',fromList:true});
+}
+function approveRevision(assignId){
+  const id=assignId||_revAssignId;
+  const a=getAssignmentById(id);
+  if(!a||a.status!=='en_revision') return;
+  const today=new Date().toISOString().slice(0,10);
+  a.status='completado';
+  a.closed_at=today;
+  a.reviewed_at=today;
+  if(!a.started_at) a.started_at=a.assigned_at;
+  const legacy=ASSIGNMENTS[a.client_id];
+  if(legacy){legacy.status='completado';legacy.closed_at=today;}
+  showToast('ASIGNACION COMPLETADA','success');
+  navTo('revision');
+}
+function openRevApproveModal(){
+  const a=getAssignmentById(_revAssignId);
+  const r=getClientForAssignment(a);
+  if(!r||!a||a.status!=='en_revision') return;
+  document.getElementById('mra-client-info').innerHTML=`
+    <div style="font-size:10px;font-weight:700;color:#5B21B6;margin-bottom:4px">${a.object_id}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--p);margin-bottom:4px">${r.object_id}</div>
+    <div style="font-size:11px;color:var(--t1);line-height:1.4">${r.address}</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:6px">Enviado: ${a.submitted_at||'—'}</div>`;
+  openMo('mo-rev-approve');
+}
+function doRevApprove(){
+  closeMo('mo-rev-approve');
+  approveRevision(_revAssignId);
+}
+function openRevRejectModal(){
+  const a=getAssignmentById(_revAssignId);
+  const r=getClientForAssignment(a);
+  if(!r||!a) return;
+  _revRejectId=a.id;
+  document.getElementById('mrr-client-info').innerHTML=`
+    <div style="font-size:10px;font-weight:700;color:#5B21B6;margin-bottom:4px">${a.object_id}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--p);margin-bottom:4px">${r.object_id}</div>
+    <div style="font-size:11px;color:var(--t1);line-height:1.4">${r.address}</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:6px">Enviado: ${a.submitted_at||'—'}</div>`;
+  document.getElementById('mrr-comment').value='';
+  openMo('mo-rev-reject');
+}
+function doRevReject(){
+  const obs=document.getElementById('mrr-comment').value.trim();
+  if(!obs){showToast('⚠ El comentario es obligatorio','warning');return;}
+  const a=getAssignmentById(_revRejectId);
+  if(!a) return;
+  a.status='observado';
+  a.failed_reason=obs;
+  a.reviewed_at=new Date().toISOString().slice(0,10);
+  const legacy=ASSIGNMENTS[a.client_id];
+  if(legacy){legacy.status='observado';legacy.failed_reason=obs;}
+  closeMo('mo-rev-reject');
+  showToast('ASIGNACION CON OBSERVACION','warning');
+  navTo('revision');
+}
 
 /* ════════════════════════════════ DISPATCH MODAL ═══ */
 function openDispatch(preClientId){
@@ -4074,7 +4484,7 @@ function confirmDelPost(){
   showToast('✓ Poste eliminado','danger');
 }
 
-function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else if(CV==='asignaciones')renderAsignaciones();else if(CV==='relevamiento')renderRelevamiento();else if(CV==='relevamiento-detail')renderRelvDetail(_relvClientId);else if(CV==='relevamiento-flow')renderRelvStep();else renderView(CV);}
+function _refresh(){if(CV==='postes')renderPostes();else if(CV==='clientes')renderClientes();else if(CV==='asignaciones')renderAsignaciones();else if(CV==='revision')renderRevision();else if(CV==='revision-detail')renderRevDetail(_revAssignId);else if(CV==='relevamiento')renderRelevamiento();else if(CV==='relevamiento-detail')renderRelvDetail(_relvClientId);else if(CV==='relevamiento-flow')renderRelvStep();else renderView(CV);}
 
 /* ════════════════════════════════ RELEVAMIENTO ═══ */
 function renderRelevamiento(){
@@ -4231,17 +4641,22 @@ function openRelvDetail(clientId){
   setTimeout(()=>renderRelvDetail(clientId),500);
 }
 
-function renderRelvComplete(clientId){
-  _relvClientId=clientId;
-  const r=DB.clientes.rows.find(x=>x.id===clientId);
-  const a=ASSIGNMENTS[clientId];
+function renderRelvComplete(clientId, opts={}){
+  const mode=opts.mode||'complete';
+  const viewId=opts.viewId||'view-relev-detail';
+  const {a,r,assignId}=resolveAssignContext(clientId,opts);
+  if(mode==='revision') _revAssignId=assignId;
+  else _relvClientId=a?.client_id||clientId;
+  if(!a||!r) return;
   const tec=TECHNICIANS.find(t=>t.id===a?.technician_id);
   const poles=(a?.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
   const napCode=a?.nap_found||(r?.nap_id);
   const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
   const ini=tec?tec.name.split(' ').map(w=>w[0]).join('').slice(0,2):'?';
-  const vEl=document.getElementById('view-relev-detail');
+  const vEl=document.getElementById(viewId);
   if(!vEl)return;
+  const warnings=mode==='revision'?[]:_revCollectWarnings(a,r,poles);
+  const fachadaSrc=a?.fachada?.[0]||r?.photos?.general||null;
 
   const condBadge=(c)=>{
     if(!c)return '';
@@ -4377,13 +4792,14 @@ function renderRelvComplete(clientId){
 
   vEl.innerHTML=`
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <button class="bs" style="padding:5px 11px;font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0" onclick="navTo('relevamiento')">
+    <button class="bs" style="padding:5px 11px;font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0" onclick="navTo('${mode==='revision'?'revision':'relevamiento'}')">
       <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Volver
     </button>
-    <span style="font-size:11px;color:var(--t3)">Relevamiento /</span>
-    <span style="font-size:11px;font-weight:700;color:var(--t1)">${r.object_id}</span>
-    <span class="asign-stat as-done">Completado</span>
-    <span style="font-size:10px;color:var(--t3);margin-left:auto">${a?.closed_at?'Cerrado: '+a.closed_at:''}</span>
+    <span style="font-size:11px;color:var(--t3)">${mode==='revision'?'Revisión':'Relevamiento'} /</span>
+    <span style="font-size:11px;font-weight:700;color:var(--p);font-family:monospace">${opts.fromList?a.object_id:r.object_id}</span>
+    ${opts.fromList?`<span style="font-size:10px;color:var(--t3)">· ${r.object_id}</span>`:''}
+    ${mode==='revision'?asignBadge(a.status):'<span class="asign-stat as-done">Completado</span>'}
+    <span style="font-size:10px;color:var(--t3);margin-left:auto">${mode==='revision'?(a?.submitted_at?'Enviado: '+a.submitted_at:''):(a?.closed_at?'Cerrado: '+a.closed_at:'')}</span>
   </div>
 
   <!-- MAPA DE RUTA -->
@@ -4461,6 +4877,24 @@ function renderRelvComplete(clientId){
 
     <!-- Info técnico + cliente -->
     <div style="display:flex;flex-direction:column;gap:12px">
+      ${mode==='revision'?`<div class="card">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Datos de la Asignación</div>
+        </div>
+        <div style="padding:12px 16px">
+          ${[
+            ['Estado',asignBadge(a.status)],
+            ['Cód. asignación',`<span style="font-family:monospace;font-weight:700;color:#5B21B6">${a.object_id||'—'}</span>`],
+            ['Asignado',a?.assigned_at||'—'],
+            ['Iniciado',a?.started_at||'—'],
+            ['Enviado a revisión',a?.submitted_at||'—'],
+            ['Acceso domicilio',a?.access!==false?'<span style="color:#10B981;font-weight:600">Con acceso</span>':'<span style="color:#EF4444;font-weight:600">Sin acceso</span>'],
+            ['Distancia IEA',a?.iea_km!=null?a.iea_km.toFixed(1)+' km':'—'],
+            ['Atenuación',a?.attenuation_db!=null?a.attenuation_db.toFixed(1)+' dB':'—'],
+            ['NAP encontrada',a?.nap_found?`<span class="nap-code">${a.nap_found}</span>`:'—'],
+          ].map(([l,v])=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);min-width:110px;flex-shrink:0;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1)">${v}</span></div>`).join('')}
+        </div>
+      </div>`:''}
       <!-- Técnico -->
       <div class="card">
         <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
@@ -4485,21 +4919,44 @@ function renderRelvComplete(clientId){
       <!-- Cliente + fotos -->
       <div class="card">
         <div style="padding:12px 16px;border-bottom:1px solid var(--bor)">
-          <div style="font-size:12px;font-weight:700;color:var(--t1)">Cliente Relevado</div>
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">${mode==='revision'?'Datos del Cliente':'Cliente Relevado'}</div>
         </div>
         <div style="padding:12px 16px">
           ${[
             ['ID',r.object_id],
             ['Dirección',r.address||'—'],
+            ['País',r.country||'—'],
+            ['Departamento',r.department||'—'],
+            ['Provincia',r.province||'—'],
             ['Distrito',r.district||'—'],
+            ['NAP',r.nap_id?`<span class="nap-code">${r.nap_id}</span>`:'—'],
+            ['GPS ref.',r.lat_ref&&r.lng_ref?`${parseFloat(r.lat_ref).toFixed(5)}, ${parseFloat(r.lng_ref).toFixed(5)}`:'—'],
           ].map(([l,v])=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:10px;color:var(--t3);min-width:70px;flex-shrink:0;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1)">${v}</span></div>`).join('')}
-          ${a?.fachada?.[0]?`
           <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:12px 0 7px">Foto · Fachada de Casa</div>
-          <div style="border-radius:8px;overflow:hidden;height:110px"><img src="${a.fachada[0]}" style="width:100%;height:100%;object-fit:cover"></div>`:''}
+          ${mode==='revision'?cpPhoto(fachadaSrc,'Fachada del domicilio',120):(fachadaSrc?`<div style="border-radius:8px;overflow:hidden;height:110px"><img src="${fachadaSrc}" style="width:100%;height:100%;object-fit:cover"></div>`:'')}
         </div>
       </div>
     </div>
-  </div>`;
+  </div>
+
+  ${mode==='revision'&&a?.status==='en_revision'?`<div class="card" style="margin-top:12px">
+    <div class="rev-action-bar">
+      <button class="rev-act-btn rev-act-reject" onclick="openRevRejectModal()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Rechazar
+      </button>
+      <button class="rev-act-btn rev-act-approve" onclick="openRevApproveModal()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Aprobar
+      </button>
+    </div>
+  </div>`:''}
+  ${mode==='revision'&&a?.status==='observado'&&a?.failed_reason?`<div class="card" style="margin-top:12px;border-color:#FECACA">
+    <div style="padding:12px 16px">
+      <div style="font-size:10px;font-weight:700;color:#B91C1C;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Observación de revisión</div>
+      <div style="font-size:12px;color:var(--t1);line-height:1.5">${a.failed_reason}</div>
+    </div>
+  </div>`:''}`;
 
   /* ── Inicializar mapa Leaflet ── */
   setTimeout(()=>{
@@ -6267,16 +6724,39 @@ function renderStepCierre(){
 
 function closeRelevamiento(km,db){
   const a=ASSIGNMENTS[_ss.clientId];
-  a.status='completado';
+  a.status='en_revision';
   a.iea_km=parseFloat(km);
   a.attenuation_db=parseFloat(db);
-  a.closed_at=new Date().toISOString().slice(0,10);
+  a.submitted_at=new Date().toISOString().slice(0,10);
   a.nap_found=_ss.napData?.code||null;
+  a.poles=[..._ss.poles];
+  a.fachada=[..._ss.fachada];
   const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
   if(_ss.napData?.code && !r.nap_id) r.nap_id=_ss.napData.code;
-  const clientId=_ss.clientId;
-  showToast(`✓ Relevamiento completado — ${km} km · ${db} dB`,'success');
-  openRelvDetail(clientId);
+  const newId=ASSIGNMENTS_LIST.length+1;
+  ASSIGNMENTS_LIST.unshift({
+    id:newId,
+    object_id:`ASG-${String(newId).padStart(6,'0')}`,
+    client_id:_ss.clientId,
+    technician_id:a.technician_id,
+    status:'en_revision',
+    assigned_at:a.assigned_at,
+    started_at:a.started_at||a.assigned_at,
+    submitted_at:a.submitted_at,
+    closed_at:null,
+    reviewed_at:null,
+    failed_reason:null,
+    access:a.access!==false,
+    gpsLat:a.gpsLat||_ss.gpsLat||r?.lat_ref,
+    gpsLng:a.gpsLng||_ss.gpsLng||r?.lng_ref,
+    iea_km:a.iea_km,
+    attenuation_db:a.attenuation_db,
+    nap_found:a.nap_found,
+    fachada:[..._ss.fachada],
+    poles:_ss.poles.map(p=>({...p})),
+  });
+  showToast(`✓ Relevamiento enviado a revisión — ${km} km · ${db} dB`,'success');
+  navTo('relevamiento');
 }
 
 /* ════════════════════════════════ MOBILE MENU ═══ */
