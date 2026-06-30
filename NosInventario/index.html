@@ -395,6 +395,41 @@
     .fchip.act{background:var(--p);border-color:var(--p);color:#fff}
     .fc-cnt{background:var(--bor);color:var(--t2);border-radius:20px;padding:1px 7px;font-size:9px;font-weight:900;min-width:18px;text-align:center;transition:background .15s,color .15s}
     .fchip.act .fc-cnt{background:rgba(255,255,255,.25);color:#fff}
+    /* ─── Dispatch: Status Filter Chips ─── */
+    .dp-sf-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:8px 0 4px}
+    .dp-sf-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);flex-shrink:0;margin-right:4px}
+    .dp-sf-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1.5px solid var(--bor);background:var(--sur);color:var(--t2);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .15s;user-select:none;font-family:inherit;line-height:1}
+    .dp-sf-chip:hover{border-color:var(--t2);color:var(--t1)}
+    .dp-sf-chip.act-libre{background:#6B7280;border-color:#6B7280;color:#fff}
+    .dp-sf-chip.act-fallido{background:#DC2626;border-color:#DC2626;color:#fff}
+    .dp-sf-chip.act-cancelado{background:#F59E0B;border-color:#F59E0B;color:#fff}
+    .dp-sf-chip.act-completado{background:#16A34A;border-color:#16A34A;color:#fff}
+    .dp-sf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .15s}
+    /* ─── History Track ─── */
+    /* Historia apilada: cada estado en su propia línea, dentro de la MISMA celda */
+    .hist-track{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+    .ht-mini{display:inline-flex;align-items:center;gap:4px;border-radius:10px;padding:2px 8px 2px 6px;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;line-height:1.4}
+    .ht-mini::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .ht-libre{background:#F3F4F6;color:#6B7280}.ht-libre::before{background:#9CA3AF}
+    .ht-pend{background:#EFF6FF;color:#1D4ED8}.ht-pend::before{background:#3B82F6}
+    .ht-prog{background:#FFF7ED;color:#C2410C}.ht-prog::before{background:#F97316}
+    .ht-done{background:#DCFCE7;color:#15803D}.ht-done::before{background:#22C55E}
+    .ht-fail{background:#FEE2E2;color:#B91C1C}.ht-fail::before{background:#EF4444}
+    .ht-canc{background:#FEF3C7;color:#92400E}.ht-canc::before{background:#F59E0B}
+    .ht-obs{background:#FEE2E2;color:#9A3412}.ht-obs::before{background:#F97316}
+    body.dark .ht-libre{background:rgba(107,114,128,.15);color:#9CA3AF}
+    body.dark .ht-done{background:rgba(21,128,61,.15);color:#86EFAC}
+    body.dark .ht-fail{background:rgba(185,28,28,.15);color:#FCA5A5}
+    body.dark .ht-canc{background:rgba(245,158,11,.15);color:#FCD34D}
+    body.dark .ht-pend{background:rgba(29,78,216,.15);color:#93C5FD}
+    /* ─── Location Cell ─── */
+    .loc-cell{display:flex;flex-direction:column;gap:1px}
+    .loc-top{font-size:9px;font-weight:600;color:var(--t3);letter-spacing:.04em;text-transform:uppercase}
+    .loc-top span{color:var(--t2);margin:0 3px;opacity:.5}
+    .loc-dist{font-size:11px;font-weight:700;color:var(--t1)}
+    /* ─── Dispatch mini status badge ─── */
+    .dp-last-stat{display:inline-flex;align-items:center;gap:3px;border-radius:12px;padding:2px 8px;font-size:9px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+    .dp-last-stat::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
     /* Assignment status badges */
     .asign-stat{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
     .asign-stat::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
@@ -842,11 +877,13 @@
       </div>
       <!-- Seccion 3: Tabla de clientes -->
       <div class="dp-sec" style="border-bottom:none;padding-top:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <div class="dp-sec-lbl" style="margin-bottom:0">Clientes disponibles</div>
           <span id="dp-sel-badge" style="font-size:11px;color:var(--p);font-weight:700;letter-spacing:.02em"></span>
         </div>
-        <div class="dp-clt-tbl-wrap">
+        <!-- Filtro por tipo de último estado -->
+        <div id="dp-sf-row" class="dp-sf-row"></div>
+        <div class="dp-clt-tbl-wrap" style="margin-top:8px">
           <div id="dp-clt-table"></div>
         </div>
         <div id="dp-clt-pgn" style="display:flex;align-items:center;gap:8px;padding:9px 2px 0;font-size:11px;color:var(--t2)"></div>
@@ -2357,6 +2394,82 @@ const ASSIGNMENTS={
   33:{technician_id:3, status:'observado',   assigned_at:'2025-03-28'},
   34:{technician_id:5, status:'cancelado',   assigned_at:'2025-04-01'},
   35:{technician_id:2, status:'pendiente',   assigned_at:'2025-05-10'},
+  // Clientes con FALLIDO como estado actual (elegibles al activar filtro FALLIDO)
+  3: {technician_id:2, status:'fallido', assigned_at:'2025-02-14', access:false, failed_reason:'Domicilio cerrado, sin respuesta en 3 intentos durante el día.'},
+  4: {technician_id:5, status:'fallido', assigned_at:'2025-03-22', access:false, failed_reason:'Edificio con control de acceso estricto, portero no permitió ingreso.'},
+  8: {technician_id:3, status:'fallido', assigned_at:'2025-03-18', access:false, failed_reason:'Dirección no encontrada en campo, posible error en datos del Excel.'},
+  10:{technician_id:4, status:'fallido', assigned_at:'2025-04-05', access:false, failed_reason:'Cliente no estaba en domicilio, vecinos tampoco pudieron dar acceso.'},
+  13:{technician_id:1, status:'fallido', assigned_at:'2025-04-09', access:false, failed_reason:'Portero del edificio exige autorización escrita previa.'},
+  21:{technician_id:2, status:'fallido', assigned_at:'2025-04-16', access:false, failed_reason:'Zona con obras, acceso bloqueado por municipalidad.'},
+  // Clientes con CANCELADO como estado actual (elegibles al activar filtro CANCELADO)
+  14:{technician_id:5, status:'cancelado', assigned_at:'2025-03-10'},
+  16:{technician_id:2, status:'cancelado', assigned_at:'2025-04-05'},
+  17:{technician_id:4, status:'cancelado', assigned_at:'2025-03-25'},
+  29:{technician_id:3, status:'cancelado', assigned_at:'2025-04-20'},
+  // Clientes COMPLETADO adicionales (con historial previo)
+  23:{technician_id:1, status:'completado', assigned_at:'2025-03-05', started_at:'2025-03-06', closed_at:'2025-03-06', access:true, gpsLat:-12.0842, gpsLng:-76.9540, iea_km:1.6, attenuation_db:3.2, nap_found:'WN-230-2049379', fachada:[null,null], poles:[{seq_order:1,codigo:'POL-0060',propietario:'ENTEL',material:'CONCRETO ARMADO',condition:'BUENO',lat:-12.0845,lng:-76.9545,access:true,is_existing:true,nap_id:'WN-230-2049379',nap_access:true,nap_observation:''}]},
+  24:{technician_id:5, status:'completado', assigned_at:'2025-02-20', started_at:'2025-02-20', closed_at:'2025-02-20', access:true, gpsLat:-12.0528, gpsLng:-77.0341, iea_km:0.9, attenuation_db:1.8, nap_found:null, fachada:[null,null], poles:[]},
+  26:{technician_id:3, status:'completado', assigned_at:'2025-03-12', started_at:'2025-03-12', closed_at:'2025-03-12', access:true, gpsLat:-12.1196, gpsLng:-77.0296, iea_km:1.3, attenuation_db:2.6, nap_found:null, fachada:[null,null], poles:[]},
+};
+
+/* ── HISTORIAL DE ASIGNACIONES POR CLIENTE (del más antiguo al más reciente) ── */
+const CLIENT_HISTORY={
+  // ── COMPLETADO con 1 intento ──────────────────────────────────────────────
+  30:[{status:'completado', date:'2025-02-05'}],
+
+  // ── COMPLETADO con 2 intentos ─────────────────────────────────────────────
+  1: [{status:'fallido',    date:'2024-10-15'}, {status:'completado', date:'2025-01-10'}],
+  15:[{status:'cancelado',  date:'2024-12-01'}, {status:'completado', date:'2025-02-10'}],
+  22:[{status:'fallido',    date:'2024-12-20'}, {status:'completado', date:'2025-01-30'}],
+  24:[{status:'fallido',    date:'2024-12-08'}, {status:'completado', date:'2025-02-20'}],
+
+  // ── COMPLETADO con 3 intentos ─────────────────────────────────────────────
+  6: [{status:'fallido',    date:'2024-11-20'}, {status:'cancelado',  date:'2024-12-10'}, {status:'completado', date:'2025-02-28'}],
+  11:[{status:'fallido',    date:'2024-09-05'}, {status:'fallido',    date:'2024-11-15'}, {status:'completado', date:'2025-01-22'}],
+  26:[{status:'cancelado',  date:'2024-11-28'}, {status:'fallido',    date:'2025-01-30'}, {status:'completado', date:'2025-03-12'}],
+
+  // ── COMPLETADO con 4 intentos ─────────────────────────────────────────────
+  23:[{status:'fallido',    date:'2024-09-10'}, {status:'fallido',    date:'2024-11-22'}, {status:'cancelado',  date:'2025-01-15'}, {status:'completado', date:'2025-03-05'}],
+
+  // ── FALLIDO actual — 1 intento (primer y único relevamiento fallido) ───────
+  3: [{status:'fallido',    date:'2025-02-14'}],
+  21:[{status:'fallido',    date:'2025-04-16'}],
+
+  // ── FALLIDO actual — 2 intentos (ambos fallidos) ──────────────────────────
+  4: [{status:'fallido',    date:'2025-01-10'}, {status:'fallido',    date:'2025-03-22'}],
+  10:[{status:'fallido',    date:'2024-12-18'}, {status:'fallido',    date:'2025-04-05'}],
+
+  // ── FALLIDO actual — 2 intentos (cancelado luego fallido) ─────────────────
+  8: [{status:'cancelado',  date:'2025-01-15'}, {status:'fallido',    date:'2025-03-18'}],
+
+  // ── FALLIDO actual — 3 intentos (caso difícil, 3 fallidos) ────────────────
+  13:[{status:'fallido',    date:'2024-10-22'}, {status:'fallido',    date:'2025-01-20'}, {status:'fallido',    date:'2025-04-09'}],
+
+  // ── CANCELADO actual — 1 intento ─────────────────────────────────────────
+  17:[{status:'cancelado',  date:'2025-03-25'}],
+
+  // ── CANCELADO actual — 2 intentos ────────────────────────────────────────
+  14:[{status:'fallido',    date:'2024-12-22'}, {status:'cancelado',  date:'2025-03-10'}],
+  16:[{status:'fallido',    date:'2025-01-18'}, {status:'cancelado',  date:'2025-04-05'}],
+  34:[{status:'fallido',    date:'2024-11-01'}, {status:'cancelado',  date:'2025-04-01'}],
+
+  // ── CANCELADO actual — 3 intentos ────────────────────────────────────────
+  29:[{status:'fallido',    date:'2025-01-25'}, {status:'fallido',    date:'2025-03-12'}, {status:'cancelado',  date:'2025-04-20'}],
+
+  // ── Activos con historial previo ─────────────────────────────────────────
+  2: [{status:'fallido',    date:'2025-01-20'}, {status:'en_progreso',date:'2025-03-15'}],
+  7: [{status:'cancelado',  date:'2025-02-18'}, {status:'pendiente',  date:'2025-04-10'}],
+  9: [{status:'fallido',    date:'2025-02-28'}, {status:'en_progreso',date:'2025-04-18'}],
+  12:[{status:'fallido',    date:'2025-01-10'}, {status:'observado',  date:'2025-03-05'}],
+  18:[{status:'cancelado',  date:'2025-01-28'}, {status:'observado',  date:'2025-03-20'}],
+  25:[{status:'fallido',    date:'2025-01-30'}, {status:'fallido',    date:'2025-03-08'}, {status:'pendiente',  date:'2025-04-12'}],
+  33:[{status:'fallido',    date:'2025-02-05'}, {status:'cancelado',  date:'2025-03-01'}, {status:'observado',  date:'2025-03-28'}],
+  35:[{status:'fallido',    date:'2025-02-18'}, {status:'cancelado',  date:'2025-04-08'}, {status:'pendiente',  date:'2025-05-10'}],
+
+  // ── Activos sin historial previo ──────────────────────────────────────────
+  5: [{status:'pendiente',  date:'2025-04-02'}],
+  20:[{status:'en_progreso',date:'2025-04-25'}],
+  27:[{status:'en_progreso',date:'2025-04-20'}],
 };
 
 /* ── ROUTES (caché geográfico generado al cerrar el relevamiento) ── */
@@ -2379,7 +2492,7 @@ let _relvClientId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
 const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole',editingFoundPoste:false,editPoleIdx:null,editPolePhotos:[null,null],editPoleExtOps:[]};
-const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15};
+const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15,statusFilters:new Set(['libre'])};
 
 /* ════════════════════════════════ NAV ═══ */
 function navTo(v){
@@ -2986,7 +3099,83 @@ function asignBadge(status){
 }
 function getAsign(c){return ASSIGNMENTS[c.id]||null;}
 function getStatus(c){const a=getAsign(c);return a?a.status:'libre';}
-function isDispatchable(c){const a=ASSIGNMENTS[c.id];return !a||a.status==='completado'||a.status==='fallido';}
+function isDispatchable(c){
+  const a=ASSIGNMENTS[c.id];
+  if(!a) return _dp.statusFilters.has('libre');
+  return _dp.statusFilters.has(a.status)&&['completado','fallido','cancelado'].includes(a.status);
+}
+
+/* ── History track helpers ── */
+const HT_MAP={
+  libre:      {cls:'ht-libre', lbl:'Sin Asignar'},
+  pendiente:  {cls:'ht-pend',  lbl:'Pendiente'},
+  en_progreso:{cls:'ht-prog',  lbl:'En Proceso'},
+  completado: {cls:'ht-done',  lbl:'Completado'},
+  fallido:    {cls:'ht-fail',  lbl:'Fallido'},
+  cancelado:  {cls:'ht-canc',  lbl:'Cancelado'},
+  observado:  {cls:'ht-obs',   lbl:'Observado'},
+};
+function htBadge(status){
+  const m=HT_MAP[status]||HT_MAP.libre;
+  return `<span class="ht-mini ${m.cls}">${m.lbl}</span>`;
+}
+function clientHistoryTrack(cid){
+  const hist=CLIENT_HISTORY[cid];
+  if(!hist||hist.length===0){
+    const a=ASSIGNMENTS[cid];
+    if(!a) return htBadge('libre');
+    return htBadge(a.status);
+  }
+  if(hist.length===1) return htBadge(hist[0].status);
+  return `<div class="hist-track">${hist.map(h=>htBadge(h.status)).join('')}</div>`;
+}
+function clientLastStatus(cid){
+  const a=ASSIGNMENTS[cid];
+  if(!a) return 'libre';
+  return a.status;
+}
+function dpLastStatusBadge(c){
+  const s=clientLastStatus(c.id);
+  const m=HT_MAP[s]||HT_MAP.libre;
+  return `<span class="dp-last-stat ${m.cls.replace('ht-','as-').replace('done','done').replace('libre','libre').replace('pend','pend').replace('prog','prog').replace('fail','fail').replace('canc','canc').replace('obs','obs')}" style="font-size:9px">${m.lbl}</span>`;
+}
+/* ── Dispatch status filter toggle ── */
+function dpToggleStatusFilter(key){
+  if(_dp.statusFilters.has(key)) _dp.statusFilters.delete(key);
+  else _dp.statusFilters.add(key);
+  _dp.clients.clear();
+  _dp.cltPage=1;
+  dpUpdateStatusFilterUI();
+  dpRenderGeoSelects();
+  renderDpCltTable();
+}
+function dpUpdateStatusFilterUI(){
+  const cfg=[
+    {key:'libre',    label:'Sin Asignar', dotColor:'#9CA3AF'},
+    {key:'fallido',  label:'Fallido',     dotColor:'#EF4444'},
+    {key:'cancelado',label:'Cancelado',   dotColor:'#F59E0B'},
+    {key:'completado',label:'Completado', dotColor:'#22C55E'},
+  ];
+  const el=document.getElementById('dp-sf-row');
+  if(!el) return;
+  el.innerHTML=`<span class="dp-sf-lbl">Mostrar:</span>`+cfg.map(c=>{
+    const act=_dp.statusFilters.has(c.key);
+    const dotCol=act?'#fff':c.dotColor;
+    return `<button class="dp-sf-chip${act?' act-'+c.key:''}" onclick="dpToggleStatusFilter('${c.key}')">
+      <span class="dp-sf-dot" style="background:${dotCol}"></span>${c.label}
+    </button>`;
+  }).join('');
+}
+/* ── Location cell helper ── */
+function locCell(c){
+  const dept=c.department||'—';
+  const prov=c.province||'—';
+  const dist=c.district||'—';
+  return `<div class="loc-cell">
+    <div class="loc-top">${dept}<span>·</span>${prov}</div>
+    <div class="loc-dist">${dist}</div>
+  </div>`;
+}
 
 function renderAsignaciones(){
   const all=DB.clientes.rows;
@@ -3126,12 +3315,11 @@ function renderAsignaciones(){
         ?`<div style="text-align:center;padding:40px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">No se encontraron clientes</div>`
         :`<table>
         <thead><tr>
-          <th style="width:120px">Codigo</th>
-          <th>Direccion</th>
-          <th style="width:130px">Distrito</th>
-          <th style="width:140px">NAP</th>
-          <th style="width:140px">Estado</th>
-          <th style="width:180px">Tecnico Asignado</th>
+          <th style="width:110px">Código</th>
+          <th>Dirección</th>
+          <th style="width:155px">Ubicación</th>
+          <th style="width:200px">Historial</th>
+          <th style="width:170px">Técnico</th>
           <th style="width:90px">Acciones</th>
         </tr></thead>
         <tbody>
@@ -3139,11 +3327,15 @@ function renderAsignaciones(){
             const a=getAsign(r);
             const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
             return `<tr>
-              <td><span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r.object_id}</span></td>
-              <td class="td-name" style="font-size:11px">${r.address}</td>
-              <td style="font-size:11px;color:var(--t2)">${r.district||'—'}</td>
-              <td>${r.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:7px;padding:2px 9px;font-size:9px;font-weight:800;letter-spacing:.04em">${r.nap_id}</span>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Sin NAP</span>'}</td>
-              <td>${asignBadge(getStatus(r))}</td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.04em">${r.object_id}</span>
+                  ${r.nap_id?`<span style="display:inline-block;background:#F0FDF4;color:#15803D;border-radius:5px;padding:1px 6px;font-size:9px;font-weight:700;letter-spacing:.03em">${r.nap_id}</span>`:''}
+                </div>
+              </td>
+              <td class="td-name" style="font-size:11px;font-weight:500;color:var(--t1)">${r.address}</td>
+              <td>${locCell(r)}</td>
+              <td>${clientHistoryTrack(r.id)}</td>
               <td>${tec
                 ?`<div style="display:flex;align-items:center;gap:7px"><div style="width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${tec.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--t1);font-size:11px">${tec.name}</div><div style="font-size:9px;color:var(--p);letter-spacing:.04em;font-weight:700">${tec.code}</div></div></div>`
                 :'<span style="font-style:italic;font-size:10px;color:var(--t3)">Sin tecnico</span>'}</td>
@@ -3189,11 +3381,13 @@ function afClear(){afDept='';afProv='';afDist='';afTec='';SQ='';CP=1;renderAsign
 function openDispatch(preClientId){
   _dp.tecId=null; _dp.clients=new Set(); _dp.cltQApplied='';
   _dp.cltDept=''; _dp.cltProv=''; _dp.cltDist=''; _dp.cltPage=1;
+  _dp.statusFilters=new Set(['libre']);
   if(preClientId!=null) _dp.clients.add(preClientId);
   dpRenderGeoSelects();
   renderDpCltTable();
   dpUpdateFooter();
   openMo('mo-dispatch');
+  dpUpdateStatusFilterUI();
   const qi=document.getElementById('dp-tec-q');
   if(qi) qi.value='';
   const dd=document.getElementById('dp-tec-dropdown');
@@ -3347,16 +3541,21 @@ function renderDpCltTable(){
     tbl.innerHTML=`<table>
       <thead><tr>
         <th style="width:36px;text-align:center"><input type="checkbox" class="dp-chk" id="dp-chk-all" ${allSel?'checked':''} onchange="dpToggleAll(this.checked,[${pageIds.join(',')}])"></th>
-        <th style="width:110px">Codigo</th>
-        <th>Direccion</th>
-        <th style="width:130px">Distrito</th>
+        <th style="width:100px">Código</th>
+        <th>Dirección</th>
+        <th style="width:140px">Ubicación</th>
+        <th style="width:130px">Estado</th>
       </tr></thead>
       <tbody>
         ${slice.map(c=>{const vid=c._vid!=null?c._vid:c.id;return `<tr class="${_dp.clients.has(vid)?'dp-row-sel':''}" onclick="dpToggleClientRow(${vid})" style="cursor:pointer">
           <td style="text-align:center" onclick="event.stopPropagation()"><input type="checkbox" class="dp-chk" ${_dp.clients.has(vid)?'checked':''} onchange="dpToggleClientRow(${vid})"></td>
           <td><span class="dp-code">${c.object_id}</span></td>
-          <td style="font-size:11px">${c.address}</td>
-          <td style="font-size:11px;color:var(--t2)">${c.district||'—'}</td>
+          <td style="font-size:11px">
+            <div style="font-weight:600;color:var(--t1);line-height:1.4">${c.address}</div>
+            ${c.nap_id?`<span style="display:inline-block;background:var(--pb);color:var(--p);border-radius:5px;padding:1px 6px;font-size:9px;font-weight:800;letter-spacing:.04em;margin-top:2px">${c.nap_id}</span>`:''}
+          </td>
+          <td>${locCell(c)}</td>
+          <td>${clientHistoryTrack(c.id)}</td>
         </tr>`;}).join('')}
       </tbody></table>`;
     const allChkEl=document.getElementById('dp-chk-all');
@@ -3445,7 +3644,11 @@ function doConfirmDispatch(){
   _dispatchPending=null;
   closeMo('mo-asign-confirm');
   const today=new Date().toISOString().split('T')[0];
-  realIds.forEach(id=>{ASSIGNMENTS[id]={technician_id:tecId,status:'pendiente',assigned_at:today};});
+  realIds.forEach(id=>{
+    ASSIGNMENTS[id]={technician_id:tecId,status:'pendiente',assigned_at:today};
+    if(!CLIENT_HISTORY[id]) CLIENT_HISTORY[id]=[];
+    CLIENT_HISTORY[id].push({status:'pendiente',date:today});
+  });
   showAsignLoading(()=>{
     renderAsignaciones();
     showToast(`✓ ${realIds.length} cliente${realIds.length!==1?'s':''} asignado${realIds.length!==1?'s':''} a ${tecName}`,'success');
