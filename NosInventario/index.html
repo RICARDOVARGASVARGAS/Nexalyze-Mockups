@@ -351,19 +351,8 @@
     .clt-pnode-meta{font-size:10px;color:var(--t2);margin-top:4px;line-height:1.4}
     .clt-pnode-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
     .clt-parrow{flex:0 0 auto;display:flex;align-items:center;padding:0 6px;color:var(--t3);font-size:16px;font-weight:300;align-self:center}
-    .clt-route-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-    .clt-fiber-card{border:1px solid var(--bor);border-radius:12px;overflow:hidden;background:var(--sur)}
-    .clt-fiber-hdr{padding:10px 14px;border-bottom:1px solid var(--bor);background:var(--bg)}
-    .clt-fiber-hdr-t{font-size:12px;font-weight:700;color:var(--t1)}
-    .clt-fiber-hdr-s{font-size:10px;color:var(--t3);margin-top:2px}
-    .clt-fiber-tbl{width:100%;border-collapse:collapse;font-size:10px}
-    .clt-fiber-tbl th{padding:7px 10px;text-align:left;font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);background:var(--bg);border-bottom:1px solid var(--bor)}
-    .clt-fiber-tbl td{padding:7px 10px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:top}
-    .clt-fiber-tbl td:first-child{font-weight:600;color:var(--t1);font-size:10px}
-    .clt-fiber-tbl tr:last-child td{border-bottom:none}
-    .clt-fiber-tbl .tot td{font-weight:800;color:var(--t1);background:var(--bg);border-top:2px solid var(--bor)}
-    .clt-fiber-tbl .db{font-weight:700;color:var(--p)}
-    .clt-fiber-foot{padding:8px 14px;font-size:9px;color:var(--t3);line-height:1.5;border-top:1px solid var(--bor);background:var(--bg)}
+    .clt-route-map-full{margin-bottom:12px}
+    .clt-route-map-full .rc-map-wrap{height:400px}
     .clt-nap-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--bor);font-size:10px}
     .clt-nap-bar-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
     .clt-nap-bar code{font-size:11px;font-weight:700;color:var(--p)}
@@ -380,7 +369,7 @@
     .clt-hist-tec{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t2);margin-top:6px}
     .clt-empty-route{text-align:center;padding:36px 20px;border:1.5px dashed var(--bor);border-radius:12px;background:var(--bg)}
     .clt-empty-route svg{margin:0 auto 10px;display:block;color:var(--t3)}
-  @media(max-width:768px){.clt-route-grid{grid-template-columns:1fr}.rc-map-wrap{height:260px}}
+  @media(max-width:768px){.clt-route-map-full .rc-map-wrap{height:300px}}
 
     /* ─── History modal ─── */
     .mc-hist{max-width:590px;max-height:92vh;display:flex;flex-direction:column}
@@ -2696,38 +2685,6 @@ function _buildRoutePoints(a,r){
   const napCode=a.nap_found||(r?.nap_id);
   if(napCode){const n=NAPS_LIST.find(x=>x.code===napCode);if(n)pts.push([n.lat,n.lng]);}
   return pts;
-}
-function _haversineM(a,b){
-  if(!a||!b||a[0]==null||b[0]==null)return 0;
-  const R=6371000,toRad=x=>x*Math.PI/180;
-  const dLat=toRad(b[0]-a[0]),dLng=toRad(b[1]-a[1]);
-  const s=Math.sin(dLat/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
-}
-function _buildFiberSegments(a,r){
-  const poles=(a.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
-  const napCode=a.nap_found||r.nap_id;
-  const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
-  const home=[a.gpsLat||r.lat_ref,a.gpsLng||r.lng_ref];
-  const waypoints=[];
-  if(nap)waypoints.push({type:'nap',label:nap.code,coord:[nap.lat,nap.lng]});
-  poles.forEach(p=>{if(p.lat&&p.lng)waypoints.push({type:'pole',label:p.codigo||('Poste #'+p.seq_order),coord:[p.lat,p.lng]});});
-  if(home[0]!=null&&home[1]!=null)waypoints.push({type:'client',label:(r.full_name||r.object_id),coord:home});
-  const rows=[];
-  let totalDist=0,totalDb=0;
-  for(let i=0;i<waypoints.length-1;i++){
-    const from=waypoints[i],to=waypoints[i+1];
-    const dist=_haversineM(from.coord,to.coord);
-    const fiber=+(dist*0.00035).toFixed(2);
-    const splice=(to.type==='pole'||from.type==='pole')?0.10:0;
-    const connector=(i===waypoints.length-2&&to.type==='client')?0.30:0;
-    const total=+(fiber+splice+connector).toFixed(2);
-    totalDist+=dist;totalDb+=total;
-    rows.push({from:from.label,to:to.label,dist:Math.round(dist),fiber,splice,connector,total});
-  }
-  if(nap)rows.push({from:'Conector NAP inicial',to:'—',dist:null,fiber:null,splice:null,connector:0.30,total:0.30,isConnector:true});
-  if(nap)totalDb=+(totalDb+0.30).toFixed(2);
-  return{rows,totalDist:Math.round(totalDist),totalDb:totalDb.toFixed(2),waypoints};
 }
 function _initRouteMap(elId,a,r){
   const el=document.getElementById(elId);
@@ -7956,10 +7913,9 @@ function _renderCltViewTabRecorrido(r){
   const poles=(a.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
   const napCode=a.nap_found||r.nap_id;
   const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
-  const fiber=_buildFiberSegments(a,r);
-  const isCrit=(a.attenuation_db||parseFloat(fiber.totalDb))>=4;
-  const distM=fiber.totalDist||(a.iea_km!=null?Math.round(a.iea_km*1000):0);
-  const attDb=a.attenuation_db!=null?a.attenuation_db.toFixed(2):fiber.totalDb;
+  const distM=a.iea_km!=null?Math.round(a.iea_km*1000):0;
+  const attDb=a.attenuation_db!=null?a.attenuation_db.toFixed(2):'—';
+  const isCrit=a.attenuation_db!=null&&a.attenuation_db>=4;
   const napPorts=nap?.total_ports!=null?`${Math.round((nap.used_ports_percentage||0)/100*nap.total_ports)}/${nap.total_ports}`:'—';
   const pipelineNodes=[
     {type:'cli',lbl:'Cliente',code:r.object_id,meta:(r.full_name||r.address?.split(',')[0]||'—')},
@@ -7975,14 +7931,6 @@ function _renderCltViewTabRecorrido(r){
       <div class="clt-pnode-meta">${n.meta}</div>
     </div>`;
   }).join('');
-  const fiberRows=fiber.rows.map(row=>`<tr${row.isConnector?' style="background:var(--bg)"':''}>
-    <td>${row.isConnector?row.from:`${row.from} → ${row.to}`}</td>
-    <td>${row.dist!=null?row.dist+' m':'—'}</td>
-    <td>${row.fiber!=null?row.fiber.toFixed(2):'—'}</td>
-    <td>${row.splice!=null?row.splice.toFixed(2):'—'}</td>
-    <td>${row.connector!=null?row.connector.toFixed(2):'—'}</td>
-    <td class="db">${row.total.toFixed(2)} dB</td>
-  </tr>`).join('');
   return`<div class="clt-pane" style="padding-top:14px">
     <div class="clt-route-hdr">
       <div>
@@ -8001,26 +7949,16 @@ function _renderCltViewTabRecorrido(r){
       <div class="rc-stat"><div class="rc-stat-val">${poles.length}</div><div class="rc-stat-lbl">Poste(s)</div></div>
       <div class="rc-stat"><div class="rc-stat-val" style="font-size:14px">${napCode?`<span class="rc-nap">${napCode}</span>`:'—'}</div><div class="rc-stat-lbl">NAP vinculada</div></div>
     </div>
-    <div class="clt-route-grid">
-      <div class="card" style="margin:0;overflow:hidden">
-        <div style="padding:10px 14px;border-bottom:1px solid var(--bor);font-size:12px;font-weight:700;color:var(--t1)">Mapa de ruta</div>
-        <div style="padding:10px"><div class="rc-map-wrap" id="clt-route-map" style="height:280px"></div></div>
-      </div>
-      <div class="clt-fiber-card">
-        <div class="clt-fiber-hdr">
-          <div class="clt-fiber-hdr-t">Tramos de fibra</div>
-          <div class="clt-fiber-hdr-s">NAP ${napCode||'—'} — ${poles.length} poste(s) — cliente ${r.object_id}</div>
+    <div class="card clt-route-map-full" style="margin:0;overflow:hidden">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="font-size:12px;font-weight:700;color:var(--t1)">Mapa de ruta</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:10px;color:var(--t2)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:#3B82F6"></span>Cliente</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:#7B6EF8"></span>Postes</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:#10B981"></span>NAP</span>
         </div>
-        <div style="overflow-x:auto">
-          <table class="clt-fiber-tbl">
-            <thead><tr><th>Tramo</th><th>Distancia</th><th>Fibra</th><th>Empalme</th><th>Conector</th><th>Total</th></tr></thead>
-            <tbody>${fiberRows}
-              <tr class="tot"><td colspan="1">Total</td><td>${distM} m</td><td colspan="3"></td><td class="db">${attDb} dB</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="clt-fiber-foot">Atenuación parcial entre la NAP y la ONT del cliente. Debe sumarse a la atenuación OLT → Splitter → NAP para el presupuesto óptico total.</div>
       </div>
+      <div style="padding:12px 14px 14px"><div class="rc-map-wrap" id="clt-route-map"></div></div>
     </div>
     ${nap?`<div class="clt-nap-bar">
       <span class="clt-nap-bar-lbl">NAP inventario:</span>
@@ -8075,7 +8013,11 @@ function _renderCltViewBody(r){
   else if(_cltViewTab==='historial')body.innerHTML=_renderCltViewTabHistorial(r);
   else body.innerHTML=_renderCltViewTabDatos(r);
   if(_cltViewTab==='recorrido'&&hasRoute){
-    setTimeout(()=>_initRouteMap('clt-route-map',ASSIGNMENTS[r.id],r),120);
+    setTimeout(()=>{
+      _initRouteMap('clt-route-map',ASSIGNMENTS[r.id],r);
+      const el=document.getElementById('clt-route-map');
+      if(el?._leafletMap)setTimeout(()=>el._leafletMap.invalidateSize(),80);
+    },120);
   }
 }
 function openViewCliente(id){
