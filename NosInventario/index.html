@@ -2656,7 +2656,7 @@ let rfDept='',rfProv='',rfDist='',rfTec='';
 let _revAssignId=null, _revRejectId=null;
 let _cltSaveCtx='clientes';
 let _relvPhoto1=null,_relvPhoto2=null;
-const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole',editingFoundPoste:false,editPoleIdx:null,editPolePhotos:[null,null],editPoleExtOps:[]};
+const _ss={clientId:null,step:'domicilio',acceso:null,gpsLat:null,gpsLng:null,fachada:[null,null],motivo:'',poles:[],curPole:null,curPolePhotos:[null,null],extOps:[],napAcceso:null,napObs:'',napPhotos:[null,null,null,null],napData:null,napPoleIdx:null,foundNap:null,showPoleList:false,foundPoste:null,addFormOpen:false,addPhase:'search',addConfirm:false,newPoleConfirmOpen:false,napModalOpen:false,napModalPhase:'pole',editingFoundPoste:false,foundEditPhotos:[null,null],editPoleIdx:null,editPolePhotos:[null,null],editPoleExtOps:[]};
 const _dp={tecId:null,clients:new Set(),cltQApplied:'',cltDept:'',cltProv:'',cltDist:'',cltPage:1,cltPS:15,statusFilters:new Set(['libre'])};
 
 /* ════════════════════════════════ NAV ═══ */
@@ -5406,7 +5406,7 @@ function startRelvFlow(clientId){
   _ss.gpsLat=a.gpsLat??null; _ss.gpsLng=a.gpsLng??null;
   _ss.fachada=[...(a.fachada||[null,null])];
   _ss.motivo=a.failed_reason||'';
-  _ss.curPole=null; _ss.curPolePhotos=[null,null];
+  _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.foundEditPhotos=[null,null];
   _ss.extOps=[]; _ss.foundPoste=null;
   _ss.napAcceso=null; _ss.napObs=''; _ss.napPhotos=[null,null,null,null]; _ss.napData=null; _ss.napPoleIdx=null; _ss.foundNap=null; _ss.showPoleList=false; _ss.addFormOpen=false; _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false; _ss.napModalOpen=false; _ss.napModalPhase='pole';
 
@@ -5615,6 +5615,265 @@ function doSaveDomicilioFallo(){
   navTo('relevamiento');
 }
 
+/* ── Pole field API helpers (POST/PATCH poles/field) ── */
+function _poleDistricts(){
+  const seen=new Map(); let nid=1;
+  (DB.clientes?.rows||[]).forEach(c=>{const n=c.district;if(n&&!seen.has(n))seen.set(n,nid++);});
+  return [...seen.entries()].map(([name,id])=>({id,name})).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function _clientGeoDefaults(){
+  const c=DB.clientes?.rows?.find(x=>x.id===_ss.clientId);
+  return{
+    country:c?.country||'PERÚ',department:c?.department||'',province:c?.province||'',
+    district:c?.district||'',
+    lat:c?.lat_ref!=null?String(c.lat_ref):'',
+    lng:c?.lng_ref!=null?String(c.lng_ref):'',
+  };
+}
+function _poleGeoFromEntity(ent){
+  if(!ent)return _clientGeoDefaults();
+  return{
+    country:ent.country||'PERÚ',department:ent.department||'',province:ent.province||'',
+    district:ent.district||'',
+    lat:ent.lat!=null&&ent.lat!==''?String(ent.lat):'',
+    lng:ent.lng!=null&&ent.lng!==''?String(ent.lng):'',
+  };
+}
+function _poleGeoCascade(prefix,level){
+  if(level==='country'){
+    const c=document.getElementById(prefix+'-country')?.value;
+    const depts=GEO_DEPTS[c]||[];
+    const deptEl=document.getElementById(prefix+'-dept');
+    if(deptEl)deptEl.innerHTML=`<option value="">—</option>`+depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+    _poleGeoCascade(prefix,'dept');
+  }else if(level==='dept'){
+    const dept=document.getElementById(prefix+'-dept')?.value;
+    const provs=GEO_PROVS[dept]||[];
+    const provEl=document.getElementById(prefix+'-prov');
+    if(provEl)provEl.innerHTML=`<option value="">—</option>`+provs.map(p=>`<option value="${p}">${p}</option>`).join('');
+    _poleGeoCascade(prefix,'prov');
+  }else if(level==='prov'){
+    const prov=document.getElementById(prefix+'-prov')?.value;
+    const dists=GEO_DISTS[prov]||[];
+    const distEl=document.getElementById(prefix+'-dist');
+    if(distEl)distEl.innerHTML=`<option value="">—</option>`+dists.map(d=>`<option value="${d}">${d}</option>`).join('');
+  }
+}
+function _poleFillGeo(prefix,country,dept,prov,dist){
+  const countryEl=document.getElementById(prefix+'-country');
+  if(countryEl){
+    countryEl.innerHTML=`<option value="PERÚ">PERÚ</option>`;
+    countryEl.value=country||'PERÚ';
+  }
+  _poleGeoCascade(prefix,'country');
+  if(dept){const el=document.getElementById(prefix+'-dept');if(el){el.value=dept;_poleGeoCascade(prefix,'dept');}}
+  if(prov){const el=document.getElementById(prefix+'-prov');if(el){el.value=prov;_poleGeoCascade(prefix,'prov');}}
+  if(dist){const el=document.getElementById(prefix+'-dist');if(el)el.value=dist;}
+}
+function _readPoleGeo(prefix){
+  const country=document.getElementById(prefix+'-country')?.value||null;
+  const department=document.getElementById(prefix+'-dept')?.value||null;
+  const province=document.getElementById(prefix+'-prov')?.value||null;
+  const district=document.getElementById(prefix+'-dist')?.value||null;
+  const latRaw=document.getElementById(prefix+'-lat')?.value;
+  const lngRaw=document.getElementById(prefix+'-lng')?.value;
+  const lat=latRaw!==''&&latRaw!=null?String(latRaw).trim():null;
+  const lng=lngRaw!==''&&lngRaw!=null?String(lngRaw).trim():null;
+  const distMatch=district?_poleDistricts().find(d=>d.name===district):null;
+  return{country,department,province,district,district_id:distMatch?.id||null,lat,lng};
+}
+function _renderPoleUbigeoSection(prefix,geo){
+  const lat=geo.lat??'';
+  const lng=geo.lng??'';
+  const refLat=parseFloat(lat)||_ss.gpsLat||-12.0464;
+  const refLng=parseFloat(lng)||_ss.gpsLng||-77.0428;
+  return`<div class="tsec">
+    <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Ubigeo</div>
+    <div class="fg2">
+      <div class="fl"><label>País</label><select id="${prefix}-country" onchange="_poleGeoCascade('${prefix}','country')"><option value="PERÚ"${(geo.country||'PERÚ')==='PERÚ'?' selected':''}>PERÚ</option></select></div>
+      <div class="fl"><label>Departamento</label><select id="${prefix}-dept" onchange="_poleGeoCascade('${prefix}','dept')"><option value="">—</option></select></div>
+      <div class="fl"><label>Provincia</label><select id="${prefix}-prov" onchange="_poleGeoCascade('${prefix}','prov')"><option value="">—</option></select></div>
+      <div class="fl"><label>Distrito</label><select id="${prefix}-dist"><option value="">—</option></select></div>
+      <div class="fl"><label>Latitud <span class="req">*</span></label><input type="number" id="${prefix}-lat" value="${lat}" step="0.000001" placeholder="-12.0464"></div>
+      <div class="fl"><label>Longitud <span class="req">*</span></label><input type="number" id="${prefix}-lng" value="${lng}" step="0.000001" placeholder="-77.0428"></div>
+    </div>
+    ${_gpsBtnHtml(prefix+'-gpsbtn',lat,lng,`captureGPS('${prefix}-gpsbtn','${prefix}-lat','${prefix}-lng',${refLat},${refLng},'pole')`)}
+    <div class="relv-save-hint">País, departamento, provincia y distrito son opcionales. Latitud y longitud son obligatorias.</div>
+  </div>`;
+}
+function _polePhotoLbl(name,required){return`${name}${required?' <span class="req">*</span>':''}`;}
+function _validatePoleCoords(prefix){
+  const lat=document.getElementById(prefix+'-lat')?.value;
+  const lng=document.getElementById(prefix+'-lng')?.value;
+  if(!lat||!lng||isNaN(parseFloat(lat))||isNaN(parseFloat(lng))){showToast('⚠ Captura las coordenadas GPS (latitud y longitud)','warning');return false;}
+  return true;
+}
+function _schedulePoleGeoFill(prefix,geo){
+  setTimeout(()=>_poleFillGeo(prefix,geo.country||'PERÚ',geo.department||'',geo.province||'',geo.district||''),0);
+}
+function _poleUbigeoLabel(g){
+  if(!g)return'—';
+  const parts=[g.country,g.department,g.province,g.district].filter(Boolean);
+  const coords=(g.lat&&g.lng)?`${parseFloat(g.lat).toFixed(5)}, ${parseFloat(g.lng).toFixed(5)}`:null;
+  return(parts.length?parts.join(' · '):'—')+(coords?` <span style="font-family:monospace;font-size:10px;color:var(--t3)">(${coords})</span>`:'');
+}
+function _catById(rows,id){return(rows||[]).find(r=>r.id===+id);}
+function _catIdByName(rows,name){if(!name)return null;const r=(rows||[]).find(x=>x.name===name&&x.status!==false);return r?r.id:null;}
+function _catNameById(rows,id){const r=_catById(rows,id);return r?r.name:'';}
+function _mkOptId(rows,curId,curName){
+  const sel=curId!=null&&curId!==''?+curId:_catIdByName(rows,curName);
+  return(rows||[]).filter(r=>r.status).map(r=>`<option value="${r.id}"${sel===r.id?' selected':''}>${r.name}</option>`).join('');
+}
+function _poleHasStoredPhoto(v){return!!(v&&String(v).trim());}
+function _poleDbRow(id){return id?DB.postes.rows.find(x=>x.id===id):null;}
+function _poleIsValidated(p){
+  if(!p)return false;
+  if(p.validated===true)return true;
+  const db=_poleDbRow(p.existingId||p.pole_id);
+  return!!db?.validated;
+}
+function _initPoleFieldMeta(){
+  if(_initPoleFieldMeta.done)return;
+  const validatedIds=new Set([1,2,4,6,10,15,17]);
+  DB.postes.rows.forEach(r=>{
+    if(r.validated==null)r.validated=validatedIds.has(r.id);
+    if(r.owner_id==null)r.owner_id=_catIdByName(DB.propietario.rows,r.propietario);
+    if(r.material_id==null)r.material_id=_catIdByName(DB.material.rows,r.material);
+    if(r.tension_id==null)r.tension_id=_catIdByName(DB.tension.rows,r.tension);
+    if(r.cable_type_id==null)r.cable_type_id=_catIdByName(DB.tipocable.rows,r.tipocable);
+    if(r.condition_id==null)r.condition_id=_catIdByName(DB.condicion.rows,r.condicion);
+    if(r.manufacturer_id==null&&r.manufacturer)r.manufacturer_id=_catIdByName(DB.fabricante.rows,r.manufacturer);
+    if(r.country==null)r.country='PERÚ';
+    if(r.department==null)r.department='LIMA';
+    if(r.province==null)r.province='LIMA';
+    if(r.district==null)r.district='SAN ISIDRO';
+    if(r.district_id==null&&r.district){const m=_poleDistricts().find(d=>d.name===r.district);if(m)r.district_id=m.id;}
+    if(r.validated){
+      if(!_poleHasStoredPhoto(r.photo_vista_general))r.photo_vista_general=`https://picsum.photos/seed/pole${r.id}g/400/300`;
+      if(!_poleHasStoredPhoto(r.photo_vista_detalle))r.photo_vista_detalle=`https://picsum.photos/seed/pole${r.id}d/400/300`;
+    }
+  });
+  _initPoleFieldMeta.done=true;
+}
+function _syncPoleDisplayNames(data){
+  data.propietario=_catNameById(DB.propietario.rows,data.owner_id)||data.propietario;
+  data.material=_catNameById(DB.material.rows,data.material_id)||data.material;
+  data.tension=_catNameById(DB.tension.rows,data.tension_id)||data.tension;
+  data.cable_type=_catNameById(DB.tipocable.rows,data.cable_type_id)||data.cable_type;
+  data.condition=_catNameById(DB.condicion.rows,data.condition_id)||data.condition;
+  if(data.manufacturer_id)data.manufacturer=_catNameById(DB.fabricante.rows,data.manufacturer_id)||data.manufacturer;
+  return data;
+}
+function _readPoleCreateForm(){
+  const geo=_readPoleGeo('sp');
+  const owner_id=parseInt(document.getElementById('sp-owner')?.value,10);
+  const code=(document.getElementById('sp-code')?.value||'').trim();
+  const material_id=parseInt(document.getElementById('sp-material')?.value,10);
+  const tension_id=parseInt(document.getElementById('sp-tension')?.value,10);
+  const cable_type_id=parseInt(document.getElementById('sp-cable')?.value,10);
+  const condition_id=parseInt(document.getElementById('sp-cond')?.value,10);
+  const height=parseFloat(document.getElementById('sp-height')?.value);
+  const load=parseFloat(document.getElementById('sp-load')?.value);
+  const depth=parseFloat(document.getElementById('sp-depth')?.value);
+  const support_points=parseInt(document.getElementById('sp-support')?.value,10);
+  const manufacturer_id=parseInt(document.getElementById('sp-manufacturer')?.value,10)||null;
+  const fabrication_date=document.getElementById('sp-fabric-date')?.value||null;
+  const installation_date=document.getElementById('sp-install-date')?.value||null;
+  const data={
+    owner_id,code,...geo,material_id,tension_id,cable_type_id,condition_id,
+    height,load,depth,support_points,
+    has_retainer:!!document.getElementById('sp-ret')?.checked,
+    manufacturer_id,fabrication_date,installation_date,
+    findings:document.getElementById('sp-findings')?.value||'',
+    observations:document.getElementById('sp-obs')?.value||'',
+    existingId:null,is_existing:false,
+    photo_vista_general:_ss.curPolePhotos[0]||null,
+    photo_vista_detalle:_ss.curPolePhotos[1]||null,
+  };
+  return _syncPoleDisplayNames(data);
+}
+function _validatePoleCreateForm(){
+  const owner=document.getElementById('sp-owner')?.value;
+  if(!owner){showToast('⚠ Selecciona el propietario del poste','warning');return false;}
+  const code=(document.getElementById('sp-code')?.value||'').trim();
+  if(!code){showToast('⚠ Ingresa el código del poste','warning');return false;}
+  if(!_validatePoleCoords('sp'))return false;
+  const reqSel=[['sp-material','material'],['sp-tension','tensión'],['sp-cable','tipo de cable'],['sp-cond','condición']];
+  for(const[id,lbl]of reqSel){if(!document.getElementById(id)?.value){showToast(`⚠ Selecciona ${lbl} del poste`,'warning');return false;}}
+  const reqNum=[['sp-height','altura'],['sp-load','carga'],['sp-depth','profundidad'],['sp-support','puntos de apoyo']];
+  for(const[id,lbl]of reqNum){const v=document.getElementById(id)?.value;if(v===''||isNaN(parseFloat(v))){showToast(`⚠ Ingresa ${lbl} del poste`,'warning');return false;}}
+  if(!_ss.curPolePhotos[0]){showToast('⚠ Sube la foto vista general del poste','warning');return false;}
+  if(!_ss.curPolePhotos[1]){showToast('⚠ Sube la foto vista detalle del poste','warning');return false;}
+  return true;
+}
+function _readPolePatchForm(prefix,dbPole){
+  const geo=_readPoleGeo(prefix);
+  const material_id=parseInt(document.getElementById(prefix+'-material')?.value,10);
+  const tension_id=parseInt(document.getElementById(prefix+'-tension')?.value,10);
+  const cable_type_id=parseInt(document.getElementById(prefix+'-cable')?.value,10);
+  const condition_id=parseInt(document.getElementById(prefix+'-cond')?.value,10);
+  const manufacturer_id=parseInt(document.getElementById(prefix+'-manufacturer')?.value,10)||null;
+  const data={
+    ...geo,
+    material_id,tension_id,cable_type_id,condition_id,manufacturer_id,
+    height:parseFloat(document.getElementById(prefix+'-height')?.value),
+    load:parseFloat(document.getElementById(prefix+'-load')?.value),
+    depth:parseFloat(document.getElementById(prefix+'-depth')?.value),
+    support_points:parseInt(document.getElementById(prefix+'-support')?.value,10),
+    has_retainer:!!document.getElementById(prefix+'-ret')?.checked,
+    fabrication_date:document.getElementById(prefix+'-fabric-date')?.value||null,
+    installation_date:document.getElementById(prefix+'-install-date')?.value||null,
+    findings:document.getElementById(prefix+'-findings')?.value??'',
+    observations:document.getElementById(prefix+'-obs')?.value??'',
+  };
+  const photos=prefix==='ep'?_ss.editPolePhotos:prefix==='ef'?_ss.foundEditPhotos:null;
+  if(photos){
+    if(photos[0])data.photo_vista_general=photos[0];
+    if(photos[1])data.photo_vista_detalle=photos[1];
+  }
+  return _syncPoleDisplayNames(data);
+}
+function _validatePolePatchForm(prefix,dbPole,photos){
+  if(!_validatePoleCoords(prefix))return false;
+  const reqSel=[['-material','material'],['-tension','tensión'],['-cable','tipo de cable'],['-cond','condición']];
+  for(const[sfx,lbl]of reqSel){if(!document.getElementById(prefix+sfx)?.value){showToast(`⚠ Selecciona ${lbl} del poste`,'warning');return false;}}
+  const reqNum=[['-height','altura'],['-load','carga'],['-depth','profundidad'],['-support','puntos de apoyo']];
+  for(const[sfx,lbl]of reqNum){const v=document.getElementById(prefix+sfx)?.value;if(v===''||isNaN(parseFloat(v))){showToast(`⚠ Ingresa ${lbl} del poste`,'warning');return false;}}
+  if(!_poleHasStoredPhoto(dbPole?.photo_vista_general)&&!photos?.[0]){showToast('⚠ Sube la foto vista general del poste','warning');return false;}
+  if(!_poleHasStoredPhoto(dbPole?.photo_vista_detalle)&&!photos?.[1]){showToast('⚠ Sube la foto vista detalle del poste','warning');return false;}
+  return true;
+}
+function _applyPolePatchToRoute(p,patch){
+  Object.assign(p,patch);
+  if(patch.lat!=null&&patch.lat!=='')p.lat=parseFloat(patch.lat);
+  if(patch.lng!=null&&patch.lng!=='')p.lng=parseFloat(patch.lng);
+  p.condicion=patch.condition;
+  p.tipocable=patch.cable_type;
+  if(patch.photo_vista_general)p.photo_vista_general=patch.photo_vista_general;
+  if(patch.photo_vista_detalle)p.photo_vista_detalle=patch.photo_vista_detalle;
+  p.photos=[p.photo_vista_general||p.photos?.[0]||null,p.photo_vista_detalle||p.photos?.[1]||null];
+}
+function _applyPolePatchToDb(dbP,patch){
+  if(!dbP)return;
+  Object.assign(dbP,{
+    country:patch.country,department:patch.department,province:patch.province,district:patch.district,
+    district_id:patch.district_id,
+    material_id:patch.material_id,material:patch.material,
+    tension_id:patch.tension_id,tension:patch.tension,
+    cable_type_id:patch.cable_type_id,tipocable:patch.cable_type,
+    condition_id:patch.condition_id,condicion:patch.condition,
+    manufacturer_id:patch.manufacturer_id,manufacturer:patch.manufacturer||null,
+    height:patch.height,load:patch.load,depth:patch.depth,support_points:patch.support_points,
+    has_retainer:patch.has_retainer,
+    fabrication_date:patch.fabrication_date,installation_date:patch.installation_date,
+    findings:patch.findings,observations:patch.observations,
+  });
+  if(patch.lat!=null&&patch.lat!=='')dbP.lat=parseFloat(patch.lat);
+  if(patch.lng!=null&&patch.lng!=='')dbP.lng=parseFloat(patch.lng);
+  if(patch.photo_vista_general)dbP.photo_vista_general=patch.photo_vista_general;
+  if(patch.photo_vista_detalle)dbP.photo_vista_detalle=patch.photo_vista_detalle;
+}
+
 /* ─── STEP 2: POSTE ─── */
 function _renderExtOpRows(){
   const propOpts=DB.propietario.rows.filter(r=>r.status).map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
@@ -5634,29 +5893,30 @@ function removeExtOp(i){_ss.extOps.splice(i,1);const el=document.getElementById(
 /* ── Pole list helpers ── */
 function toggleAddForm(){
   _ss.addFormOpen=!_ss.addFormOpen;
-  if(!_ss.addFormOpen){_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.foundPoste=null;_ss.addPhase='search';_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;}
+  if(!_ss.addFormOpen){_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.foundEditPhotos=[null,null];_ss.extOps=[];_ss.foundPoste=null;_ss.addPhase='search';_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;_ss.editingFoundPoste=false;}
   renderStepPoste();
   if(_ss.addFormOpen) setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
-function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;_ss.editingFoundPoste=false;renderStepPoste();}
+function _resetAddSearch(){_ss.addPhase='search';_ss.foundPoste=null;_ss.curPole=null;_ss.curPolePhotos=[null,null];_ss.foundEditPhotos=[null,null];_ss.extOps=[];_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;_ss.editingFoundPoste=false;renderStepPoste();}
 function _openAddConfirm(){_ss.addConfirm=true;renderStepPoste();}
+function _openFoundPosteEdit(){
+  const p=_ss.foundPoste;
+  if(!p)return;
+  if(p.validated){showToast('⚠ Poste validado — solo puedes agregarlo al recorrido','warning');return;}
+  _ss.foundEditPhotos=[p.photo_vista_general||null,p.photo_vista_detalle||null];
+  _ss.editPoleExtOps=[...(p.external_operators||[]).map(e=>({operator:e.operator||e.owner_name,cable_count:e.cable_count}))];
+  _ss.editingFoundPoste=true;
+  renderStepPoste();
+}
 function _saveFoundPosteEdit(){
-  const p=_ss.foundPoste; if(!p)return;
-  p.material=document.getElementById('ef-material')?.value||p.material;
-  p.condicion=document.getElementById('ef-cond')?.value||p.condicion;
-  p.tension=document.getElementById('ef-tension')?.value||p.tension;
-  p.tipocable=document.getElementById('ef-cable')?.value||p.tipocable;
-  p.height=parseFloat(document.getElementById('ef-height')?.value)||p.height;
-  p.load=parseFloat(document.getElementById('ef-load')?.value)||p.load;
-  p.has_retainer=document.getElementById('ef-ret')?.checked??p.has_retainer;
-  p.lat=parseFloat(document.getElementById('ef-lat')?.value)||p.lat;
-  p.lng=parseFloat(document.getElementById('ef-lng')?.value)||p.lng;
-  p.observations=document.getElementById('ef-obs')?.value??p.observations;
-  p.external_operators=[..._ss.editPoleExtOps];
-  const inv=DB.postes.rows.find(x=>x.id===p.id);
-  if(inv){Object.assign(inv,{material:p.material,condicion:p.condicion,tension:p.tension,tipocable:p.tipocable,height:p.height,load:p.load,has_retainer:p.has_retainer,lat:p.lat,lng:p.lng,observations:p.observations,external_operators:p.external_operators});}
+  const p=_ss.foundPoste; if(!p||p.validated)return;
+  if(!_validatePolePatchForm('ef',p,_ss.foundEditPhotos))return;
+  const patch=_readPolePatchForm('ef',p);
+  _applyPolePatchToDb(p,patch);
+  if(patch.external_operators)_ss.editPoleExtOps=patch.external_operators;
+  p.external_operators=(_ss.editPoleExtOps||[]).map(e=>({operator:e.operator,cable_count:e.cable_count}));
   _ss.editingFoundPoste=false;
-  showToast('✓ Datos del poste actualizados','success');
+  showToast('✓ Datos del poste actualizados (PATCH field)','success');
   renderStepPoste();
 }
 function _closeAnyConfirm(){_ss.addConfirm=false;_ss.newPoleConfirmOpen=false;renderStepPoste();}
@@ -5670,6 +5930,7 @@ function confirmRemovePoste(i){
 }
 function confirmEditPoste(i){
   const p=_ss.poles[i];
+  if(_poleIsValidated(p)){showToast('⚠ Poste validado — no se puede editar desde campo','warning');return;}
   const lbl=p?`Poste #${p.seq_order} · ${p.pole?.code||p.codigo||'Sin código'}`:'';
   document.getElementById('mo-edit-pole-sub').textContent=lbl?`Editando: ${lbl}`:'Se abrirá el formulario de edición.';
   document.getElementById('mo-edit-pole-btn').onclick=()=>{closeMo('mo-confirm-edit-pole');openEditPoste(i);};
@@ -5689,8 +5950,10 @@ function openEditPoste(i){
   _ss.editPoleIdx=i;
   _ss.addFormOpen=false;
   const p=_ss.poles[i];
+  if(_poleIsValidated(p)){_ss.editPoleIdx=null;showToast('⚠ Poste validado — no se puede editar desde campo','warning');return;}
   _ss.editPoleExtOps=[...(p.external_operators||[])];
-  _ss.editPolePhotos=[p.photos?.[0]||null,p.photos?.[1]||null];
+  const dbP=_poleDbRow(p.existingId||p.pole_id);
+  _ss.editPolePhotos=[p.photos?.[0]||dbP?.photo_vista_general||null,p.photos?.[1]||dbP?.photo_vista_detalle||null];
   renderStepPoste();
   setTimeout(()=>document.querySelector('.relv-edit-pole-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
@@ -5698,7 +5961,10 @@ function openEditPoste(i){
 function _renderEditPolePanel(){
   const i=_ss.editPoleIdx; if(i==null||!_ss.poles[i])return '';
   const p=_ss.poles[i];
-  const mkOptE=(rows,cur)=>rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${cur===r.name?' selected':''}>${r.name}</option>`).join('');
+  const dbP=_poleDbRow(p.existingId||p.pole_id);
+  const geo=_poleGeoFromEntity({...p,...dbP});
+  const needPhotoG=!_poleHasStoredPhoto(dbP?.photo_vista_general||p.photo_vista_general);
+  const needPhotoD=!_poleHasStoredPhoto(dbP?.photo_vista_detalle||p.photo_vista_detalle);
   const extOpsHtml=(_ss.editPoleExtOps||[]).map((e,ei)=>`
     <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
       <select style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid var(--bor);background:var(--sur);font-size:11px;color:var(--t1)" onchange="_ss.editPoleExtOps[${ei}].operator=this.value">
@@ -5713,7 +5979,7 @@ function _renderEditPolePanel(){
       <div style="width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${p.seq_order}</div>
       <div style="flex:1">
         <div style="font-size:12px;font-weight:700;color:var(--t1)">Editando Poste #${p.seq_order}</div>
-        <div style="font-size:10px;color:var(--t3)">${p.propietario||'—'} · ${p.codigo||'Sin código'} — Propietario y código no editables</div>
+        <div style="font-size:10px;color:var(--t3)">${p.propietario||'—'} · ${p.codigo||'Sin código'} — PATCH field (propietario y código inmutables)</div>
       </div>
       <button onclick="_ss.editPoleIdx=null;renderStepPoste()" title="Cerrar" style="width:26px;height:26px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center" onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
@@ -5721,25 +5987,31 @@ function _renderEditPolePanel(){
       <div class="tsec">
         <div class="tsec-hdr">Características</div>
         <div class="fg2">
-          <div class="fl"><label>Material</label><select id="ep-material"><option value="">—</option>${mkOptE(DB.material.rows,p.material||p.condition)}</select></div>
-          <div class="fl"><label>Condición</label><select id="ep-cond"><option value="">—</option>${mkOptE(DB.condicion.rows,p.condition)}</select></div>
-          <div class="fl"><label>Tensión</label><select id="ep-tension"><option value="">—</option>${mkOptE(DB.tension.rows,p.tension)}</select></div>
-          <div class="fl"><label>Tipo de Cable</label><select id="ep-cable"><option value="">—</option>${mkOptE(DB.tipocable.rows,p.cable_type)}</select></div>
-          <div class="fl"><label>Altura (m)</label><input type="number" id="ep-height" step="0.1" value="${p.height||''}"></div>
-          <div class="fl"><label>Carga (kg)</label><input type="number" id="ep-load" step="1" value="${p.load||''}"></div>
+          <div class="fl"><label>Material <span class="req">*</span></label><select id="ep-material"><option value="">—</option>${_mkOptId(DB.material.rows,p.material_id,p.material)}</select></div>
+          <div class="fl"><label>Condición <span class="req">*</span></label><select id="ep-cond"><option value="">—</option>${_mkOptId(DB.condicion.rows,p.condition_id,p.condition)}</select></div>
+          <div class="fl"><label>Tensión <span class="req">*</span></label><select id="ep-tension"><option value="">—</option>${_mkOptId(DB.tension.rows,p.tension_id,p.tension)}</select></div>
+          <div class="fl"><label>Tipo de Cable <span class="req">*</span></label><select id="ep-cable"><option value="">—</option>${_mkOptId(DB.tipocable.rows,p.cable_type_id,p.cable_type)}</select></div>
+          <div class="fl"><label>Fabricante</label><select id="ep-manufacturer"><option value="">—</option>${_mkOptId(DB.fabricante.rows,p.manufacturer_id,p.manufacturer)}</select></div>
+          <div class="fl"><label>Fecha Fabricación</label><input type="date" id="ep-fabric-date" value="${p.fabrication_date||dbP?.fabrication_date||''}"></div>
+          <div class="fl"><label>Fecha Instalación</label><input type="date" id="ep-install-date" value="${p.installation_date||dbP?.installation_date||''}"></div>
+          <div class="fl"><label>Altura (m) <span class="req">*</span></label><input type="number" id="ep-height" step="0.1" value="${p.height||''}"></div>
+          <div class="fl"><label>Carga (kg) <span class="req">*</span></label><input type="number" id="ep-load" step="1" value="${p.load||''}"></div>
+          <div class="fl"><label>Profundidad (m) <span class="req">*</span></label><input type="number" id="ep-depth" step="0.1" value="${p.depth||''}"></div>
+          <div class="fl"><label>Puntos de Apoyo <span class="req">*</span></label><input type="number" id="ep-support" step="1" value="${p.support_points??''}"></div>
         </div>
         <div class="bool-card ${p.has_retainer?'on':'off'} fc2" id="ep-ret-card" onclick="toggleBoolCard('ep-ret','ep-ret-card')">
           <div class="bool-card-l"><div class="blbl">Retenida instalada</div></div>
           <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="ep-ret"${p.has_retainer?' checked':''} onchange="syncBoolCard('ep-ret','ep-ret-card')"><span class="tgl-sl"></span></label>
         </div>
       </div>
+      ${_renderPoleUbigeoSection('ep',geo)}
       <div class="tsec">
-        <div class="tsec-hdr">GPS del Poste</div>
+        <div class="tsec-hdr">Fotografías</div>
         <div class="fg2">
-          <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="ep-lat" step="0.000001" value="${p.lat||''}"></div>
-          <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="ep-lng" step="0.000001" value="${p.lng||''}"></div>
+          ${_pslot('ep-ph1',_ss.editPolePhotos[0],'ep-pinp1',_polePhotoLbl('Vista general',needPhotoG),'handleEditPolePhoto(0,this)')}
+          ${_pslot('ep-ph2',_ss.editPolePhotos[1],'ep-pinp2',_polePhotoLbl('Vista detalle',needPhotoD),'handleEditPolePhoto(1,this)')}
         </div>
-        ${_gpsBtnHtml('ep-gpsbtn',p.lat,p.lng,`captureGPS('ep-gpsbtn','ep-lat','ep-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
+        ${needPhotoG||needPhotoD?'<div class="relv-save-hint">Las fotos con <span class="req">*</span> son obligatorias solo si el poste aún no las tiene registradas.</div>':''}
       </div>
       <div class="tsec">
         <div class="tsec-hdr">Operadores Externos</div>
@@ -5748,7 +6020,7 @@ function _renderEditPolePanel(){
       </div>
       <div class="tsec">
         <div class="tsec-hdr">Observaciones</div>
-        <div class="fl"><label>Hallazgos</label><textarea id="ep-findings" rows="2">${p.findings||p.observation||''}</textarea></div>
+        <div class="fl"><label>Hallazgos</label><textarea id="ep-findings" rows="2">${p.findings||''}</textarea></div>
         <div class="fl" style="margin-bottom:0"><label>Observaciones</label><textarea id="ep-obs" rows="2">${p.observations||p.observation||''}</textarea></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
@@ -5764,21 +6036,19 @@ function _renderEditPolePanel(){
 function saveEditPoste(){
   const i=_ss.editPoleIdx; if(i==null)return;
   const p=_ss.poles[i];
-  p.material=document.getElementById('ep-material')?.value||p.material;
-  p.condition=document.getElementById('ep-cond')?.value||p.condition;
-  p.tension=document.getElementById('ep-tension')?.value||p.tension;
-  p.cable_type=document.getElementById('ep-cable')?.value||p.cable_type;
-  p.height=parseFloat(document.getElementById('ep-height')?.value)||p.height;
-  p.load=parseFloat(document.getElementById('ep-load')?.value)||p.load;
-  p.has_retainer=document.getElementById('ep-ret')?.checked??p.has_retainer;
-  p.lat=parseFloat(document.getElementById('ep-lat')?.value)||p.lat;
-  p.lng=parseFloat(document.getElementById('ep-lng')?.value)||p.lng;
-  p.findings=document.getElementById('ep-findings')?.value??p.findings;
-  p.observations=document.getElementById('ep-obs')?.value??p.observations;
-  p.external_operators=[..._ss.editPoleExtOps];
+  if(_poleIsValidated(p)){showToast('⚠ Poste validado — no se puede editar desde campo','warning');return;}
+  const dbP=_poleDbRow(p.existingId||p.pole_id);
+  if(!_validatePolePatchForm('ep',dbP||p,_ss.editPolePhotos))return;
+  const patch=_readPolePatchForm('ep',dbP||p);
+  patch.external_operators=[..._ss.editPoleExtOps];
+  _applyPolePatchToRoute(p,patch);
+  if(dbP){
+    _applyPolePatchToDb(dbP,patch);
+    if(patch.external_operators)dbP.external_operators=patch.external_operators.map(e=>({operator:e.operator,cable_count:e.cable_count}));
+  }
   const a=ASSIGNMENTS[_ss.clientId]; if(a) a.poles=[..._ss.poles];
   _ss.editPoleIdx=null;
-  showToast(`✓ Poste #${p.seq_order} actualizado`,'success');
+  showToast(`✓ Poste #${p.seq_order} actualizado (PATCH field)`,'success');
   renderStepPoste();
 }
 
@@ -5883,17 +6153,18 @@ function _renderPoleTimeline(){
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px;flex-wrap:wrap">
               <span style="font-size:12px;font-weight:700;color:var(--t1)">${p.codigo||'Sin código'}</span>
               ${p.is_existing?'<span class="rc-nap" style="background:rgba(123,110,248,.12);color:var(--p)">Inventario</span>':'<span class="rc-nap" style="background:rgba(251,146,60,.12);color:#C2410C">Nuevo</span>'}
+              ${_poleIsValidated(p)?'<span class="rc-nap" style="background:rgba(16,185,129,.12);color:#059669">Validado</span>':''}
               ${isNap?`<span class="rc-nap">NAP: ${p.nap_id}</span>`:''}
             </div>
             <div style="font-size:11px;color:var(--t2)">${p.propietario||'—'} · ${p.material||'—'} · ${p.condition||'—'}</div>
             <div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:1px">${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}</div>
           </div>
           <div style="display:flex;gap:4px;flex-shrink:0">
-            <button onclick="confirmEditPoste(${i})" title="Editar poste"
+            ${_poleIsValidated(p)?'':`<button onclick="confirmEditPoste(${i})" title="Editar poste"
               style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:all .15s"
               onmouseenter="this.style.borderColor='var(--p)';this.style.color='var(--p)'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'">
               <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
+            </button>`}
             <button onclick="confirmRemovePoste(${i})" title="Quitar del recorrido"
               style="width:24px;height:24px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:all .15s"
               onmouseenter="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseleave="this.style.borderColor='var(--bor)';this.style.color='var(--t3)'">
@@ -5944,6 +6215,7 @@ function _renderAddPoleForm(){
   if(phase==='found'){
     const p=_ss.foundPoste;
     if(!p) return `<div class="relv-add-panel">${hdr}</div>`;
+    const isValidated=!!p.validated;
     const extOps=(p.external_operators||[]);
     const infoRow=(l,v)=>`<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bor)"><span style="font-size:11px;color:var(--t3);min-width:110px;font-weight:600">${l}</span><span style="font-size:11px;color:var(--t1);font-weight:700">${v||'—'}</span></div>`;
 
@@ -5958,7 +6230,9 @@ function _renderAddPoleForm(){
               <div style="font-size:12px;color:var(--t2)">${p.propietario}</div>
             </div>
             <span class="rc-nap" style="background:rgba(123,110,248,.12);color:var(--p)">Inventario</span>
+            ${isValidated?'<span class="rc-nap" style="background:rgba(16,185,129,.12);color:#059669">Validado</span>':''}
           </div>
+          ${isValidated?'<div class="relv-save-hint" style="margin-bottom:12px">Poste validado por supervisor. Solo puedes agregarlo al recorrido — no se puede editar desde campo.</div>':''}
           <div style="border:1px solid var(--bor);border-radius:8px;overflow:hidden;margin-bottom:14px">
             ${infoRow('Material',p.material)}
             ${infoRow('Condición',p.condicion)}
@@ -5966,20 +6240,30 @@ function _renderAddPoleForm(){
             ${infoRow('Tipo Cable',p.tipocable)}
             ${infoRow('Altura',p.height?(p.height+'m'):null)}
             ${infoRow('Carga',p.load?(p.load+'kg'):null)}
+            ${infoRow('Profundidad',p.depth?(p.depth+'m'):null)}
+            ${infoRow('Puntos apoyo',p.support_points!=null?p.support_points:null)}
             ${infoRow('Retenida',p.has_retainer?'Sí':'No')}
-            ${infoRow('GPS',`${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}`)}
+            ${infoRow('Ubigeo',_poleUbigeoLabel(p))}
             ${extOps.length?infoRow('Operadores ext.',extOps.map(e=>`${e.operator} (${e.cable_count} cables)`).join(' · ')):''}
+            ${infoRow('Hallazgos',p.findings)}
             ${infoRow('Observaciones',p.observations)}
           </div>
-          <button class="bp" onclick="_openAddConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar este poste a la ruta
-          </button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${!isValidated?`<button class="bs" onclick="_openFoundPosteEdit()" style="flex:1;min-width:120px;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Actualizar datos
+            </button>`:''}
+            <button class="bp" onclick="_openAddConfirm()" style="flex:${isValidated?'1':'2'};min-width:160px;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar a la ruta
+            </button>
+          </div>
         </div>
       </div>`;
     }
 
-    /* ── Vista de edición inline ── */
-    const mkOptF=(rows,cur)=>rows.filter(r=>r.status).map(r=>`<option value="${r.name}"${cur===r.name?' selected':''}>${r.name}</option>`).join('');
+    /* ── Vista de edición inline (solo si !validated) ── */
+    const geo=_poleGeoFromEntity(p);
+    const needPhotoG=!_poleHasStoredPhoto(p.photo_vista_general);
+    const needPhotoD=!_poleHasStoredPhoto(p.photo_vista_detalle);
     const extOpsEdit=_ss.editPoleExtOps||[];
     const extOpsHtml=extOpsEdit.map((e,i)=>`
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
@@ -5995,7 +6279,7 @@ function _renderAddPoleForm(){
       <div style="padding:14px 16px">
         <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--t3)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span style="font-size:10px;color:var(--t3)">Propietario y código no son editables — identifican el poste en inventario</span>
+          <span style="font-size:10px;color:var(--t3)">Propietario y código no son editables — PATCH field</span>
         </div>
         <div style="display:flex;gap:10px;margin-bottom:14px">
           <div style="flex:1"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px">Propietario</div><div style="font-size:13px;font-weight:700;color:var(--t1)">${p.propietario}</div></div>
@@ -6004,25 +6288,31 @@ function _renderAddPoleForm(){
         <div class="tsec">
           <div class="tsec-hdr">Características del Poste</div>
           <div class="fg2">
-            <div class="fl"><label>Material</label><select id="ef-material"><option value="">—</option>${mkOptF(DB.material.rows,p.material)}</select></div>
-            <div class="fl"><label>Condición</label><select id="ef-cond"><option value="">—</option>${mkOptF(DB.condicion.rows,p.condicion)}</select></div>
-            <div class="fl"><label>Tensión</label><select id="ef-tension"><option value="">—</option>${mkOptF(DB.tension.rows,p.tension)}</select></div>
-            <div class="fl"><label>Tipo de Cable</label><select id="ef-cable"><option value="">—</option>${mkOptF(DB.tipocable.rows,p.tipocable)}</select></div>
-            <div class="fl"><label>Altura (m)</label><input type="number" id="ef-height" step="0.1" value="${p.height||''}"></div>
-            <div class="fl"><label>Carga (kg)</label><input type="number" id="ef-load" step="1" value="${p.load||''}"></div>
+            <div class="fl"><label>Material <span class="req">*</span></label><select id="ef-material"><option value="">—</option>${_mkOptId(DB.material.rows,p.material_id,p.material)}</select></div>
+            <div class="fl"><label>Condición <span class="req">*</span></label><select id="ef-cond"><option value="">—</option>${_mkOptId(DB.condicion.rows,p.condition_id,p.condicion)}</select></div>
+            <div class="fl"><label>Tensión <span class="req">*</span></label><select id="ef-tension"><option value="">—</option>${_mkOptId(DB.tension.rows,p.tension_id,p.tension)}</select></div>
+            <div class="fl"><label>Tipo de Cable <span class="req">*</span></label><select id="ef-cable"><option value="">—</option>${_mkOptId(DB.tipocable.rows,p.cable_type_id,p.tipocable)}</select></div>
+            <div class="fl"><label>Fabricante</label><select id="ef-manufacturer"><option value="">—</option>${_mkOptId(DB.fabricante.rows,p.manufacturer_id,p.manufacturer)}</select></div>
+            <div class="fl"><label>Fecha Fabricación</label><input type="date" id="ef-fabric-date" value="${p.fabrication_date||''}"></div>
+            <div class="fl"><label>Fecha Instalación</label><input type="date" id="ef-install-date" value="${p.installation_date||''}"></div>
+            <div class="fl"><label>Altura (m) <span class="req">*</span></label><input type="number" id="ef-height" step="0.1" value="${p.height||''}"></div>
+            <div class="fl"><label>Carga (kg) <span class="req">*</span></label><input type="number" id="ef-load" step="1" value="${p.load||''}"></div>
+            <div class="fl"><label>Profundidad (m) <span class="req">*</span></label><input type="number" id="ef-depth" step="0.1" value="${p.depth||''}"></div>
+            <div class="fl"><label>Puntos de Apoyo <span class="req">*</span></label><input type="number" id="ef-support" step="1" value="${p.support_points??''}"></div>
           </div>
           <div class="bool-card ${p.has_retainer?'on':'off'} fc2" id="ef-ret-card" onclick="toggleBoolCard('ef-ret','ef-ret-card')">
             <div class="bool-card-l"><div class="blbl">Retenida instalada</div><div class="bsub">¿El poste tiene cable de retenida?</div></div>
             <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="ef-ret"${p.has_retainer?' checked':''} onchange="syncBoolCard('ef-ret','ef-ret-card')"><span class="tgl-sl"></span></label>
           </div>
         </div>
+        ${_renderPoleUbigeoSection('ef',geo)}
         <div class="tsec">
-          <div class="tsec-hdr">GPS del Poste</div>
+          <div class="tsec-hdr">Fotografías</div>
           <div class="fg2">
-            <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="ef-lat" step="0.000001" value="${p.lat||''}"></div>
-            <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="ef-lng" step="0.000001" value="${p.lng||''}"></div>
+            ${_pslot('ef-ph1',_ss.foundEditPhotos[0],'ef-pinp1',_polePhotoLbl('Vista general',needPhotoG),'handleFoundPolePhoto(0,this)')}
+            ${_pslot('ef-ph2',_ss.foundEditPhotos[1],'ef-pinp2',_polePhotoLbl('Vista detalle',needPhotoD),'handleFoundPolePhoto(1,this)')}
           </div>
-          ${_gpsBtnHtml('ef-gpsbtn',p.lat,p.lng,`captureGPS('ef-gpsbtn','ef-lat','ef-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
+          ${needPhotoG||needPhotoD?'<div class="relv-save-hint">Las fotos con <span class="req">*</span> son obligatorias solo si el poste aún no las tiene registradas.</div>':''}
         </div>
         <div class="tsec">
           <div class="tsec-hdr">Operadores Externos</div>
@@ -6031,6 +6321,7 @@ function _renderAddPoleForm(){
         </div>
         <div class="tsec">
           <div class="tsec-hdr">Observaciones</div>
+          <div class="fl"><label>Hallazgos</label><textarea id="ef-findings" rows="2">${p.findings||''}</textarea></div>
           <div class="fl"><label>Observaciones</label><textarea id="ef-obs" rows="2">${p.observations||''}</textarea></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
@@ -6044,31 +6335,45 @@ function _renderAddPoleForm(){
   }
 
   /* ══ FASE: NEW ══ */
-  if(!_ss.curPole){_ss.curPole={codigo:_ss._lastSearchCode||'',propietario:_ss._lastSearchOwner||'',manufacturer:'',installation_date:'',material:'',tension:'',cable_type:'',condition:'',height:'',load:'',depth:'',support_points:'',has_retainer:false,findings:'',observations:'',lat:'',lng:'',existingId:null};}
+  if(!_ss.curPole){
+    const def=_clientGeoDefaults();
+    _ss.curPole={
+      codigo:_ss._lastSearchCode||'',owner_id:_catIdByName(DB.propietario.rows,_ss._lastSearchOwner)||'',
+      propietario:_ss._lastSearchOwner||'',manufacturer_id:'',manufacturer:'',
+      fabrication_date:'',installation_date:'',
+      country:def.country,department:def.department,province:def.province,district:def.district,
+      lat:def.lat,lng:def.lng,
+      material_id:'',material:'',tension_id:'',tension:'',cable_type_id:'',cable_type:'',
+      condition_id:'',condition:'',height:'',load:'',depth:'',support_points:'',
+      has_retainer:false,findings:'',observations:'',existingId:null,
+    };
+  }
   const p=_ss.curPole;
+  const geo=_poleGeoFromEntity(p);
   return `<div class="relv-add-panel">
     ${hdr}
     <div style="padding:16px">
       <div class="tsec">
         <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Identificación</div>
         <div class="fg2">
-          <div class="fl"><label>Propietario <span class="req">*</span></label><select id="sp-owner"><option value="">Seleccionar...</option>${mkOpt(DB.propietario.rows,p.propietario)}</select></div>
-          <div class="fl"><label>Código del Poste</label><input type="text" id="sp-code" placeholder="POL-XXXX" value="${p.codigo}"></div>
-          <div class="fl"><label>Fabricante</label><select id="sp-manufacturer"><option value="">—</option>${mkOpt(DB.fabricante.rows,p.manufacturer)}</select></div>
+          <div class="fl"><label>Propietario <span class="req">*</span></label><select id="sp-owner"><option value="">Seleccionar...</option>${_mkOptId(DB.propietario.rows,p.owner_id,p.propietario)}</select></div>
+          <div class="fl"><label>Código del Poste <span class="req">*</span></label><input type="text" id="sp-code" placeholder="POL-XXXX" value="${p.codigo}"></div>
+          <div class="fl"><label>Fabricante</label><select id="sp-manufacturer"><option value="">—</option>${_mkOptId(DB.fabricante.rows,p.manufacturer_id,p.manufacturer)}</select></div>
+          <div class="fl"><label>Fecha Fabricación</label><input type="date" id="sp-fabric-date" value="${p.fabrication_date||''}"></div>
           <div class="fl"><label>Fecha Instalación</label><input type="date" id="sp-install-date" value="${p.installation_date||''}"></div>
-          <div class="fl"><label>Material</label><select id="sp-material"><option value="">—</option>${mkOpt(DB.material.rows,p.material)}</select></div>
-          <div class="fl"><label>Tensión</label><select id="sp-tension"><option value="">—</option>${mkOpt(DB.tension.rows,p.tension)}</select></div>
-          <div class="fl"><label>Tipo de Cable</label><select id="sp-cable"><option value="">—</option>${mkOpt(DB.tipocable.rows,p.cable_type)}</select></div>
-          <div class="fl"><label>Condición</label><select id="sp-cond"><option value="">—</option>${mkOpt(DB.condicion.rows,p.condition)}</select></div>
+          <div class="fl"><label>Material <span class="req">*</span></label><select id="sp-material"><option value="">—</option>${_mkOptId(DB.material.rows,p.material_id,p.material)}</select></div>
+          <div class="fl"><label>Tensión <span class="req">*</span></label><select id="sp-tension"><option value="">—</option>${_mkOptId(DB.tension.rows,p.tension_id,p.tension)}</select></div>
+          <div class="fl"><label>Tipo de Cable <span class="req">*</span></label><select id="sp-cable"><option value="">—</option>${_mkOptId(DB.tipocable.rows,p.cable_type_id,p.cable_type)}</select></div>
+          <div class="fl"><label>Condición <span class="req">*</span></label><select id="sp-cond"><option value="">—</option>${_mkOptId(DB.condicion.rows,p.condition_id,p.condition)}</select></div>
         </div>
       </div>
       <div class="tsec">
         <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Dimensiones</div>
         <div class="fg2">
-          <div class="fl"><label>Altura (m)</label><input type="number" id="sp-height" step="0.1" placeholder="9.0" value="${p.height}"></div>
-          <div class="fl"><label>Carga (kg)</label><input type="number" id="sp-load" step="1" placeholder="500" value="${p.load}"></div>
-          <div class="fl"><label>Profundidad (m)</label><input type="number" id="sp-depth" step="0.1" placeholder="1.6" value="${p.depth}"></div>
-          <div class="fl"><label>Puntos de Apoyo</label><input type="number" id="sp-support" step="1" placeholder="2" value="${p.support_points}"></div>
+          <div class="fl"><label>Altura (m) <span class="req">*</span></label><input type="number" id="sp-height" step="0.1" placeholder="9.0" value="${p.height}"></div>
+          <div class="fl"><label>Carga (kg) <span class="req">*</span></label><input type="number" id="sp-load" step="1" placeholder="500" value="${p.load}"></div>
+          <div class="fl"><label>Profundidad (m) <span class="req">*</span></label><input type="number" id="sp-depth" step="0.1" placeholder="1.6" value="${p.depth}"></div>
+          <div class="fl"><label>Puntos de Apoyo <span class="req">*</span></label><input type="number" id="sp-support" step="1" placeholder="2" value="${p.support_points}"></div>
           <div class="bool-card ${p.has_retainer?'on':'off'} fc2" id="sp-ret-card" onclick="toggleBoolCard('sp-ret','sp-ret-card')">
             <div class="bool-card-l"><div class="blbl">Retenida instalada</div><div class="bsub">¿El poste tiene cable de retenida?</div></div>
             <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="sp-ret"${p.has_retainer?' checked':''} onchange="syncBoolCard('sp-ret','sp-ret-card')"><span class="tgl-sl"></span></label>
@@ -6085,19 +6390,12 @@ function _renderAddPoleForm(){
         <div id="sp-extops-list">${_renderExtOpRows()}</div>
         <button class="bs" onclick="addExtOp()" style="font-size:11px;padding:6px 12px;margin-top:8px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar operador</button>
       </div>
-      <div class="tsec">
-        <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>GPS del Poste <span class="req">*</span></div>
-        <div class="fg2">
-          <div class="fl" style="margin-bottom:0"><label>Latitud</label><input type="number" id="sp-lat" value="${p.lat}" step="0.000001" placeholder="-12.0464"></div>
-          <div class="fl" style="margin-bottom:0"><label>Longitud</label><input type="number" id="sp-lng" value="${p.lng}" step="0.000001" placeholder="-77.0428"></div>
-        </div>
-        ${_gpsBtnHtml('sp-gpsbtn',p.lat,p.lng,`captureGPS('sp-gpsbtn','sp-lat','sp-lng',${(_ss.gpsLat||'-12.0464')},${(_ss.gpsLng||'-77.0428')},'pole')`)}
-      </div>
+      ${_renderPoleUbigeoSection('sp',geo)}
       <div class="tsec">
         <div class="tsec-hdr"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Fotografías del Poste</div>
         <div class="fg2">
-          ${_pslot('sp-ph1',_ss.curPolePhotos[0],'sp-pinp1','Panorámica','handlePolePhoto(0,this)')}
-          ${_pslot('sp-ph2',_ss.curPolePhotos[1],'sp-pinp2','Detalle','handlePolePhoto(1,this)')}
+          ${_pslot('sp-ph1',_ss.curPolePhotos[0],'sp-pinp1',_polePhotoLbl('Vista general',true),'handlePolePhoto(0,this)')}
+          ${_pslot('sp-ph2',_ss.curPolePhotos[1],'sp-pinp2',_polePhotoLbl('Vista detalle',true),'handlePolePhoto(1,this)')}
         </div>
       </div>
       <button class="bp" onclick="_openNewPoleConfirm()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:16px">
@@ -6319,7 +6617,7 @@ function _renderExistingPoleConfirmModal(){
           <div style="font-size:10px;color:var(--t3);font-family:monospace">${parseFloat(p.lat||0).toFixed(5)}, ${parseFloat(p.lng||0).toFixed(5)}</div>
         </div>
         <div style="font-size:12px;color:var(--t2);margin-bottom:4px">¿Confirmas agregar este poste como <strong style="color:var(--t1)">Poste #${pNum}</strong> en el recorrido?</div>
-        <div class="relv-save-hint">Se vinculará en <code>assignment_poles</code> sin crear un duplicado en <code>poles</code>.</div>
+        <div class="relv-save-hint">Se vinculará en <code>assignment_poles</code> sin crear un duplicado en <code>poles</code>.${p.validated?' Poste validado: no se puede editar desde campo.':''}</div>
       </div>
       <div class="nap-mo-ftr">
         <button class="bs" onclick="_closeAnyConfirm()" style="flex:1;padding:10px;font-size:12px;justify-content:center;display:flex">Cancelar</button>
@@ -6361,30 +6659,8 @@ function _renderNewPoleConfirmModal(){
 }
 
 function _openNewPoleConfirm(){
-  const owner=document.getElementById('sp-owner')?.value;
-  if(!owner){showToast('⚠ Selecciona el propietario del poste','warning');return;}
-  const lat=parseFloat(document.getElementById('sp-lat')?.value);
-  const lng=parseFloat(document.getElementById('sp-lng')?.value);
-  if(isNaN(lat)||isNaN(lng)){showToast('⚠ Captura las coordenadas GPS del poste','warning');return;}
-  _ss.curPole={
-    existingId:null, is_existing:false,
-    propietario:owner,
-    codigo:document.getElementById('sp-code')?.value||'',
-    manufacturer:document.getElementById('sp-manufacturer')?.value||'',
-    installation_date:document.getElementById('sp-install-date')?.value||'',
-    material:document.getElementById('sp-material')?.value||'',
-    tension:document.getElementById('sp-tension')?.value||'',
-    cable_type:document.getElementById('sp-cable')?.value||'',
-    condition:document.getElementById('sp-cond')?.value||'',
-    height:parseFloat(document.getElementById('sp-height')?.value)||null,
-    load:parseFloat(document.getElementById('sp-load')?.value)||null,
-    depth:parseFloat(document.getElementById('sp-depth')?.value)||null,
-    support_points:parseInt(document.getElementById('sp-support')?.value)||null,
-    has_retainer:document.getElementById('sp-ret')?.checked||false,
-    findings:document.getElementById('sp-findings')?.value||'',
-    observations:document.getElementById('sp-obs')?.value||'',
-    lat,lng,
-  };
+  if(!_validatePoleCreateForm())return;
+  _ss.curPole=_readPoleCreateForm();
   _ss.newPoleConfirmOpen=true;
   renderStepPoste();
 }
@@ -6393,18 +6669,44 @@ function savePosteConfirmed(){
   const p=_ss.curPole; if(!p)return;
   const pNum=_ss.poles.length+1;
   const newId=Math.max(0,...DB.postes.rows.map(r=>r.id))+1;
-  DB.postes.rows.push({id:newId,codigo:p.codigo||`POL-NEW${newId}`,propietario:p.propietario,manufacturer:p.manufacturer||null,installation_date:p.installation_date||null,material:p.material,tension:p.tension,tipocable:p.cable_type,condicion:p.condition,height:p.height,load:p.load,depth:p.depth,support_points:p.support_points,has_retainer:p.has_retainer,findings:p.findings,observations:p.observations,lat:p.lat,lng:p.lng,external_operators:_ss.extOps.map(e=>({operator:e.owner_name,cable_count:e.cable_count})),status:true});
-  const pole={pole_id:newId,existingId:newId,is_existing:false,...p,observation:p.observations||'',access:true,external_operators:[..._ss.extOps],photos:[..._ss.curPolePhotos],seq_order:pNum,nap_id:null,nap_access:null,nap_observation:null};
+  const dbRow={
+    id:newId,
+    owner_id:p.owner_id,codigo:p.code,code:p.code,propietario:p.propietario,
+    manufacturer_id:p.manufacturer_id,manufacturer:p.manufacturer||null,
+    fabrication_date:p.fabrication_date,installation_date:p.installation_date,
+    country:p.country,department:p.department,province:p.province,district:p.district,
+    district_id:p.district_id,
+    material_id:p.material_id,material:p.material,
+    tension_id:p.tension_id,tension:p.tension,
+    cable_type_id:p.cable_type_id,tipocable:p.cable_type,
+    condition_id:p.condition_id,condicion:p.condition,
+    height:p.height,load:p.load,depth:p.depth,support_points:p.support_points,
+    has_retainer:p.has_retainer,findings:p.findings,observations:p.observations,
+    lat:p.lat!=null&&p.lat!==''?parseFloat(p.lat):null,
+    lng:p.lng!=null&&p.lng!==''?parseFloat(p.lng):null,
+    photo_vista_general:p.photo_vista_general,photo_vista_detalle:p.photo_vista_detalle,
+    external_operators:_ss.extOps.map(e=>({operator:e.owner_name,cable_count:e.cable_count})),
+    validated:false,status:true,
+  };
+  DB.postes.rows.push(dbRow);
+  const pole={
+    pole_id:newId,existingId:newId,is_existing:false,validated:false,...p,
+    codigo:p.code,observation:p.observations||'',access:true,
+    external_operators:[..._ss.extOps],
+    photos:[p.photo_vista_general,p.photo_vista_detalle],
+    seq_order:pNum,nap_id:null,nap_access:null,nap_observation:null,
+  };
   _ss.poles.push(pole);
   const a=ASSIGNMENTS[_ss.clientId]; if(!a.poles)a.poles=[]; a.poles=[..._ss.poles];
   _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
   _ss.addPhase='search'; _ss.addConfirm=false; _ss.newPoleConfirmOpen=false;
   renderStepPoste();
-  showToast(`✓ Poste #${pNum} creado en inventario y agregado al recorrido`,'success');
+  showToast(`✓ Poste #${pNum} creado (POST field) y agregado al recorrido`,'success');
   setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
 
 function renderStepPoste(){
+  _initPoleFieldMeta();
   const r=DB.clientes.rows.find(x=>x.id===_ss.clientId);
   const vEl=document.getElementById('view-relev-flow');
   if(!vEl)return;
@@ -6448,9 +6750,18 @@ function renderStepPoste(){
     ${existingConfirmHTML}
     ${newPoleConfirmHTML}
   </div>`;
+
+  if(addOpen&&_ss.addPhase==='new')_schedulePoleGeoFill('sp',_poleGeoFromEntity(_ss.curPole));
+  if(addOpen&&_ss.addPhase==='found'&&_ss.editingFoundPoste&&_ss.foundPoste)_schedulePoleGeoFill('ef',_poleGeoFromEntity(_ss.foundPoste));
+  if(_ss.editPoleIdx!=null){
+    const ep=_ss.poles[_ss.editPoleIdx];
+    const dbP=_poleDbRow(ep?.existingId||ep?.pole_id);
+    _schedulePoleGeoFill('ep',_poleGeoFromEntity({...ep,...dbP}));
+  }
 }
 
 function searchPoste(){
+  _initPoleFieldMeta();
   const owner=document.getElementById('sp-srch-owner')?.value;
   const code=document.getElementById('sp-srch-code')?.value.trim().toUpperCase();
   if(!owner&&!code){showToast('⚠ Ingresa el propietario o código para buscar','warning');return;}
@@ -6461,7 +6772,7 @@ function searchPoste(){
     return matchOwner&&matchCode&&p.status;
   });
   if(found){
-    _ss.foundPoste=found; _ss.addPhase='found'; _ss.addConfirm=false;
+    _ss.foundPoste=found; _ss.addPhase='found'; _ss.addConfirm=false; _ss.editingFoundPoste=false;
     renderStepPoste();
   } else {
     _ss.foundPoste=null; _ss.addPhase='new'; _ss.curPole=null;
@@ -6483,25 +6794,30 @@ function confirmAddExistingPoste(id){
   const p=DB.postes.rows.find(x=>x.id===id);
   if(!p)return;
   const pole={
-    pole_id:id, existingId:id, is_existing:true,
-    codigo:p.codigo, propietario:p.propietario, manufacturer:p.manufacturer||'',
-    installation_date:p.installation_date||'', material:p.material, tension:p.tension,
-    cable_type:p.tipocable, condition:p.condicion, height:p.height, load:p.load,
-    depth:p.depth, support_points:p.support_points, has_retainer:!!p.has_retainer,
+    pole_id:id, existingId:id, is_existing:true, validated:!!p.validated,
+    owner_id:p.owner_id,codigo:p.codigo, propietario:p.propietario,
+    manufacturer_id:p.manufacturer_id,manufacturer:p.manufacturer||'',
+    fabrication_date:p.fabrication_date||'',installation_date:p.installation_date||'',
+    country:p.country,department:p.department,province:p.province,district:p.district,
+    district_id:p.district_id,
+    material_id:p.material_id,material:p.material, tension_id:p.tension_id,tension:p.tension,
+    cable_type_id:p.cable_type_id,cable_type:p.tipocable, condition_id:p.condition_id,condition:p.condicion,
+    height:p.height, load:p.load, depth:p.depth, support_points:p.support_points, has_retainer:!!p.has_retainer,
     findings:p.findings||'', observations:p.observations||'', observation:p.observations||'',
     lat:p.lat, lng:p.lng, access:true,
-    external_operators:(p.external_operators||[]).map(e=>({owner_name:e.operator,cable_count:e.cable_count})),
-    photos:[null,null], seq_order:_ss.poles.length+1,
+    photo_vista_general:p.photo_vista_general||null,photo_vista_detalle:p.photo_vista_detalle||null,
+    external_operators:(p.external_operators||[]).map(e=>({owner_name:e.operator,cable_count:e.cable_count,operator:e.operator})),
+    photos:[p.photo_vista_general||null,p.photo_vista_detalle||null], seq_order:_ss.poles.length+1,
     nap_id:null, nap_access:null, nap_observation:null,
   };
   _ss.poles.push(pole);
   const a=ASSIGNMENTS[_ss.clientId];
   if(!a.poles)a.poles=[];
   a.poles=[..._ss.poles];
-  _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
-  _ss.addPhase='search'; _ss.addConfirm=false;
+  _ss.curPole=null; _ss.curPolePhotos=[null,null]; _ss.foundEditPhotos=[null,null]; _ss.extOps=[]; _ss.foundPoste=null;
+  _ss.addPhase='search'; _ss.addConfirm=false; _ss.editingFoundPoste=false;
   renderStepPoste();
-  showToast(`✓ Poste #${pole.seq_order} agregado al recorrido (inventario)`,'success');
+  showToast(`✓ Poste #${pole.seq_order} agregado al recorrido${p.validated?' (validado, sin edición)':''}`,'success');
   setTimeout(()=>document.querySelector('.relv-add-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
 }
 
@@ -6509,6 +6825,18 @@ function handlePolePhoto(n,inp){
   const f=inp.files[0]; if(!f)return;
   const rdr=new FileReader();
   rdr.onload=e=>{_ss.curPolePhotos[n]=e.target.result;const s=document.getElementById(`sp-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
+  rdr.readAsDataURL(f); inp.value='';
+}
+function handleEditPolePhoto(n,inp){
+  const f=inp.files[0]; if(!f)return;
+  const rdr=new FileReader();
+  rdr.onload=e=>{_ss.editPolePhotos[n]=e.target.result;const s=document.getElementById(`ep-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
+  rdr.readAsDataURL(f); inp.value='';
+}
+function handleFoundPolePhoto(n,inp){
+  const f=inp.files[0]; if(!f)return;
+  const rdr=new FileReader();
+  rdr.onload=e=>{_ss.foundEditPhotos[n]=e.target.result;const s=document.getElementById(`ef-ph${n+1}`);if(s)s.innerHTML=`<img src="${e.target.result}">`;};
   rdr.readAsDataURL(f); inp.value='';
 }
 
