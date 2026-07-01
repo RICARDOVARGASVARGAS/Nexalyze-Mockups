@@ -328,6 +328,60 @@
     .vm-photo-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-top:5px;color:var(--t3)}
     .vm-map{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:24px 20px;text-align:center;color:var(--t3);margin-top:10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 
+    /* ─── Cliente view (tabs + ruta) ─── */
+    .mc-clt-view{max-width:960px;width:calc(100vw - 32px);max-height:92vh;display:flex;flex-direction:column}
+    .clt-tabs{display:flex;gap:0;border-bottom:2px solid var(--bor);padding:0 22px;background:var(--bg);flex-shrink:0}
+    .clt-tab{padding:11px 16px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;user-select:none;display:flex;align-items:center;gap:6px}
+    .clt-tab:hover{color:var(--t1)}
+    .clt-tab.act{color:var(--p);border-bottom-color:var(--p)}
+    .clt-tab.off{opacity:.4;cursor:not-allowed;pointer-events:none}
+    .clt-tab .clt-tab-dot{width:6px;height:6px;border-radius:50%;background:var(--bor)}
+    .clt-tab.act .clt-tab-dot{background:var(--p)}
+    .clt-pane{padding:16px 22px 20px}
+    .clt-route-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .clt-route-title{font-size:15px;font-weight:800;color:var(--t1);line-height:1.25}
+    .clt-route-sub{font-size:11px;color:var(--t3);margin-top:3px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+    .clt-crit-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#FEE2E2;color:#B91C1C}
+    .clt-pipeline{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 2px 12px;margin-bottom:14px;scrollbar-width:thin}
+    .clt-pnode{flex:0 0 auto;min-width:148px;max-width:180px;border-radius:12px;border:1.5px solid var(--bor);background:var(--sur);padding:12px 13px;position:relative}
+    .clt-pnode.cli{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(59,130,246,.02));border-color:rgba(59,130,246,.35)}
+    .clt-pnode.nap{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.02));border-color:rgba(16,185,129,.45);box-shadow:0 0 0 1px rgba(16,185,129,.15)}
+    .clt-pnode-type{font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+    .clt-pnode-code{font-size:12px;font-weight:800;color:var(--t1);font-family:monospace;line-height:1.2}
+    .clt-pnode-meta{font-size:10px;color:var(--t2);margin-top:4px;line-height:1.4}
+    .clt-pnode-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .clt-parrow{flex:0 0 auto;display:flex;align-items:center;padding:0 6px;color:var(--t3);font-size:16px;font-weight:300;align-self:center}
+    .clt-route-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .clt-fiber-card{border:1px solid var(--bor);border-radius:12px;overflow:hidden;background:var(--sur)}
+    .clt-fiber-hdr{padding:10px 14px;border-bottom:1px solid var(--bor);background:var(--bg)}
+    .clt-fiber-hdr-t{font-size:12px;font-weight:700;color:var(--t1)}
+    .clt-fiber-hdr-s{font-size:10px;color:var(--t3);margin-top:2px}
+    .clt-fiber-tbl{width:100%;border-collapse:collapse;font-size:10px}
+    .clt-fiber-tbl th{padding:7px 10px;text-align:left;font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);background:var(--bg);border-bottom:1px solid var(--bor)}
+    .clt-fiber-tbl td{padding:7px 10px;border-bottom:1px solid var(--bor);color:var(--t2);vertical-align:top}
+    .clt-fiber-tbl td:first-child{font-weight:600;color:var(--t1);font-size:10px}
+    .clt-fiber-tbl tr:last-child td{border-bottom:none}
+    .clt-fiber-tbl .tot td{font-weight:800;color:var(--t1);background:var(--bg);border-top:2px solid var(--bor)}
+    .clt-fiber-tbl .db{font-weight:700;color:var(--p)}
+    .clt-fiber-foot{padding:8px 14px;font-size:9px;color:var(--t3);line-height:1.5;border-top:1px solid var(--bor);background:var(--bg)}
+    .clt-nap-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--bor);font-size:10px}
+    .clt-nap-bar-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+    .clt-nap-bar code{font-size:11px;font-weight:700;color:var(--p)}
+    .clt-hist-tl{padding:4px 0}
+    .clt-hist-item{display:flex;gap:14px;padding-bottom:18px;position:relative}
+    .clt-hist-item:last-child{padding-bottom:0}
+    .clt-hist-item::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--bor)}
+    .clt-hist-item:last-child::before{display:none}
+    .clt-hist-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg);border:2px solid var(--bor);position:relative;z-index:1}
+    .clt-hist-body{flex:1;min-width:0;border:1px solid var(--bor);border-radius:10px;padding:10px 13px;background:var(--sur)}
+    .clt-hist-body.cur{border-color:rgba(123,110,248,.4);background:linear-gradient(135deg,rgba(123,110,248,.04),transparent)}
+    .clt-hist-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .clt-hist-date{font-size:10px;color:var(--t3);font-weight:600}
+    .clt-hist-tec{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t2);margin-top:6px}
+    .clt-empty-route{text-align:center;padding:36px 20px;border:1.5px dashed var(--bor);border-radius:12px;background:var(--bg)}
+    .clt-empty-route svg{margin:0 auto 10px;display:block;color:var(--t3)}
+  @media(max-width:768px){.clt-route-grid{grid-template-columns:1fr}.rc-map-wrap{height:260px}}
+
     /* ─── History modal ─── */
     .mc-hist{max-width:590px;max-height:92vh;display:flex;flex-direction:column}
     .hm-body{flex:1;overflow-y:auto;padding:20px 22px}
@@ -2643,6 +2697,91 @@ function _buildRoutePoints(a,r){
   if(napCode){const n=NAPS_LIST.find(x=>x.code===napCode);if(n)pts.push([n.lat,n.lng]);}
   return pts;
 }
+function _haversineM(a,b){
+  if(!a||!b||a[0]==null||b[0]==null)return 0;
+  const R=6371000,toRad=x=>x*Math.PI/180;
+  const dLat=toRad(b[0]-a[0]),dLng=toRad(b[1]-a[1]);
+  const s=Math.sin(dLat/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+function _buildFiberSegments(a,r){
+  const poles=(a.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
+  const napCode=a.nap_found||r.nap_id;
+  const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
+  const home=[a.gpsLat||r.lat_ref,a.gpsLng||r.lng_ref];
+  const waypoints=[];
+  if(nap)waypoints.push({type:'nap',label:nap.code,coord:[nap.lat,nap.lng]});
+  poles.forEach(p=>{if(p.lat&&p.lng)waypoints.push({type:'pole',label:p.codigo||('Poste #'+p.seq_order),coord:[p.lat,p.lng]});});
+  if(home[0]!=null&&home[1]!=null)waypoints.push({type:'client',label:(r.full_name||r.object_id),coord:home});
+  const rows=[];
+  let totalDist=0,totalDb=0;
+  for(let i=0;i<waypoints.length-1;i++){
+    const from=waypoints[i],to=waypoints[i+1];
+    const dist=_haversineM(from.coord,to.coord);
+    const fiber=+(dist*0.00035).toFixed(2);
+    const splice=(to.type==='pole'||from.type==='pole')?0.10:0;
+    const connector=(i===waypoints.length-2&&to.type==='client')?0.30:0;
+    const total=+(fiber+splice+connector).toFixed(2);
+    totalDist+=dist;totalDb+=total;
+    rows.push({from:from.label,to:to.label,dist:Math.round(dist),fiber,splice,connector,total});
+  }
+  if(nap)rows.push({from:'Conector NAP inicial',to:'—',dist:null,fiber:null,splice:null,connector:0.30,total:0.30,isConnector:true});
+  if(nap)totalDb=+(totalDb+0.30).toFixed(2);
+  return{rows,totalDist:Math.round(totalDist),totalDb:totalDb.toFixed(2),waypoints};
+}
+function _initRouteMap(elId,a,r){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(el._leafletMap){el._leafletMap.remove();el._leafletMap=null;}
+  const poles=(a?.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
+  const napCode=a?.nap_found||(r?.nap_id);
+  const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
+  const pts=_buildRoutePoints(a,r);
+  if(!pts.length){el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:12px">Sin coordenadas registradas</div>';return;}
+  el.innerHTML='';
+  const map=L.map(el,{zoomControl:true,scrollWheelZoom:false});
+  el._leafletMap=map;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  const line=L.polyline(pts,{color:'#7B6EF8',weight:4,opacity:.9}).addTo(map);
+  const mkIcon=(color,label,size=28)=>L.divIcon({className:'',iconAnchor:[size/2,size/2],iconSize:[size,size],
+    html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:${size<30?9:10}px;font-weight:800;line-height:1">${label}</div>`});
+  L.marker(pts[0],{icon:mkIcon('#3B82F6','C',30)}).addTo(map).bindPopup(`<b>Cliente</b><br>${r.address||''}`);
+  poles.forEach(p=>{
+    if(!p.lat||!p.lng)return;
+    const color=p.nap_id?'#10B981':'#7B6EF8';
+    L.marker([p.lat,p.lng],{icon:mkIcon(color,p.nap_id?'NAP':p.seq_order,28)}).addTo(map)
+      .bindPopup(`<b>Poste #${p.seq_order}</b> ${p.codigo||''}<br>${p.propietario||''}`);
+  });
+  if(nap&&nap.lat&&nap.lng){
+    L.marker([nap.lat,nap.lng],{icon:mkIcon('#10B981','NAP',32)}).addTo(map)
+      .bindPopup(`<b>NAP: ${nap.code}</b><br>${nap.tipo||''} · ${nap.distrito||''}`);
+  }
+  map.fitBounds(line.getBounds(),{padding:[24,24]});
+}
+function _clientHasCompletedRoute(cid){
+  const a=ASSIGNMENTS[cid];
+  return a?.status==='completado'&&((a.poles||[]).length>0||!!a.nap_found);
+}
+function _clientHistoryEntries(cid){
+  const hist=CLIENT_HISTORY[cid];
+  const cur=ASSIGNMENTS[cid];
+  if(hist&&hist.length){
+    return hist.map((h,i)=>{
+      const isLast=i===hist.length-1;
+      const tec=isLast&&cur?TECHNICIANS.find(t=>t.id===cur.technician_id):null;
+      return{...h,isCurrent:isLast,technician:tec,assignment:isLast?cur:null};
+    });
+  }
+  if(cur)return[{status:cur.status,date:cur.assigned_at,isCurrent:true,technician:TECHNICIANS.find(t=>t.id===cur.technician_id),assignment:cur}];
+  return[{status:'libre',date:null,isCurrent:true,technician:null,assignment:null}];
+}
+function _condDotColor(cond){
+  const c=(cond||'').toUpperCase();
+  if(['CRÍTICO','MALO','DETERIORADO'].includes(c))return'#EF4444';
+  if(c==='REGULAR')return'#F97316';
+  return'#22C55E';
+}
+let _cltViewId=null,_cltViewTab='datos';
 
 /* ════════════════════════════════ STATE ═══ */
 let CV='inicio', CT=null, editId=null, delId=null, SQ='', CP=1, PS=15;
@@ -4959,42 +5098,7 @@ function renderRelvComplete(clientId, opts={}){
   </div>`:''}`;
 
   /* ── Inicializar mapa Leaflet ── */
-  setTimeout(()=>{
-    const el=document.getElementById('rc-route-map');
-    if(!el)return;
-    if(el._leafletMap){el._leafletMap.remove();el._leafletMap=null;}
-    const pts=_buildRoutePoints(a,r);
-    if(!pts.length){el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:12px">Sin coordenadas registradas</div>';return;}
-    const map=L.map(el,{zoomControl:true,scrollWheelZoom:false});
-    el._leafletMap=map;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
-
-    /* Polilínea principal */
-    const line=L.polyline(pts,{color:'#7B6EF8',weight:4,opacity:.9,dashArray:null}).addTo(map);
-
-    const mkIcon=(color,label,size=28)=>L.divIcon({className:'',iconAnchor:[size/2,size/2],iconSize:[size,size],
-      html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:${size<30?9:10}px;font-weight:800;line-height:1">${label}</div>`});
-
-    /* Domicilio */
-    L.marker(pts[0],{icon:mkIcon('#3B82F6','D',30)}).addTo(map).bindPopup(`<b>Domicilio</b><br>${r.address||''}`);
-
-    /* Postes */
-    poles.forEach((p,i)=>{
-      const coord=[p.lat,p.lng];
-      if(!p.lat||!p.lng)return;
-      const color=p.nap_id?'#10B981':'#7B6EF8';
-      L.marker(coord,{icon:mkIcon(color,p.nap_id?'NAP':p.seq_order,28)}).addTo(map)
-        .bindPopup(`<b>Poste #${p.seq_order}</b> ${p.codigo||''}<br>${p.propietario||''}${p.nap_id?'<br><b style="color:#10B981">'+p.nap_id+'</b>':''}`);
-    });
-
-    /* NAP */
-    if(nap&&nap.lat&&nap.lng){
-      L.marker([nap.lat,nap.lng],{icon:mkIcon('#10B981','NAP',32)}).addTo(map)
-        .bindPopup(`<b>NAP: ${nap.code}</b><br>${nap.tipo||''} · ${nap.distrito||''}`);
-    }
-
-    map.fitBounds(line.getBounds(),{padding:[24,24]});
-  },120);
+  setTimeout(()=>_initRouteMap('rc-route-map',a,r),120);
 }
 
 function renderRelvDetail(clientId){
@@ -7290,6 +7394,11 @@ function renderPhotoSlot(slot,dataUrl){
 function openViewPost(id){
   const r=DB.postes.rows.find(x=>x.id===id);
   if(!r) return;
+  _cltViewId=null;
+  const tabsEl=document.getElementById('clt-tabs');
+  if(tabsEl)tabsEl.style.display='none';
+  const mc=document.querySelector('#mo-view .mc');
+  if(mc){mc.classList.remove('mc-clt-view');mc.classList.add('mc-view');}
 
   document.getElementById('vm-code').textContent=r.codigo||'#'+r.id;
   const installFmt=r.installation_date
@@ -7777,43 +7886,53 @@ function confirmDelCliente(){
   closeMo('mo-del');renderClientes();showToast('✓ Cliente eliminado','danger');
 }
 
-/* ─── View Cliente ─── */
-function openViewCliente(id){
-  const r=DB.clientes.rows.find(x=>x.id===id);
-  if(!r) return;
-  document.getElementById('vm-code').textContent=r.object_id;
-  document.getElementById('vm-meta').textContent=[r.district,r.province,r.department,r.country].filter(Boolean).join(' · ');
-  const napBadge=r.nap_id?`<span style="background:var(--pb);color:var(--p);font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:6px;padding:3px 10px">NAP: ${r.nap_id}</span>`:'';
-  document.getElementById('vm-badges').innerHTML=napBadge+(r.status?'<span class="badge-act" style="margin-left:2px">Activo</span>':'<span class="badge-ina" style="margin-left:2px">Inactivo</span>');
+/* ─── View Cliente (tabs: Datos · Recorrido · Historial) ─── */
+function switchCltViewTab(tab){
+  const r=DB.clientes.rows.find(x=>x.id===_cltViewId);
+  if(!r)return;
+  if(tab==='recorrido'&&!_clientHasCompletedRoute(_cltViewId))return;
+  _cltViewTab=tab;
+  _renderCltViewBody(r);
+}
+function _renderCltViewTabDatos(r){
   const fv=(lbl,val,sp=1)=>`<div class="vm-field"${sp>1?` style="grid-column:span ${sp}"`:''}>
     <div class="vm-f-lbl">${lbl}</div>
     <div class="vm-f-val${val==null?' muted':''}">${val!=null?val:'<em>No especificado</em>'}</div>
   </div>`;
   const nap=r.nap_id?NAPS_LIST.find(n=>n.code===r.nap_id):null;
   const photo=(r.photos||{}).general;
-  document.getElementById('vm-body').innerHTML=`
-    <div class="vm-sec">
+  const a=ASSIGNMENTS[r.id];
+  const tec=a?TECHNICIANS.find(t=>t.id===a.technician_id):null;
+  return`<div class="clt-pane">
+    <div class="vm-sec" style="padding:0 0 14px;border-bottom:1px solid var(--bor)">
       <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Identificación</div>
       <div class="vm-grid g2">${fv('Código de Cliente',r.object_id)}${fv('Estado',r.status?'Activo':'Inactivo')}${fv('Dirección',r.address,2)}</div>
     </div>
-    <div class="vm-sec">
+    <div class="vm-sec" style="padding:14px 0;border-bottom:1px solid var(--bor)">
       <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Ubicación Administrativa</div>
       <div class="vm-grid">${fv('País',r.country)}${fv('Departamento',r.department)}${fv('Provincia',r.province)}${fv('Distrito',r.district)}</div>
     </div>
-    <div class="vm-sec">
-      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Coordenadas GPS</div>
+    <div class="vm-sec" style="padding:14px 0;border-bottom:1px solid var(--bor)">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Coordenadas GPS de Referencia</div>
       <div class="vm-grid g2">${fv('Latitud',r.lat_ref!=null?r.lat_ref.toString():null)}${fv('Longitud',r.lng_ref!=null?r.lng_ref.toString():null)}</div>
     </div>
-    <div class="vm-sec">
+    <div class="vm-sec" style="padding:14px 0;border-bottom:1px solid var(--bor)">
       <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>NAP Asignada</div>
       ${r.nap_id?`<div class="vm-extop-row">
         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--p)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <span class="vm-op-lbl">${r.nap_id}</span>
         ${nap?`<span class="vm-op-cnt">${nap.tipo} · ${nap.distrito}</span>`:''}
-      </div>`:
-      `<div style="font-size:11px;color:var(--t2);font-style:italic;padding:4px 0">Sin NAP asignada</div>`}
+      </div>`:`<div style="font-size:11px;color:var(--t2);font-style:italic;padding:4px 0">Sin NAP asignada</div>`}
     </div>
-    <div class="vm-sec">
+    ${a?`<div class="vm-sec" style="padding:14px 0;border-bottom:1px solid var(--bor)">
+      <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Asignación Actual</div>
+      <div class="vm-grid g2">
+        ${fv('Estado',htBadge(a.status))}
+        ${fv('Técnico',tec?`${tec.name} (${tec.code})`:null)}
+        ${fv('Asignado',a.assigned_at)}${fv('Cerrado',a.closed_at||a.submitted_at||null)}
+      </div>
+    </div>`:''}
+    <div class="vm-sec" style="padding:14px 0 0;border-bottom:none">
       <div class="vm-sec-ttl"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Fotografía de la Vivienda</div>
       <div style="max-width:380px">
         <div class="vm-photo-lbl">FOTO 1 — VISTA GENERAL DE LA CASA</div>
@@ -7822,7 +7941,165 @@ function openViewCliente(id){
           `<div class="vm-photo-empty"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="var(--bor)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span style="font-size:9px;color:var(--t3);font-weight:600;margin-top:4px">Sin foto</span></div>`}
         </div>
       </div>
+    </div>
+  </div>`;
+}
+function _renderCltViewTabRecorrido(r){
+  const a=ASSIGNMENTS[r.id];
+  if(!_clientHasCompletedRoute(r.id)){
+    return`<div class="clt-pane"><div class="clt-empty-route">
+      <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px">Sin recorrido disponible</div>
+      <div style="font-size:11px;color:var(--t3);line-height:1.5;max-width:320px;margin:0 auto">El recorrido de postes y NAP se muestra cuando el cliente tiene una asignación <strong>completada</strong> con relevamiento registrado.</div>
+    </div></div>`;
+  }
+  const poles=(a.poles||[]).slice().sort((x,y)=>x.seq_order-y.seq_order);
+  const napCode=a.nap_found||r.nap_id;
+  const nap=napCode?NAPS_LIST.find(n=>n.code===napCode):null;
+  const fiber=_buildFiberSegments(a,r);
+  const isCrit=(a.attenuation_db||parseFloat(fiber.totalDb))>=4;
+  const distM=fiber.totalDist||(a.iea_km!=null?Math.round(a.iea_km*1000):0);
+  const attDb=a.attenuation_db!=null?a.attenuation_db.toFixed(2):fiber.totalDb;
+  const napPorts=nap?.total_ports!=null?`${Math.round((nap.used_ports_percentage||0)/100*nap.total_ports)}/${nap.total_ports}`:'—';
+  const pipelineNodes=[
+    {type:'cli',lbl:'Cliente',code:r.object_id,meta:(r.full_name||r.address?.split(',')[0]||'—')},
+    ...poles.map(p=>({type:'pole',lbl:'Poste #'+p.seq_order,code:p.codigo||'—',meta:[p.material||p.tipocable,p.propietario].filter(Boolean).join(' · ')||'—',cond:p.condition||p.condicion})),
+    ...(nap?[{type:'nap',lbl:'NAP',code:nap.code,meta:[nap.tipo,nap.distrito].filter(Boolean).join(' · ')}]:[]),
+  ];
+  const pipeHtml=pipelineNodes.map((n,i)=>{
+    const dot=n.cond?`<span class="clt-pnode-dot" style="background:${_condDotColor(n.cond)}"></span>`:'';
+    return`${i?'<div class="clt-parrow">→</div>':''}<div class="clt-pnode ${n.type}">
+      ${dot}
+      <div class="clt-pnode-type">${n.lbl}</div>
+      <div class="clt-pnode-code">${n.code}</div>
+      <div class="clt-pnode-meta">${n.meta}</div>
     </div>`;
+  }).join('');
+  const fiberRows=fiber.rows.map(row=>`<tr${row.isConnector?' style="background:var(--bg)"':''}>
+    <td>${row.isConnector?row.from:`${row.from} → ${row.to}`}</td>
+    <td>${row.dist!=null?row.dist+' m':'—'}</td>
+    <td>${row.fiber!=null?row.fiber.toFixed(2):'—'}</td>
+    <td>${row.splice!=null?row.splice.toFixed(2):'—'}</td>
+    <td>${row.connector!=null?row.connector.toFixed(2):'—'}</td>
+    <td class="db">${row.total.toFixed(2)} dB</td>
+  </tr>`).join('');
+  return`<div class="clt-pane" style="padding-top:14px">
+    <div class="clt-route-hdr">
+      <div>
+        <div class="clt-route-title">${r.object_id}${r.full_name?' '+r.full_name:''}</div>
+        <div class="clt-route-sub">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${r.address} · ${r.district||'—'}
+        </div>
+      </div>
+      ${isCrit?'<span class="clt-crit-badge">Ruta Crítica</span>':''}
+    </div>
+    <div class="clt-pipeline">${pipeHtml}</div>
+    <div class="rc-stat-bar" style="margin-bottom:14px">
+      <div class="rc-stat"><div class="rc-stat-val">${distM}<span style="font-size:13px;color:var(--t2)"> m</span></div><div class="rc-stat-lbl">Distancia</div></div>
+      <div class="rc-stat"><div class="rc-stat-val">${attDb}<span style="font-size:13px;color:var(--t2)"> dB</span></div><div class="rc-stat-lbl">Atenuación tramo</div></div>
+      <div class="rc-stat"><div class="rc-stat-val">${poles.length}</div><div class="rc-stat-lbl">Poste(s)</div></div>
+      <div class="rc-stat"><div class="rc-stat-val" style="font-size:14px">${napCode?`<span class="rc-nap">${napCode}</span>`:'—'}</div><div class="rc-stat-lbl">NAP vinculada</div></div>
+    </div>
+    <div class="clt-route-grid">
+      <div class="card" style="margin:0;overflow:hidden">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--bor);font-size:12px;font-weight:700;color:var(--t1)">Mapa de ruta</div>
+        <div style="padding:10px"><div class="rc-map-wrap" id="clt-route-map" style="height:280px"></div></div>
+      </div>
+      <div class="clt-fiber-card">
+        <div class="clt-fiber-hdr">
+          <div class="clt-fiber-hdr-t">Tramos de fibra</div>
+          <div class="clt-fiber-hdr-s">NAP ${napCode||'—'} — ${poles.length} poste(s) — cliente ${r.object_id}</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="clt-fiber-tbl">
+            <thead><tr><th>Tramo</th><th>Distancia</th><th>Fibra</th><th>Empalme</th><th>Conector</th><th>Total</th></tr></thead>
+            <tbody>${fiberRows}
+              <tr class="tot"><td colspan="1">Total</td><td>${distM} m</td><td colspan="3"></td><td class="db">${attDb} dB</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="clt-fiber-foot">Atenuación parcial entre la NAP y la ONT del cliente. Debe sumarse a la atenuación OLT → Splitter → NAP para el presupuesto óptico total.</div>
+      </div>
+    </div>
+    ${nap?`<div class="clt-nap-bar">
+      <span class="clt-nap-bar-lbl">NAP inventario:</span>
+      <code>${nap.code}</code>
+      <span style="background:var(--bg);border:1px solid var(--bor);border-radius:20px;padding:2px 9px;font-size:9px;font-weight:700;color:var(--t2)">${nap.tipo||'—'}</span>
+      <span style="background:#DCFCE7;color:#15803D;border-radius:20px;padding:2px 9px;font-size:9px;font-weight:700">${nap.inventory_status||'Disponible'}</span>
+      <span style="color:var(--t3)">Puertos: <strong style="color:var(--t1)">${napPorts}</strong></span>
+      ${nap.building?`<span style="color:var(--t3)">${nap.building}</span>`:''}
+    </div>`:''}
+  </div>`;
+}
+function _renderCltViewTabHistorial(r){
+  const entries=_clientHistoryEntries(r.id);
+  const items=entries.map((e,i)=>{
+    const m=HT_MAP[e.status]||HT_MAP.libre;
+    const isDone=e.status==='completado';
+    return`<div class="clt-hist-item">
+      <div class="clt-hist-dot" style="border-color:${isDone?'#22C55E':e.isCurrent?'var(--p)':'var(--bor)'};background:${isDone?'#DCFCE7':e.isCurrent?'var(--pb)':'var(--sur)'}">
+        <span style="font-size:9px;font-weight:800;color:${isDone?'#15803D':'var(--p)'}">${i+1}</span>
+      </div>
+      <div class="clt-hist-body${e.isCurrent?' cur':''}">
+        <div class="clt-hist-meta">${htBadge(e.status)}${e.isCurrent?'<span style="font-size:8px;font-weight:800;color:var(--p);letter-spacing:.06em;text-transform:uppercase">Actual</span>':''}</div>
+        <div class="clt-hist-date">${e.date?new Date(e.date+'T12:00').toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'}):'—'}</div>
+        ${e.technician?`<div class="clt-hist-tec">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center">${e.technician.name.charAt(0)}</div>
+          <span><strong>${e.technician.name}</strong> · ${e.technician.code}</span>
+        </div>`:''}
+        ${e.isCurrent&&e.assignment?.closed_at?`<div style="font-size:10px;color:var(--t3);margin-top:5px">Cerrado: ${e.assignment.closed_at}</div>`:''}
+        ${e.isCurrent&&isDone&&_clientHasCompletedRoute(r.id)?`<div style="margin-top:8px"><button class="bs" style="font-size:10px;padding:5px 12px" onclick="switchCltViewTab('recorrido')">Ver recorrido →</button></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="clt-pane">
+    <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Historial de asignaciones · del más antiguo al más reciente</div>
+    <div class="clt-hist-tl">${items}</div>
+    <div class="relv-save-hint" style="margin-top:14px">Mismo criterio que la columna <em>Historial</em> en Asignaciones. Cada intento de relevamiento queda registrado con su estado final.</div>
+  </div>`;
+}
+function _renderCltViewBody(r){
+  const hasRoute=_clientHasCompletedRoute(r.id);
+  if(_cltViewTab==='recorrido'&&!hasRoute)_cltViewTab='datos';
+  const tabs=[
+    {k:'datos',lbl:'Datos'},
+    {k:'recorrido',lbl:'Recorrido',off:!hasRoute},
+    {k:'historial',lbl:'Historial'},
+  ];
+  document.getElementById('clt-tabs').innerHTML=tabs.map(t=>
+    `<div class="clt-tab${_cltViewTab===t.k?' act':''}${t.off?' off':''}" onclick="switchCltViewTab('${t.k}')">${t.lbl}${t.off?'' :''}</div>`
+  ).join('');
+  const body=document.getElementById('vm-body');
+  if(_cltViewTab==='recorrido')body.innerHTML=_renderCltViewTabRecorrido(r);
+  else if(_cltViewTab==='historial')body.innerHTML=_renderCltViewTabHistorial(r);
+  else body.innerHTML=_renderCltViewTabDatos(r);
+  if(_cltViewTab==='recorrido'&&hasRoute){
+    setTimeout(()=>_initRouteMap('clt-route-map',ASSIGNMENTS[r.id],r),120);
+  }
+}
+function openViewCliente(id){
+  const r=DB.clientes.rows.find(x=>x.id===id);
+  if(!r) return;
+  _cltViewId=id;
+  _cltViewTab='datos';
+  const mc=document.querySelector('#mo-view .mc');
+  if(mc){mc.classList.add('mc-clt-view');mc.classList.remove('mc-view');}
+  document.getElementById('vm-code').textContent=r.object_id;
+  document.getElementById('vm-meta').textContent=[r.district,r.province,r.department].filter(Boolean).join(' · ');
+  const napBadge=r.nap_id?`<span style="background:var(--pb);color:var(--p);font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:6px;padding:3px 10px">NAP: ${r.nap_id}</span>`:'';
+  const routeBadge=_clientHasCompletedRoute(id)?'<span style="background:#DCFCE7;color:#15803D;font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:6px;padding:3px 10px">Con recorrido</span>':'';
+  const hist=CLIENT_HISTORY[id];
+  const histBadge=hist&&hist.length>1?`<span style="background:var(--bg);color:var(--t2);font-size:9px;font-weight:700;border:1px solid var(--bor);border-radius:6px;padding:3px 10px">${hist.length} asignaciones</span>`:'';
+  document.getElementById('vm-badges').innerHTML=[napBadge,routeBadge,histBadge,r.status?'<span class="badge-act">Activo</span>':'<span class="badge-ina">Inactivo</span>'].filter(Boolean).join('');
+  const tabsEl=document.getElementById('clt-tabs');
+  if(!tabsEl){
+    const tabsWrap=document.createElement('div');
+    tabsWrap.id='clt-tabs';
+    tabsWrap.className='clt-tabs';
+    document.getElementById('vm-body').before(tabsWrap);
+  }else tabsEl.style.display='';
+  _renderCltViewBody(r);
   openMo('mo-view');
 }
 
