@@ -2470,12 +2470,15 @@ DB.clientes={
 
 /* ── Catálogos Tablas Generales → contrato audit_logs (auditable_type) ── */
 const AUDIT_CATALOG={
-  propietario:{auditable_type:'nos_inventario.pole_owners',api_slug:'pole-owners',screen:'NosInventario / Tablas Generales / Propietario Poste'},
-  material:   {auditable_type:'nos_inventario.pole_materials',api_slug:'pole-materials',screen:'NosInventario / Tablas Generales / Material Poste'},
-  tension:    {auditable_type:'nos_inventario.pole_tensions',api_slug:'pole-tensions',screen:'NosInventario / Tablas Generales / Tensión Poste'},
-  tipocable:  {auditable_type:'nos_inventario.pole_cable_types',api_slug:'pole-cable-types',screen:'NosInventario / Tablas Generales / Tipo Cables'},
-  condicion:  {auditable_type:'nos_inventario.pole_conditions',api_slug:'pole-conditions',screen:'NosInventario / Tablas Generales / Condición Poste'},
-  fabricante: {auditable_type:'nos_inventario.pole_manufacturers',api_slug:'pole-manufacturers',screen:'NosInventario / Tablas Generales / Fabricante Poste'},
+  propietario:{auditable_type:'nos_inventario.pole_owners',api_slug:'pole-owners',screen:'NOSINVENTARIO / TABLAS GENERALES / PROPIETARIO POSTE'},
+  material:   {auditable_type:'nos_inventario.pole_materials',api_slug:'pole-materials',screen:'NOSINVENTARIO / TABLAS GENERALES / MATERIAL POSTE'},
+  tension:    {auditable_type:'nos_inventario.pole_tensions',api_slug:'pole-tensions',screen:'NOSINVENTARIO / TABLAS GENERALES / TENSIÓN POSTE'},
+  tipocable:  {auditable_type:'nos_inventario.pole_cable_types',api_slug:'pole-cable-types',screen:'NOSINVENTARIO / TABLAS GENERALES / TIPO CABLES'},
+  condicion:  {auditable_type:'nos_inventario.pole_conditions',api_slug:'pole-conditions',screen:'NOSINVENTARIO / TABLAS GENERALES / CONDICIÓN POSTE'},
+  fabricante: {auditable_type:'nos_inventario.pole_manufacturers',api_slug:'pole-manufacturers',screen:'NOSINVENTARIO / TABLAS GENERALES / FABRICANTE POSTE'},
+  clientes:   {auditable_type:'nos_inventario.clients',api_slug:'clients',screen:'NOSINVENTARIO / POSTES / CLIENTES'},
+  postes:     {auditable_type:'nos_inventario.poles',api_slug:'poles',screen:'NOSINVENTARIO / POSTES / INVENTARIO POSTES'},
+  asignaciones:{auditable_type:'nos_inventario.assignments',api_slug:'assignments',screen:'NOSINVENTARIO / POSTES / ASIGNACIONES'},
 };
 const AUDIT_MOCK_USERS=[
   {id:1,name:'Sistema NOS OLITEL'},
@@ -3082,7 +3085,7 @@ function renderView(v){
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
-                <button class="act-btn" title="Historial de movimientos" onclick="openCatalogAudit('${v}',${r.id})" style="color:var(--t2)">
+                <button class="act-btn" title="Historial de movimientos" onclick="openEntityAudit('${v}',${r.id})" style="color:var(--t2)">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </button>
                 <button class="act-btn dl" title="Eliminar" onclick="openDel(${r.id})">
@@ -3283,7 +3286,7 @@ function renderClientes(){
             <th style="width:130px">Distrito</th>
             <th style="width:165px">NAP</th>
             <th style="width:110px">Estado</th>
-            <th style="width:100px">Acciones</th>
+            <th style="width:130px">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -3302,6 +3305,9 @@ function renderClientes(){
                 </button>
                 <button class="act-btn ed" title="Editar" onclick="openEditCliente(${r.id})">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="act-btn" title="Historial de movimientos" onclick="openEntityAudit('clientes',${r.id})" style="color:var(--t2)">
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </button>
                 <button class="act-btn dl" title="Eliminar" onclick="openDelCliente(${r.id})">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
@@ -3435,7 +3441,7 @@ function renderPostes(){
                 <button class="act-btn dl" title="Eliminar" onclick="openDelPost(${r.id})">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
                 </button>
-                <button class="act-btn" title="Historial de movimientos" onclick="openHistoryPost(${r.id})" style="color:var(--t2)">
+                <button class="act-btn" title="Historial de movimientos" onclick="openEntityAudit('postes',${r.id})" style="color:var(--t2)">
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </button>
               </div>
@@ -3700,7 +3706,7 @@ function renderAsignaciones(){
           <th style="width:165px">NAP</th>
           <th style="width:200px">Historial</th>
           <th style="width:170px">Técnico</th>
-          <th style="width:90px">Acciones</th>
+          <th style="width:120px">Acciones</th>
         </tr></thead>
         <tbody>
           ${slice.map(r=>{
@@ -3718,6 +3724,7 @@ function renderAsignaciones(){
                 ?`<div style="display:flex;align-items:center;gap:7px"><div style="width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${tec.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--t1);font-size:11px">${tec.name}</div><div style="font-size:9px;color:var(--p);letter-spacing:.04em;font-weight:700">${tec.code}</div></div></div>`
                 :'<span style="font-style:italic;font-size:10px;color:var(--t3)">Sin tecnico</span>'}</td>
               <td style="white-space:nowrap">${[
+                  `<button class="act-btn" title="Historial de movimientos" onclick="openEntityAudit('asignaciones',${r.id})" style="color:var(--t2)"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>`,
                   getStatus(r)==='pendiente'
                     ?`<button class="act-btn" title="Reasignar / Liberar" onclick="openReassignModal(${r.id})" style="color:#C2410C"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>`
                     :'',
@@ -7574,11 +7581,50 @@ function openViewPost(id){
 }
 
 /* ════════════════════════════════ AUDIT LOGS (audit_logs) ═══ */
+function _auditUpper(v){
+  if(v==null||v==='')return '—';
+  if(typeof v==='boolean')return v?'ACTIVO':'INACTIVO';
+  return String(v).toUpperCase();
+}
+function _auditAsignStatus(st){
+  const m=HT_MAP[st];
+  return m?_auditUpper(m.lbl):(st||'').toUpperCase().replace(/_/g,' ');
+}
 function _auditFmtVal(k,v){
-  if(k==='status'||typeof v==='boolean')return v===true||v==='true'?'Activo':'Inactivo';
   if(v==null)return '—';
-  if(typeof v==='object')return JSON.stringify(v);
-  return String(v);
+  if(k==='ESTADO'||k==='status'||typeof v==='boolean')return v===true||v==='true'?'ACTIVO':'INACTIVO';
+  if(typeof v==='object')return _auditUpper(JSON.stringify(v));
+  return _auditUpper(v);
+}
+function _polePrevOwner(cur){
+  const c=(cur||'').toUpperCase();
+  if(c==='MOVISTAR')return 'CLARO';
+  if(c==='CLARO')return 'MOVISTAR';
+  const alts=(DB.propietario?.rows||[]).map(x=>x.name.toUpperCase()).filter(o=>o!==c);
+  return alts[0]||'CLARO';
+}
+function _polePrevMaterial(cur){
+  const c=(cur||'').toUpperCase();
+  const alts=(DB.material?.rows||[]).map(x=>x.name.toUpperCase()).filter(m=>m!==c);
+  return alts[0]||'MADERA TRATADA';
+}
+function _poleAuditSnap(r,ov={}){
+  const g=(k,def='')=>_auditUpper(ov[k]!==undefined?ov[k]:(r[k]??def));
+  return{
+    'CÓDIGO':g('codigo'),
+    'PROPIETARIO':g('propietario'),
+    'MATERIAL':g('material'),
+    'TENSIÓN':g('tension'),
+    'CONDICIÓN':g('condicion'),
+    'TIPO CABLE':g('tipocable'),
+    'FABRICANTE':g('manufacturer','SIN FABRICANTE'),
+    'ALTURA':_auditUpper((ov.height!==undefined?ov.height:r.height)+' M'),
+    'ESTADO':(ov.status!==undefined?ov.status:r.status)?'ACTIVO':'INACTIVO',
+  };
+}
+function _fmtExtOperators(ops){
+  if(!ops?.length)return 'SIN OPERADORES';
+  return ops.map(o=>`${(o.operator||'').toUpperCase()} (${o.cable_count} CABLE${o.cable_count!==1?'S':''})`).join(', ');
 }
 function _normalizeAuditLog(log){
   const u=log.user_id?AUDIT_MOCK_USERS.find(x=>x.id===log.user_id):null;
@@ -7587,7 +7633,7 @@ function _normalizeAuditLog(log){
     old_values:log.old_values??log.old??null,
     new_values:log.new_values??log.changes??null,
     user_id:log.user_id??null,
-    user_name:log.user_name??u?.name??log.user??'—',
+    user_name:_auditUpper(log.user_name??u?.name??log.user??'—'),
     actor_type:log.actor_type||'user',
     actor_context:log.actor_context??null,
     ip_address:log.ip_address??log.ip??null,
@@ -7596,12 +7642,12 @@ function _normalizeAuditLog(log){
     http_method:log.http_method??log.method??null,
     client_origin:log.client_origin??null,
     created_at:log.created_at??log.date??'—',
-    note:log.note??null,
+    note:log.note?_auditUpper(log.note):null,
   };
 }
 function _renderAuditTimeline(logs){
   const EVT_LBL={created:'CREACIÓN',updated:'ACTUALIZACIÓN',deleted:'ELIMINACIÓN',restored:'RESTAURACIÓN'};
-  const ACTOR_LBL={user:'Usuario',system:'Sistema',api:'API'};
+  const ACTOR_LBL={user:'USUARIO',system:'SISTEMA',api:'API'};
   const EVT_ICO={
     created:`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`,
     updated:`<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
@@ -7617,12 +7663,12 @@ function _renderAuditTimeline(logs){
     const oldV=log.old_values,newV=log.new_values;
     let changeHtml='';
     if(ev==='created'){
-      const rows=newV?Object.keys(newV).map(k=>`<div style="display:flex;gap:8px;padding:3px 0"><span style="font-size:9px;color:var(--t3);min-width:72px;text-transform:uppercase">${k}</span><span style="font-size:11px;font-weight:600;color:var(--t1)">${_auditFmtVal(k,newV[k])}</span></div>`).join(''):'';
-      changeHtml=`<div class="hist-create-box">${log.note||'Registro creado.'}${rows?`<div style="margin-top:8px;border-top:1px solid var(--bor);padding-top:8px">${rows}</div>`:''}</div>`;
+      const rows=newV?Object.keys(newV).map(k=>`<div style="display:flex;gap:8px;padding:3px 0"><span style="font-size:9px;color:var(--t3);min-width:100px;font-weight:700">${k}</span><span style="font-size:11px;font-weight:600;color:var(--t1)">${_auditFmtVal(k,newV[k])}</span></div>`).join(''):'';
+      changeHtml=`<div class="hist-create-box">${log.note||'REGISTRO CREADO.'}${rows?`<div style="margin-top:8px;border-top:1px solid var(--bor);padding-top:8px">${rows}</div>`:''}</div>`;
     }else if(oldV&&newV){
       const fields=[...new Set([...Object.keys(oldV),...Object.keys(newV)])];
       changeHtml=`<div class="hist-diff">
-        <div class="hist-diff-head"><div class="hist-d-head">Campo</div><div class="hist-d-head">Antes</div><div class="hist-d-head">Después</div></div>
+        <div class="hist-diff-head"><div class="hist-d-head">CAMPO</div><div class="hist-d-head">ANTES</div><div class="hist-d-head">DESPUÉS</div></div>
         ${fields.map(f=>`<div class="hist-diff-row">
           <div class="hist-d-cell hist-d-field">${f}</div>
           <div class="hist-d-cell hist-d-old">${_auditFmtVal(f,oldV[f])}</div>
@@ -7631,9 +7677,9 @@ function _renderAuditTimeline(logs){
       </div>`;
     }
     const chips=[
-      `<span class="hist-chip">${personIco} ${log.user_name} <span style="opacity:.65">(${ACTOR_LBL[log.actor_type]||log.actor_type})</span></span>`,
-      log.user_id?`<span class="hist-chip">user_id: ${log.user_id}</span>`:'',
-      log.actor_context?`<span class="hist-chip">ctx: ${log.actor_context}</span>`:'',
+      `<span class="hist-chip">${personIco} ${log.user_name} <span style="opacity:.65">(${ACTOR_LBL[log.actor_type]||_auditUpper(log.actor_type)})</span></span>`,
+      log.user_id?`<span class="hist-chip">USER_ID: ${log.user_id}</span>`:'',
+      log.actor_context?`<span class="hist-chip">CTX: ${_auditUpper(log.actor_context)}</span>`:'',
       log.ip_address?`<span class="hist-chip">${ipIco} ${log.ip_address}</span>`:'',
       log.user_agent?`<span class="hist-chip" title="${log.user_agent}">${log.user_agent.length>42?log.user_agent.slice(0,42)+'…':log.user_agent}</span>`:'',
       log.http_method&&log.url?`<span class="hist-chip">${httpIco} ${log.http_method} ${log.url}</span>`:'',
@@ -7641,7 +7687,7 @@ function _renderAuditTimeline(logs){
     ].filter(Boolean).join('');
     return `<div class="hist-entry">
       <div class="hist-dot ev-${ev}">${EVT_ICO[ev]||''}</div>
-      <div><span class="hist-badge ev-${ev}">${EVT_LBL[ev]||ev}</span></div>
+      <div><span class="hist-badge ev-${ev}">${EVT_LBL[ev]||_auditUpper(ev)}</span></div>
       <div class="hist-ts">${log.created_at}</div>
       <div class="hist-meta-row">${chips}</div>
       ${changeHtml}
@@ -7654,118 +7700,357 @@ function generateCatalogAuditLogs(meta,row){
   const m=String((row.id%12)+1).padStart(2,'0');
   const origin=meta.screen;
   const base=`${y}-${m}-10`;
+  const nombre=_auditUpper(row.name);
   logs.push({
     auditable_type:meta.auditable_type,auditable_id:row.id,event:'created',
-    old_values:null,new_values:{name:row.name,status:true},
+    old_values:null,new_values:{NOMBRE:nombre,ESTADO:'ACTIVO'},
     user_id:1,actor_type:'system',actor_context:'seed:catalog',
     ip_address:null,user_agent:null,
     url:`/api/nos_inventario/${meta.api_slug}`,http_method:'POST',
     client_origin:origin,created_at:`${base} 09:15:00`,
-    note:'Alta inicial del catálogo en inventario NOS OLITEL.',
+    note:'ALTA INICIAL DEL CATÁLOGO EN INVENTARIO NOS OLITEL.',
   });
   if(row.id%2===0){
-    const prevName=row.name.split(' ').slice(0,2).join(' ')+' (temp)';
+    const prevName=_auditUpper(row.name.split(' ').slice(0,2).join(' ')+' (TEMP)');
     logs.push({
       auditable_type:meta.auditable_type,auditable_id:row.id,event:'updated',
-      old_values:{name:prevName},new_values:{name:row.name},
+      old_values:{NOMBRE:prevName},new_values:{NOMBRE:nombre},
       user_id:2,actor_type:'user',actor_context:null,
       ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0',
       url:`/api/nos_inventario/${meta.api_slug}/${row.id}`,http_method:'PATCH',
       client_origin:origin,created_at:`${y}-${m}-22 11:40:00`,
+      note:'CORRECCIÓN DE NOMENCLATURA SEGÚN CATÁLOGO MAESTRO.',
     });
   }
   if(!row.status){
     logs.push({
       auditable_type:meta.auditable_type,auditable_id:row.id,event:'updated',
-      old_values:{status:true},new_values:{status:false},
+      old_values:{ESTADO:'ACTIVO'},new_values:{ESTADO:'INACTIVO'},
       user_id:5,actor_type:'user',actor_context:'admin:disable',
       ip_address:'10.0.0.88',user_agent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
       url:`/api/nos_inventario/${meta.api_slug}/${row.id}`,http_method:'PATCH',
       client_origin:origin,created_at:`${y+1}-04-18 16:05:00`,
+      note:'REGISTRO DESHABILITADO POR ADMINISTRADOR.',
     });
   }
   return logs;
 }
-function openCatalogAudit(tableKey,id){
-  const meta=AUDIT_CATALOG[tableKey];
-  const r=DB[tableKey]?.rows.find(x=>x.id===id);
-  if(!meta||!r)return;
-  document.getElementById('hm-title').textContent=`Historial · ${r.name}`;
-  document.getElementById('hm-sub').textContent=`${meta.auditable_type} · auditable_id ${r.id}`;
-  document.getElementById('hm-timeline').innerHTML=_renderAuditTimeline(generateCatalogAuditLogs(meta,r));
-  openMo('mo-hist');
-}
-
-/* ════════════════════════════════ HISTORIAL POSTE ═══ */
-function generateAuditLogs(r){
-  const origin='NosInventario / Postes / Inventario Postes';
+function generatePoleAuditLogs(r){
+  const meta=AUDIT_CATALOG.postes;
+  const origin=meta.screen;
   const logs=[];
   const yr=r.installation_date?parseInt(r.installation_date.split('-')[0]):2020;
   const baseDate=r.installation_date?r.installation_date:`${yr}-06-15`;
   const api=`/api/nos_inventario/poles/${r.id}`;
+  const snap=_poleAuditSnap(r);
 
   logs.push({
     event:'created',created_at:`${baseDate} 09:15:00`,
-    user_id:1,user_name:'Sistema NOS OLITEL',actor_type:'system',actor_context:'import:excel',
+    user_id:1,user_name:'SISTEMA NOS OLITEL',actor_type:'system',actor_context:'import:excel',
     ip_address:null,user_agent:null,http_method:'POST',url:'/api/nos_inventario/poles',
     client_origin:origin,old_values:null,
-    new_values:{code:r.codigo,owner_id:r.propietario,status:true},
-    note:'Registro inicial del poste en el inventario NOS OLITEL',
+    new_values:{
+      'CÓDIGO':snap['CÓDIGO'],'PROPIETARIO':snap['PROPIETARIO'],'MATERIAL':snap['MATERIAL'],
+      'TENSIÓN':snap['TENSIÓN'],'CONDICIÓN':snap['CONDICIÓN'],'TIPO CABLE':snap['TIPO CABLE'],
+      'ESTADO':'ACTIVO',
+    },
+    note:'REGISTRO INICIAL DEL POSTE EN EL INVENTARIO NOS OLITEL.',
   });
+
+  if(r.id%3!==2){
+    const prevOwner=_polePrevOwner(r.propietario);
+    if(prevOwner!==snap['PROPIETARIO']){
+      logs.push({
+        event:'updated',created_at:`${yr+1}-03-22 11:40:00`,
+        user_id:2,user_name:'CARLOS LÓPEZ SILVA',actor_type:'user',actor_context:null,
+        ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/118.0.0.0',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{PROPIETARIO:_auditUpper(prevOwner)},
+        new_values:{PROPIETARIO:snap['PROPIETARIO']},
+        note:'CAMBIO DE PROPIETARIO REGISTRADO TRAS CONVENIO DE COMPARTICIÓN DE INFRAESTRUCTURA.',
+      });
+    }
+  }
 
   if((r.external_operators||[]).length>0){
     logs.push({
-      event:'updated',created_at:`${yr+1}-03-22 11:40:00`,
-      user_id:2,user_name:'Carlos López Silva',actor_type:'user',actor_context:null,
-      ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/118.0.0.0',
+      event:'updated',created_at:`${yr+1}-06-14 15:20:00`,
+      user_id:3,user_name:'JUAN PÉREZ TORRES',actor_type:'user',actor_context:null,
+      ip_address:'10.0.0.88',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/121.0',
       http_method:'PATCH',url:api,client_origin:origin,
-      old_values:{external_operators:'Sin operadores'},
-      new_values:{external_operators:r.external_operators.map(o=>`${o.operator} (${o.cable_count} cable${o.cable_count!==1?'s':''})`).join(', ')},
+      old_values:{'OPERADORES EXTERNOS':'SIN OPERADORES'},
+      new_values:{'OPERADORES EXTERNOS':_fmtExtOperators(r.external_operators)},
+      note:'RELEVAMIENTO DE OPERADORES EXTERNOS EN CAMPO.',
     });
   }
 
-  if(['DETERIORADO','MALO','CRÍTICO'].includes(r.condicion)){
+  if(['DETERIORADO','MALO','CRÍTICO'].includes((r.condicion||'').toUpperCase())){
     logs.push({
       event:'updated',created_at:`${yr+2}-08-10 14:22:00`,
-      user_id:3,user_name:'Juan Pérez Torres',actor_type:'user',actor_context:null,
+      user_id:3,user_name:'JUAN PÉREZ TORRES',actor_type:'user',actor_context:null,
       ip_address:'10.0.0.88',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/121.0',
       http_method:'PATCH',url:api,client_origin:origin,
-      old_values:{condition:'REGULAR',findings:'Sin hallazgos'},
-      new_values:{condition:r.condicion,findings:r.findings||'Deterioro visible identificado en inspección'},
+      old_values:{CONDICIÓN:'REGULAR',HALLAZGOS:'SIN HALLAZGOS'},
+      new_values:{CONDICIÓN:snap['CONDICIÓN'],HALLAZGOS:_auditUpper(r.findings||'DETERIORO VISIBLE IDENTIFICADO EN INSPECCIÓN')},
+      note:'ACTUALIZACIÓN TRAS INSPECCIÓN TÉCNICA EN CAMPO.',
+    });
+  }
+
+  if(r.id%4===0){
+    const prevMat=_polePrevMaterial(r.material);
+    logs.push({
+      event:'updated',created_at:`${yr+2}-01-18 10:30:00`,
+      user_id:4,user_name:'ANA VARGAS QUISPE',actor_type:'user',actor_context:null,
+      ip_address:'172.16.0.22',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edg/117.0.0.0',
+      http_method:'PATCH',url:api,client_origin:origin,
+      old_values:{MATERIAL:_auditUpper(prevMat)},
+      new_values:{MATERIAL:snap['MATERIAL']},
+      note:'CORRECCIÓN DE MATERIAL TRAS VERIFICACIÓN DE FICHA TÉCNICA.',
     });
   }
 
   if(r.height&&r.height>=12){
     logs.push({
       event:'updated',created_at:`${yr+1}-11-05 10:08:00`,
-      user_id:4,user_name:'Ana Vargas Quispe',actor_type:'user',actor_context:null,
+      user_id:4,user_name:'ANA VARGAS QUISPE',actor_type:'user',actor_context:null,
       ip_address:'172.16.0.22',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edg/117.0.0.0',
       http_method:'PATCH',url:api,client_origin:origin,
-      old_values:{height:(r.height-2)+' m'},new_values:{height:r.height+' m'},
+      old_values:{ALTURA:_auditUpper((r.height-2)+' M')},new_values:{ALTURA:snap['ALTURA']},
+      note:'AJUSTE DE ALTURA SEGÚN MEDICIÓN EN CAMPO.',
     });
   }
 
   if(!r.status){
     logs.push({
       event:'updated',created_at:`${yr+3}-04-18 16:05:00`,
-      user_id:5,user_name:'María García Torres',actor_type:'user',actor_context:'admin:disable',
+      user_id:5,user_name:'MARÍA GARCÍA TORRES',actor_type:'user',actor_context:'admin:disable',
       ip_address:'192.168.1.105',user_agent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
       http_method:'PATCH',url:api,client_origin:origin,
-      old_values:{status:true},new_values:{status:false},
+      old_values:{ESTADO:'ACTIVO'},new_values:{ESTADO:'INACTIVO'},
+      note:'POSTE RETIRADO DE SERVICIO POR CONDICIÓN CRÍTICA.',
     });
   }
 
   return logs;
 }
+function generateClienteAuditLogs(r){
+  const meta=AUDIT_CATALOG.clientes;
+  const origin=meta.screen;
+  const api=`/api/nos_inventario/clients/${r.id}`;
+  const logs=[];
+  const yr=2023+(r.id%3);
+  const base=`${yr}-${String((r.id%12)+1).padStart(2,'0')}-08`;
 
-function openHistoryPost(id){
-  const r=DB.postes.rows.find(x=>x.id===id);
-  if(!r) return;
-  document.getElementById('hm-title').textContent=`Historial · ${r.codigo||'#'+r.id}`;
-  document.getElementById('hm-sub').textContent=`nos_inventario.poles · auditable_id ${r.id}`;
-  document.getElementById('hm-timeline').innerHTML=_renderAuditTimeline(generateAuditLogs(r));
+  logs.push({
+    event:'created',created_at:`${base} 09:30:00`,
+    user_id:1,user_name:'SISTEMA NOS OLITEL',actor_type:'system',actor_context:'import:crm',
+    ip_address:null,user_agent:null,http_method:'POST',url:'/api/nos_inventario/clients',
+    client_origin:origin,old_values:null,
+    new_values:{
+      'CÓDIGO':_auditUpper(r.object_id),
+      'DIRECCIÓN':_auditUpper((r.address||'').split(',')[0]),
+      'DISTRITO':_auditUpper(r.district||'—'),
+      'DEPARTAMENTO':_auditUpper(r.department||'LIMA'),
+      'ESTADO':'ACTIVO',
+    },
+    note:'ALTA DEL CLIENTE DESDE INTEGRACIÓN CRM.',
+  });
+
+  if(r.nap_id){
+    logs.push({
+      event:'updated',created_at:`${yr}-10-12 14:15:00`,
+      user_id:2,user_name:'CARLOS LÓPEZ SILVA',actor_type:'user',actor_context:null,
+      ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0',
+      http_method:'PATCH',url:api,client_origin:origin,
+      old_values:{NAP:'SIN NAP ASIGNADA'},
+      new_values:{NAP:_auditUpper(r.nap_id)},
+      note:'VINCULACIÓN DE NAP TRAS RELEVAMIENTO COMPLETADO.',
+    });
+  }
+
+  if(r.id%5===0){
+    const addr=(r.address||'').split(',')[0];
+    const prev=addr.replace(/\d+/,'').trim()+' S/N';
+    logs.push({
+      event:'updated',created_at:`${yr+1}-02-20 11:00:00`,
+      user_id:3,user_name:'JUAN PÉREZ TORRES',actor_type:'user',actor_context:null,
+      ip_address:'10.0.0.88',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/121.0',
+      http_method:'PATCH',url:api,client_origin:origin,
+      old_values:{DIRECCIÓN:_auditUpper(prev)},
+      new_values:{DIRECCIÓN:_auditUpper(addr)},
+      note:'CORRECCIÓN DE DIRECCIÓN SEGÚN VALIDACIÓN EN CAMPO.',
+    });
+  }
+
+  if(!r.status){
+    logs.push({
+      event:'updated',created_at:`${yr+1}-06-30 16:45:00`,
+      user_id:5,user_name:'MARÍA GARCÍA TORRES',actor_type:'user',actor_context:'admin:disable',
+      ip_address:'192.168.1.105',user_agent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
+      http_method:'PATCH',url:api,client_origin:origin,
+      old_values:{ESTADO:'ACTIVO'},new_values:{ESTADO:'INACTIVO'},
+      note:'CLIENTE DADO DE BAJA EN EL INVENTARIO.',
+    });
+  }
+
+  return logs;
+}
+function generateAssignmentAuditLogs(clientId){
+  const meta=AUDIT_CATALOG.asignaciones;
+  const origin=meta.screen;
+  const client=DB.clientes.rows.find(c=>c.id===clientId);
+  const list=_getClientAssignments(clientId);
+  const logs=[];
+  if(!list.length){
+    logs.push({
+      event:'created',created_at:'2025-01-01 08:00:00',
+      user_id:1,user_name:'SISTEMA NOS OLITEL',actor_type:'system',actor_context:'init',
+      ip_address:null,user_agent:null,http_method:'POST',url:'/api/nos_inventario/assignments',
+      client_origin:origin,old_values:null,
+      new_values:{
+        CLIENTE:_auditUpper(client?.object_id||'—'),
+        ESTADO:'SIN ASIGNAR',
+      },
+      note:'CLIENTE REGISTRADO SIN ASIGNACIÓN DE TÉCNICO.',
+    });
+    return logs;
+  }
+
+  list.forEach((a,idx)=>{
+    const tec=TECHNICIANS.find(t=>t.id===a.technician_id);
+    const tecName=_auditUpper(tec?.name||'—');
+    const date=a.assigned_at||'2025-01-01';
+    const ts=`${date} ${String(8+(idx%4)).padStart(2,'0')}:${String(15+(idx*7)%45).padStart(2,'0')}:00`;
+    const api=`/api/nos_inventario/assignments/${a.object_id||clientId}`;
+
+    if(idx===0){
+      logs.push({
+        event:'created',created_at:ts,
+        user_id:2,user_name:'CARLOS LÓPEZ SILVA',actor_type:'user',actor_context:'dispatch',
+        ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0',
+        http_method:'POST',url:'/api/nos_inventario/assignments',client_origin:origin,
+        old_values:null,
+        new_values:{
+          CLIENTE:_auditUpper(client?.object_id),
+          'CÓDIGO ASIGNACIÓN':_auditUpper(a.object_id),
+          ESTADO:_auditAsignStatus(a.status),
+          TÉCNICO:tecName,
+        },
+        note:'PRIMERA ASIGNACIÓN DE RELEVAMIENTO AL TÉCNICO.',
+      });
+    }else{
+      const prev=list[idx-1];
+      const prevTec=TECHNICIANS.find(t=>t.id===prev.technician_id);
+      logs.push({
+        event:'updated',created_at:ts,
+        user_id:2,user_name:'CARLOS LÓPEZ SILVA',actor_type:'user',actor_context:'reassign',
+        ip_address:'192.168.10.44',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{
+          ESTADO:_auditAsignStatus(prev.status),
+          TÉCNICO:_auditUpper(prevTec?.name),
+          'CÓDIGO ASIGNACIÓN':_auditUpper(prev.object_id),
+        },
+        new_values:{
+          ESTADO:_auditAsignStatus(a.status),
+          TÉCNICO:tecName,
+          'CÓDIGO ASIGNACIÓN':_auditUpper(a.object_id),
+        },
+        note:`INTENTO #${a._attempt||idx+1} DE RELEVAMIENTO.`,
+      });
+    }
+
+    if(a.status==='completado'&&a.nap_found){
+      const closeDate=a.closed_at||a.submitted_at||date;
+      logs.push({
+        event:'updated',created_at:`${closeDate} 17:30:00`,
+        user_id:tec?.id||3,user_name:_auditUpper(tec?.name),actor_type:'user',actor_context:'field:close',
+        ip_address:'10.20.30.'+(40+idx),user_agent:'NosInventario-Mobile/2.1 Android',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{NAP:'PENDIENTE DE VALIDACIÓN',ESTADO:_auditAsignStatus('en_revision')},
+        new_values:{
+          NAP:_auditUpper(a.nap_found),
+          'DISTANCIA IEA':_auditUpper((a.iea_km||0).toFixed(2)+' KM'),
+          ATENUACIÓN:_auditUpper((a.attenuation_db||0).toFixed(1)+' DB'),
+          'POSTES RELEVADOS':_auditUpper(String((a.poles||[]).length)),
+          ESTADO:_auditAsignStatus('completado'),
+        },
+        note:'RELEVAMIENTO CERRADO Y VALIDADO EN CAMPO.',
+      });
+    }else if(a.status==='fallido'){
+      const motivos=['CLIENTE NO DISPONIBLE EN DOMICILIO','ACCESO DENEGADO AL EDIFICIO','DIRECCIÓN NO COINCIDE CON GPS','POSTE DE ACCESO BLOQUEADO'];
+      logs.push({
+        event:'updated',created_at:`${date} 16:00:00`,
+        user_id:tec?.id||3,user_name:_auditUpper(tec?.name),actor_type:'user',actor_context:'field:fail',
+        ip_address:'10.20.30.'+(40+idx),user_agent:'NosInventario-Mobile/2.1 Android',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{ESTADO:_auditAsignStatus('en_progreso')},
+        new_values:{ESTADO:_auditAsignStatus('fallido'),MOTIVO:_auditUpper(a.failed_reason||motivos[idx%motivos.length])},
+        note:'RELEVAMIENTO MARCADO COMO FALLIDO EN CAMPO.',
+      });
+    }else if(a.status==='observado'){
+      const obsList=['FOTOS DE POSTE BORROSAS O CON POCA LUZ','NAP SIN ETIQUETADO VISIBLE EN FOTO DE FIBRAS','FACHADA ILEGIBLE O PARCIALMENTE RECORTADA'];
+      logs.push({
+        event:'updated',created_at:`${date} 15:45:00`,
+        user_id:4,user_name:'ANA VARGAS QUISPE',actor_type:'user',actor_context:'supervisor:review',
+        ip_address:'172.16.0.22',user_agent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edg/117.0.0.0',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{ESTADO:_auditAsignStatus('en_revision')},
+        new_values:{ESTADO:_auditAsignStatus('observado'),OBSERVACIÓN:_auditUpper(a.failed_reason||obsList[idx%obsList.length])},
+        note:'SUPERVISOR DEVUELVE RELEVAMIENTO CON OBSERVACIONES.',
+      });
+    }else if(a.status==='cancelado'){
+      logs.push({
+        event:'updated',created_at:`${date} 12:00:00`,
+        user_id:5,user_name:'MARÍA GARCÍA TORRES',actor_type:'user',actor_context:'admin:cancel',
+        ip_address:'192.168.1.105',user_agent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
+        http_method:'PATCH',url:api,client_origin:origin,
+        old_values:{ESTADO:_auditAsignStatus('pendiente')},
+        new_values:{ESTADO:_auditAsignStatus('cancelado')},
+        note:'ASIGNACIÓN CANCELADA DESDE DESPACHO.',
+      });
+    }
+  });
+
+  return logs;
+}
+function openEntityAudit(entity,id){
+  const meta=AUDIT_CATALOG[entity];
+  if(!meta)return;
+  let title,sub,logs;
+  if(entity==='postes'){
+    const r=DB.postes.rows.find(x=>x.id===id);
+    if(!r)return;
+    title=r.codigo||'#'+r.id;
+    sub=`${meta.auditable_type} · AUDITABLE_ID ${r.id}`;
+    logs=generatePoleAuditLogs(r);
+  }else if(entity==='clientes'){
+    const r=DB.clientes.rows.find(x=>x.id===id);
+    if(!r)return;
+    title=r.object_id;
+    sub=`${meta.auditable_type} · AUDITABLE_ID ${r.id}`;
+    logs=generateClienteAuditLogs(r);
+  }else if(entity==='asignaciones'){
+    const r=DB.clientes.rows.find(x=>x.id===id);
+    if(!r)return;
+    title=r.object_id;
+    const cur=ASSIGNMENTS[id];
+    sub=`${meta.auditable_type} · CLIENTE_ID ${r.id}${cur?` · ${(cur.status||'').toUpperCase()}`:''}`;
+    logs=generateAssignmentAuditLogs(id);
+  }else{
+    const r=DB[entity]?.rows.find(x=>x.id===id);
+    if(!r)return;
+    title=r.name;
+    sub=`${meta.auditable_type} · AUDITABLE_ID ${r.id}`;
+    logs=generateCatalogAuditLogs(meta,r);
+  }
+  document.getElementById('hm-title').textContent=`Historial · ${title}`;
+  document.getElementById('hm-sub').textContent=sub;
+  document.getElementById('hm-timeline').innerHTML=_renderAuditTimeline(logs);
   openMo('mo-hist');
 }
+function openCatalogAudit(tableKey,id){openEntityAudit(tableKey,id);}
+function openHistoryPost(id){openEntityAudit('postes',id);}
 
 /* ════════════════════════════════ CLIENTES: MODAL ═══ */
 const CLIEN_TABS=4;
